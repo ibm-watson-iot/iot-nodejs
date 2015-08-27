@@ -2,17 +2,17 @@
 Supports to be loaded in node.js, browserify and the browser
 
 ## Usage
-### node.js / browserify / browser
+### Install
 `npm install ibm-iotf`
 
-### node.js / browserify
+### Load the library (node.js / browserify)
 ```JavaScript
 var IBMIoTF = require('ibm-iotf');
 ```
-### browser
+### Load the library (browser)
 load `iotf-client-bundle.js` or `iotf-client-bundle-min.js` from the `dist` directory
 
-### node.js / browserify / browser
+### Write your code
 ```JavaScript
 // myscript.js
 var deviceClientConfig = {
