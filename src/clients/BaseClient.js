@@ -27,8 +27,8 @@ export default class BaseClient extends events.EventEmitter {
 
     if(config.org === QUICKSTART_ORG_ID){
       this.host = "ws://quickstart.messaging.internetofthings.ibmcloud.com:1883";
-  		this.isQuickstart = true;
-  		this.mqttConfig = {};
+      this.isQuickstart = true;
+      this.mqttConfig = {};
     } else {
 
       if(!isDefined(config['auth-token'])){
@@ -41,12 +41,12 @@ export default class BaseClient extends events.EventEmitter {
       this.host = "wss://" + config.org + ".messaging.internetofthings.ibmcloud.com:8883";
       this.isQuickstart = false;
       this.mqttConfig = {
-  			password: config['auth-token'],
-  			rejectUnauthorized : true,
-  		};
+        password: config['auth-token'],
+        rejectUnauthorized : true,
+      };
 
       if(isNode()){
-          this.mqttConfig.caPaths = [__dirname + '/IoTFoundation.pem'];
+        this.mqttConfig.caPaths = [__dirname + '/IoTFoundation.pem'];
       }
     }
 

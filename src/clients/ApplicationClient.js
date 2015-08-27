@@ -47,162 +47,169 @@ export default class ApplicationClient extends BaseClient {
 
     this.mqtt.on('connect', () => {
 
-  		this.isConnected = true;
+      this.isConnected = true;
 
-  		try	{
-  			for(var i = 0, l = this.subscriptions.length; i < l; i++) {
-  				this.mqtt.subscribe(this.subscriptions[i], {qos: 0});
-  			}
+      try	{
+        for(var i = 0, l = this.subscriptions.length; i < l; i++) {
+          this.mqtt.subscribe(this.subscriptions[i], {qos: 0});
+        }
 
-  		}
-  		catch (err){
-  			console.error("Error while trying to subscribe : "+err);
-  		}
+      }
+      catch (err){
+        console.error("Error while trying to subscribe : "+err);
+      }
 
-  		//reset the counter to 0 incase of reconnection
-  		this.retryCount = 0;
+      //reset the counter to 0 incase of reconnection
+      this.retryCount = 0;
 
-  		//emit a 'connect' event
-  		this.emit('connect');
+      //emit a 'connect' event
+      this.emit('connect');
 
-  	});
+    });
 
     this.mqtt.on('message', (topic, payload) => {
-  		console.info("mqtt: ", topic, payload.toString());
+      console.info("mqtt: ", topic, payload.toString());
 
-  		// For each type of registered callback, check the incoming topic against a Regexp.
-  		// If matches, forward the payload and various fields from the topic (extracted using groups in the regexp)
+      // For each type of registered callback, check the incoming topic against a Regexp.
+      // If matches, forward the payload and various fields from the topic (extracted using groups in the regexp)
 
-			var match = DEVICE_EVT_RE.exec(topic);
-			if(match){
-				this.emit('deviceEvent', {
+      var match = DEVICE_EVT_RE.exec(topic);
+      if(match){
+        this.emit('deviceEvent', {
           type: match[1],
           id: match[2],
           event: match[3],
           format: match[4],
           payload,
-          topic });
-				return;
-			}
+          topic
+        });
+
+        return;
+      }
 
 
       var match = DEVICE_CMD_RE.exec(topic);
-			if(match){
-				this.emit('deviceCommand', {
+      if(match){
+        this.emit('deviceCommand', {
           type: match[1],
           id: match[2],
           command: match[3],
           format: match[4],
           payload,
-          topic });
-				return;
-			}
+          topic
+        });
+
+        return;
+      }
 
       var match = DEVICE_MON_RE.exec(topic);
-			if(match){
-				this.emit('deviceStatus', {
+      if(match){
+        this.emit('deviceStatus', {
           type: match[1],
           id: match[2],
           payload,
-          topic });
-				return;
-			}
+          topic
+        });
+
+        return;
+      }
 
       var match = APP_MON_RE.exec(topic);
-			if(match){
-				this.emit('appStatus', {
+        if(match){
+        this.emit('appStatus', {
           app: match[1],
           payload,
-          topic });
-				return;
-			}
+          topic
+        });
+        return;
+      }
 
-  		// catch all which logs the receipt of an unexpected message
-  		console.info("Message received on unexpected topic"+", "+topic+", "+payload);
-  	});
+      // catch all which logs the receipt of an unexpected message
+      console.info("Message received on unexpected topic"+", "+topic+", "+payload);
+    });
   }
 
   subscribe(topic){
-  	if (!this.mqtt) {
-  		console.error("Application Client is not yet Initialized. Call the constructor first IotfApplication(config)");
-  		throw new Error("Application Client is not yet Initialized. Call the constructor first IotfApplication(config)");
-  	}
+    if (!this.mqtt) {
+      console.error("Application Client is not yet Initialized. Call the constructor first IotfApplication(config)");
+      throw new Error("Application Client is not yet Initialized. Call the constructor first IotfApplication(config)");
+    }
 
-  	console.info("Subscribe: "+", "+topic);
-  	this.subscriptions.push(topic);
+    console.info("Subscribe: "+", "+topic);
+    this.subscriptions.push(topic);
 
-  	if(this.isConnected) {
-  		this.mqtt.subscribe(topic, {qos: 0});
-  		console.info("Freshly Subscribed to: " +	this.subscriptions[this.subscriptionCount - 1]);
-  	} else {
-  		console.error("Unable to subscribe as application is not currently connected");
-  	}
+    if(this.isConnected) {
+      this.mqtt.subscribe(topic, {qos: 0});
+      console.info("Freshly Subscribed to: " +	this.subscriptions[this.subscriptionCount - 1]);
+    } else {
+      console.error("Unable to subscribe as application is not currently connected");
+    }
   }
 
   publish(topic, msg){
-  	if (!this.mqtt) {
+    if (!this.mqtt) {
       console.error("Application Client is not yet Initialized. Call the constructor first IotfApplication(config)");
-  		throw new Error("Application Client is not yet Initialized. Call the constructor first IotfApplication(config)");
-  	}
+      throw new Error("Application Client is not yet Initialized. Call the constructor first IotfApplication(config)");
+    }
 
-  	console.info("Publish: "+topic+", "+msg);
+    console.info("Publish: "+topic+", "+msg);
 
-  	if(this.isConnected) {
-  		this.mqtt.publish(topic, msg);
-  	} else {
-  		console.warn("Unable to publish as application is not currently connected");
-  	}
+    if(this.isConnected) {
+      this.mqtt.publish(topic, msg);
+    } else {
+      console.warn("Unable to publish as application is not currently connected");
+    }
   }
 
   subscribeToDeviceEvents(type, id, event, format){
-  	type = type || '+';
-  	id = id || '+';
-  	event = event || '+';
-  	format = format || '+';
+    type = type || '+';
+    id = id || '+';
+    event = event || '+';
+    format = format || '+';
 
-  	var topic = "iot-2/type/" + type + "/id/" + id + "/evt/"+ event + "/fmt/" + format;
-  	this.subscribe(topic);
-  	return this;
+    var topic = "iot-2/type/" + type + "/id/" + id + "/evt/"+ event + "/fmt/" + format;
+    this.subscribe(topic);
+    return this;
   }
 
   subscribeToDeviceCommands(type, id, command, format){
-  	type = type || '+';
-  	id = id || '+';
-  	command = command || '+';
-  	format = format || '+';
+    type = type || '+';
+    id = id || '+';
+    command = command || '+';
+    format = format || '+';
 
-  	var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/"+ command + "/fmt/" + format;
-  	this.subscribe(topic);
-  	return this;
+    var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/"+ command + "/fmt/" + format;
+    this.subscribe(topic);
+    return this;
   }
 
   subscribeToDeviceStatus(type, id){
-  	type = type || '+';
-  	id = id || '+';
+    type = type || '+';
+    id = id || '+';
 
-  	var topic = "iot-2/type/" + type + "/id/" + id + "/mon";
-  	this.subscribe(topic);
-  	return this;
+    var topic = "iot-2/type/" + type + "/id/" + id + "/mon";
+    this.subscribe(topic);
+    return this;
   }
 
   subscribeToAppStatus(id){
-  	id = id || '+';
+    id = id || '+';
 
-  	var topic = "iot-2/app/" + id + "/mon";
-  	this.subscribe(topic);
-  	return this;
+    var topic = "iot-2/app/" + id + "/mon";
+    this.subscribe(topic);
+    return this;
   }
 
   publishDeviceEvent(type, id, event, format, data){
-  	var topic = "iot-2/type/" + type + "/id/" + id + "/evt/" + event + "/fmt/" + format;
-  	this.publish(topic, data);
-  	return this;
+    var topic = "iot-2/type/" + type + "/id/" + id + "/evt/" + event + "/fmt/" + format;
+    this.publish(topic, data);
+    return this;
   }
 
   publishDeviceCommand(type, id, command, format, data){
-  	var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/" + command + "/fmt/" + format;
-  	this.publish(topic, data);
-  	return this;
+    var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/" + command + "/fmt/" + format;
+    this.publish(topic, data);
+    return this;
   }
 
   callApi(method, expectedHttpCode, expectJsonContent, paths, body){
@@ -256,48 +263,48 @@ export default class ApplicationClient extends BaseClient {
   }
 
   listAllDevices(){
-  	console.info("listAllDevices()");
-  	return this.callApi('GET', 200, true, ['devices'], null);
+    console.info("listAllDevices()");
+    return this.callApi('GET', 200, true, ['devices'], null);
   }
 
   listAllDevicesOfType(type){
-  	console.info("listAllDevicesOfType("+type+")");
-  	return this.callApi('GET', 200, true, ['devices', type], null);
+    console.info("listAllDevicesOfType("+type+")");
+    return this.callApi('GET', 200, true, ['devices', type], null);
   }
 
   listAllDeviceTypes(){
-  	console.info("listAllDeviceTypes()");
-  	return this.callApi('GET', 200, true, ['device-types'], null);
+    console.info("listAllDeviceTypes()");
+    return this.callApi('GET', 200, true, ['device-types'], null);
   }
 
   registerDevice(type, id, metadata){
-  	console.info("registerDevice("+type+", "+id+", "+metadata+")");
-  	// TODO: field validation
-  	let body = {
-  			type: type,
-  			id: id,
-  			metadata: metadata
-  	};
+    console.info("registerDevice("+type+", "+id+", "+metadata+")");
+    // TODO: field validation
+    let body = {
+      type: type,
+      id: id,
+      metadata: metadata
+    };
 
-  	return this.callApi('POST', 201, true, ['devices'], JSON.stringify(body));
+    return this.callApi('POST', 201, true, ['devices'], JSON.stringify(body));
   }
 
   unregisterDevice(type, id){
-  	console.info("unregisterDevice("+type+", "+id+")");
-  	return this.callApi('DELETE', 204, false, ['devices', type, id], null);
+    console.info("unregisterDevice("+type+", "+id+")");
+    return this.callApi('DELETE', 204, false, ['devices', type, id], null);
   }
 
   updateDevice(type, id, metadata){
-  	console.info("updateDevice("+type+", "+id+", "+metadata+")");
-  	let body = {
-  			metadata: metadata
-  	};
+    console.info("updateDevice("+type+", "+id+", "+metadata+")");
+    let body = {
+      metadata: metadata
+    };
 
-  	return this.callApi('PUT', 200, true, ['devices', type, id], JSON.stringify(body));
+    return this.callApi('PUT', 200, true, ['devices', type, id], JSON.stringify(body));
   }
 
   getDeviceDetails(type, id){
-  	console.info("getDeviceDetails("+type+", "+id+")");
-  	return this.callApi('GET', 200, true, ['devices', type, id], null);
+    console.info("getDeviceDetails("+type+", "+id+")");
+    return this.callApi('GET', 200, true, ['devices', type, id], null);
   }
 }

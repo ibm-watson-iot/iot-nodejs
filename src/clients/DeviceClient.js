@@ -72,8 +72,8 @@ export default class DeviceClient extends BaseClient {
   publish(eventType, eventFormat, payload, qos){
     if (!this.isConnected) {
       console.error("Client is not connected");
-  		throw new Error("Client is not connected");
-  	}
+      throw new Error("Client is not connected");
+    }
 
     let topic = format("iot-2/evt/%s/fmt/%s", eventType, eventFormat);
     let QOS = qos || 0;
