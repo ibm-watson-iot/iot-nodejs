@@ -1,3 +1,15 @@
+/**
+ *****************************************************************************
+ Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+ Contributors:
+ Tim-Daniel Jacobi - Initial Contribution
+ *****************************************************************************
+ *
+ */
 import { default as IBMIoTF } from '../src/iotf-client.js';
 import chai from 'chai';
 import sinon from 'sinon';
@@ -263,6 +275,74 @@ describe('ApplicationClient', () => {
       let args = callback.getCall(0).args;
 
       expect(args[0]).to.deep.equal(expectation);
+    });
+  });
+
+  describe('.subscribe()', () => {
+    afterEach(() => {
+      if(mqtt.connect.restore){
+        mqtt.connect.restore();
+      }
+    });
+
+    it('should throw an error when trying to subscribe without being connected', () => {
+      let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+
+      expect(() => {
+        client.subscribe('mytopic');
+      }).to.throw(/Client is not connected/);
+    });
+
+    it('should subscribe to the specified topic', () => {
+      let subscribe = sinon.spy();
+      let fakeMqtt = new events.EventEmitter();
+      fakeMqtt.subscribe = subscribe;
+      let mqttConnect = sinon.stub(mqtt, 'connect').returns(fakeMqtt);
+
+      let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      let topic = 'mytopic';
+      client.connect();
+      fakeMqtt.emit('connect');
+      client.subscribe(topic);
+
+      let args = subscribe.getCall(0).args;
+      expect(args[0]).to.equal(topic);
+      expect(args[1]).to.deep.equal({qos: 0});
+      expect(client.subscriptions[0]).to.equal(topic);
+    });
+  });
+
+  describe('.publish()', () => {
+    afterEach(() => {
+      if(mqtt.connect.restore){
+        mqtt.connect.restore();
+      }
+    });
+
+    it('should throw an error when trying to subscribe without being connected', () => {
+      let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+
+      expect(() => {
+        client.publish('mytopic', 'mymessage');
+      }).to.throw(/Client is not connected/);
+    });
+
+    it('should publish to the specified topic', () => {
+      let publish = sinon.spy();
+      let fakeMqtt = new events.EventEmitter();
+      fakeMqtt.publish = publish;
+      let mqttConnect = sinon.stub(mqtt, 'connect').returns(fakeMqtt);
+
+      let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      let topic = 'mytopic';
+      let message = 'mymessage';
+      client.connect();
+      fakeMqtt.emit('connect');
+      client.publish(topic, message);
+
+      let args = publish.getCall(0).args;
+      expect(args[0]).to.equal(topic);
+      expect(args[1]).to.equal(message);
     });
   });
 });

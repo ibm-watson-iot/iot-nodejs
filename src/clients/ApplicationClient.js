@@ -1,3 +1,15 @@
+/**
+ *****************************************************************************
+ Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+ Contributors:
+ Tim-Daniel Jacobi - Initial Contribution
+ *****************************************************************************
+ *
+ */
 import xhr from 'axios';
 import Promise from 'bluebird';
 import format from 'format';
@@ -130,9 +142,9 @@ export default class ApplicationClient extends BaseClient {
   }
 
   subscribe(topic){
-    if (!this.mqtt) {
-      console.error("Application Client is not yet Initialized. Call the constructor first IotfApplication(config)");
-      throw new Error("Application Client is not yet Initialized. Call the constructor first IotfApplication(config)");
+    if (!this.isConnected) {
+      console.error("Client is not connected");
+      throw new Error("Client is not connected");
     }
 
     console.info("Subscribe: "+", "+topic);
@@ -140,7 +152,7 @@ export default class ApplicationClient extends BaseClient {
 
     if(this.isConnected) {
       this.mqtt.subscribe(topic, {qos: 0});
-      console.info("Freshly Subscribed to: " +	this.subscriptions[this.subscriptionCount - 1]);
+      console.info("Freshly Subscribed to: " +	topic);
     } else {
       console.error("Unable to subscribe as application is not currently connected");
     }
@@ -148,8 +160,8 @@ export default class ApplicationClient extends BaseClient {
 
   publish(topic, msg){
     if (!this.mqtt) {
-      console.error("Application Client is not yet Initialized. Call the constructor first IotfApplication(config)");
-      throw new Error("Application Client is not yet Initialized. Call the constructor first IotfApplication(config)");
+      console.error("Client is not connected");
+      throw new Error("Client is not connected");
     }
 
     console.info("Publish: "+topic+", "+msg);
