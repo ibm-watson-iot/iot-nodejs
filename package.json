@@ -1,0 +1,34 @@
+{
+  "name": "ibm-iotf",
+  "version": "1.0.0",
+  "description": "Client for the IBM Internet of Things Foundation API and MQTT endpoints",
+  "main": "dist/iotf-client.js",
+  "dependencies": {
+    "axios": "^0.5.4",
+    "bluebird": "^2.9.34",
+    "btoa": "^1.1.2",
+    "events": "^1.0.2",
+    "format": "^0.2.1",
+    "mqtt": "^1.3.5"
+  },
+  "devDependencies": {
+    "babel": "^5.8.21",
+    "babelify": "^6.1.3",
+    "browserify": "^11.0.1",
+    "chai": "^3.2.0",
+    "mocha": "^2.2.5",
+    "mocha-babel": "^3.0.0",
+    "sinon": "^1.16.1"
+  },
+  "scripts": {
+    "build:commonjs": "babel src --out-dir dist --modules umd",
+    "build:bundle": "browserify src/iotf-client.js -t babelify -s IBMIoTF --outfile dist/iotf-client-bundle.js",
+    "build:min": "browserify src/iotf-client.js -t babelify -s IBMIoTF | uglifyjs > dist/iotf-client-bundle.min.js",
+    "build": "rm -rf dist/* && npm run build:commonjs && npm run build:bundle && npm run build:min",
+    "prepublish": "npm run build",
+    "test": "mocha --compilers js:mocha-babel",
+    "test:watch": "mocha --compilers js:mocha-babel --watch"
+  },
+  "author": "Tim Jacobi <tim.jacobi@uk.ibm.com>",
+  "license": "ISC"
+}
