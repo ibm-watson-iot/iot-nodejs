@@ -2,6 +2,14 @@ export function isString(value){
   return typeof value === 'string';
 }
 
+export function isNumber(value){
+  return typeof value === 'number';
+}
+
+export function isBoolean(value){
+  return typeof value === 'boolean';
+}
+
 export function isDefined(value){
   return value !== undefined && value !== null;
 }
@@ -9,3 +17,10 @@ export function isDefined(value){
 export const isBrowser = new Function("try {return this===window;}catch(e){ return false;}");
 
 export const isNode = new Function("try {return this===global;}catch(e){return false;}");
+
+export function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+    return v.toString(16);
+  });
+}
