@@ -17,7 +17,6 @@
     "browserify": "^11.0.1",
     "chai": "^3.2.0",
     "mocha": "^2.2.5",
-    "mocha-babel": "^3.0.0",
     "sinon": "^1.16.1"
   },
   "scripts": {
@@ -26,8 +25,8 @@
     "build:min": "browserify src/iotf-client.js -t babelify -s IBMIoTF | uglifyjs > dist/iotf-client-bundle.min.js",
     "build": "rm -rf dist/* && npm run build:commonjs && npm run build:bundle && npm run build:min",
     "prepublish": "npm run build",
-    "test": "mocha --compilers js:mocha-babel",
-    "test:watch": "mocha --compilers js:mocha-babel --watch"
+    "test": "mocha --compilers js:babel/register",
+    "test:watch": "mocha --compilers js:babel/register --watch"
   },
   "author": "Tim Jacobi <tim.jacobi@uk.ibm.com>",
   "license": "ISC"
