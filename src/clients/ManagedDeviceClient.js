@@ -7,6 +7,7 @@ const QUICKSTART_ORG_ID = 'quickstart';
 const QOS = 1;
 
 // Publish MQTT topics
+const RESPONSE_TOPIC = 'iotdevice-1/response';
 const MANAGE_TOPIC = 'iotdevice-1/mgmt/manage';
 const UNMANAGE_TOPIC = 'iotdevice-1/mgmt/unmanage';
 const UPDATE_LOCATION_TOPIC = 'iotdevice-1/device/update/location';
@@ -26,6 +27,10 @@ const DM_REBOOT_TOPIC = 'iotdm-1/mgmt/initiate/device/reboot';
 const DM_FACTORY_RESET_TOPIC = 'iotdm-1/mgmt/initiate/device/factory_reset';
 const DM_FIRMWARE_DOWNLOAD_TOPIC = 'iotdm-1/mgmt/initiate/firmware/download';
 const DM_FIRMWARE_UPDATE_TOPIC = 'iotdm-1/mgmt/initiate/firmware/update';
+
+// Regex topic
+const DM_REQUEST_RE = /^iotdm-1\/*/;
+const DM_ACTION_RE = /^iotdm-1\/mgmt\/initiate\/(.+)\/(.+)$/;
 
 export default class ManagedDeviceClient extends DeviceClient {
 
@@ -50,8 +55,14 @@ export default class ManagedDeviceClient extends DeviceClient {
     });
 
     this.mqtt.on('message', (topic, payload) => {
-      if(topic == DM_RESPONSE_TOPIC){
-        this._onDmResponse(payload);
+      let match = DM_REQUEST_RE.exec(topic);
+
+      if(match){
+        if(topic == DM_RESPONSE_TOPIC){
+          this._onDmResponse(payload);
+        } else{
+          this._onDmRequest(topic, payload);    
+        }
       }
     });
   }
@@ -107,7 +118,7 @@ export default class ManagedDeviceClient extends DeviceClient {
     console.info("Publishing manage request with payload : %s", payload);
     this.mqtt.publish(MANAGE_TOPIC, payload, QOS);
 
-    return this;
+    return reqId;
   }
 
   unmanage(){
@@ -126,7 +137,7 @@ export default class ManagedDeviceClient extends DeviceClient {
     console.info("Publishing unmanage request with payload : %s", payload);
     this.mqtt.publish(UNMANAGE_TOPIC, payload, QOS);
 
-    return this;
+    return reqId;
   }
 
   updateLocation(longitude, latitude, elevation, accuracy){
@@ -184,7 +195,7 @@ export default class ManagedDeviceClient extends DeviceClient {
     console.info("Publishing update location request with payload : %s", payload);
     this.mqtt.publish(UPDATE_LOCATION_TOPIC, payload, QOS);
 
-    return this;
+    return reqId;
   }
 
   addErrorCode(errorCode){
@@ -215,7 +226,7 @@ export default class ManagedDeviceClient extends DeviceClient {
     console.info("Publishing add error code request with payload : %s", payload);
     this.mqtt.publish(ADD_ERROR_CODE_TOPIC, payload, QOS);
 
-    return this;
+    return reqId;
   }
 
   clearErrorCodes(){
@@ -234,7 +245,7 @@ export default class ManagedDeviceClient extends DeviceClient {
     console.info("Publishing clear error codes request with payload : %s", payload);
     this.mqtt.publish(CLEAR_ERROR_CODES_TOPIC, payload, QOS);
 
-    return this;
+    return reqId;
   }
 
   addLog(message, severity, data){
@@ -283,7 +294,7 @@ export default class ManagedDeviceClient extends DeviceClient {
     console.info("Publishing add log request with payload : %s", payload);
     this.mqtt.publish(ADD_LOG_TOPIC, payload, QOS);
 
-    return this;
+    return reqId;
   }
 
   clearLogs(){
@@ -302,12 +313,53 @@ export default class ManagedDeviceClient extends DeviceClient {
     console.info("Publishing clear logs request with payload : %s", payload);
     this.mqtt.publish(CLEAR_LOGS_TOPIC, payload, QOS);
 
+    return reqId;
+  }
+
+  respondDeviceAction(reqId, accept){
+    if(!this.isConnected){
+      throw new Error("client must be connected");
+    }
+
+    if(!isDefined(reqId) || !isDefined(accept)){
+      throw new Error("reqId and accept are required");
+    }
+
+    if(!isString(reqId)){
+      throw new Error("reqId must be a string");
+    }
+    
+    if(!isBoolean(accept)){
+      throw new Error("accept must be a boolean");
+    }
+
+    var request = this._dmRequests[reqId];
+    if(!isDefined(request)){
+      throw new Error("unknown request : %s", reqId);
+    }
+
+    var rc;
+    if(accept){
+      rc = 202;
+    } else{
+      rc = 500;
+    }
+
+    var payload = new Object();
+    payload.rc = rc;
+    payload.reqId = reqId;
+    payload = JSON.stringify(payload);
+    
+    console.info("Publishing device action response with payload : %s", payload);
+    this.mqtt.publish(RESPONSE_TOPIC, payload, QOS);
+
+    delete this._dmRequests[reqId];
+
     return this;
   }
 
   _onDmResponse(payload){
     payload = JSON.parse(payload);
-
     var reqId = payload.reqId;
     var rc = payload.rc;
 
@@ -370,7 +422,37 @@ export default class ManagedDeviceClient extends DeviceClient {
         throw new Error("unknown action response");
     }
 
+    this.emit('dmResponse', {
+      reqId: reqId,
+      rc: rc
+    });
+
     delete this._deviceRequests[reqId];
+
+    return this;
+  }
+
+  _onDmRequest(topic, payload){
+    payload = JSON.parse(payload);
+    var reqId = payload.reqId;
+
+    this._dmRequests[reqId] = {topic : topic, payload : payload};
+
+    let match = DM_ACTION_RE.exec(topic);
+
+    if(match){
+      var type = match[1];
+      var action = match[2];
+
+      if(type == "firmware"){
+        action = type+'_'+action;
+      }
+
+      this.emit('dmAction', {
+        reqId: reqId,
+        action: action
+      });
+    }
 
     return this;
   }
