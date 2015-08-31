@@ -96,7 +96,7 @@ export default class BaseClient extends events.EventEmitter {
     });
 
     this.mqtt.on('error', (error) => {
-      console.error("Connection Error :: "+err);
+      console.error("Connection Error :: "+error);
       this.isConnected = false;
       this.emit('error', error);
     });

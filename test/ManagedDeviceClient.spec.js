@@ -325,35 +325,27 @@ describe('ManagedDeviceClient', () => {
       }).to.throw(/client must be connected/);
     });
 
-    it('should throw an error if message, timestamp, and severity are not provided', () => {
+    it('should throw an error if message and severity are not provided', () => {
       expect(() => {
         let client = new IBMIoTF.ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.addLog();
-      }).to.throw(/message, timestamp, and severity are required for adding a log/);
+      }).to.throw(/message and severity are required for adding a log/);
     });
 
     it('should throw an error if message is not a string', () => {
       expect(() => {
         let client = new IBMIoTF.ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
-        client.addLog(43, "blah", 0);
+        client.addLog(43, 0);
       }).to.throw(/message must be a string/);
-    });
-
-    it('should throw an error if timestamp is not a string', () => {
-      expect(() => {
-        let client = new IBMIoTF.ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
-        client.isConnected = true;
-        client.addLog("blah", 1050, 0);
-      }).to.throw(/timestamp must be a string/);
     });
 
     it('should throw an error if severity is not a number', () => {
       expect(() => {
         let client = new IBMIoTF.ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
-        client.addLog("blah", "blah", "0");
+        client.addLog("blah", "0");
       }).to.throw(/severity must be a number/);
     });
 
@@ -361,7 +353,7 @@ describe('ManagedDeviceClient', () => {
       expect(() => {
         let client = new IBMIoTF.ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
-        client.addLog("blah", "blah", 5);
+        client.addLog("blah", 5);
       }).to.throw(/severity can only equal 0, 1, or 2/);
     });
 
@@ -369,7 +361,7 @@ describe('ManagedDeviceClient', () => {
       expect(() => {
         let client = new IBMIoTF.ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
-        client.addLog("blah", "blah", 0, 0);
+        client.addLog("blah", 0, 0);
       }).to.throw(/data must be a string/);
     });
   });

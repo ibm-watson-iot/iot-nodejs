@@ -68,16 +68,18 @@ export default class DeviceClient extends BaseClient {
     });
 
     this.mqtt.on('message', (topic, payload) => {
-
-      console.info("Message received on ",topic,payload);
-
+      console.info("Message received on topic : "+ topic + " with payload : "+ payload);
+      
       let match = CMD_RE.exec(topic);
-      this.emit('command', {
-        command: match[1],
-        format: match[2],
-        payload,
-        topic
-      });
+
+      if(match){
+        this.emit('command', {
+          command: match[1],
+          format: match[2],
+          payload,
+          topic
+        });
+      }
     });
   }
 
