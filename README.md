@@ -36,6 +36,29 @@ deviceClient.on('disconnect', function(){
   console.log('Disconnected from IoTF');
 });
 
+var managedClient = new IBMIoTF.ManagedDeviceClient(deviceClientConfig);
+
+managedClient.connect();
+
+managedClient.on('connect', function(){
+    var reqId = managedClient.manage(86400, true, false);
+    managedClient.once('dmResponse', function(response){
+      if(response.reqId == reqId && response.rc == 200){
+        console.log('Manage request was successful!');
+      }
+    });
+});
+
+managedClient.on('dmAction', function(request){
+  if(request.action == "reboot"){
+    managedClient.respondDeviceAction(request.reqId, true);
+  }
+});
+
+managedClient.on('disconnect', function(){
+  console.log('Disconnected from IoTF');
+});
+
 var appClientConfig = {
   org: 'myorg',
   id: 'myapp',
@@ -127,6 +150,28 @@ Emitted when the connection to IoTF is not in function.
 `function({ type, id, command, format, payload, topic }) {}`
 
 Emitted when a message is received on the device-command topic.
+
+## IBMIoTF.ManagedDeviceClient
+
+The ManagedDeviceClient extends the DeviceClient by turning the device into a device management agent. More information on device management can be found [here.](https://docs.internetofthings.ibmcloud.com/reference/device_mgmt.html)
+
+### API
+TODO
+
+### Events
+The IBM IoTF client library implements the EventEmitter pattern and supports the following events.
+
+#### `'dmResponse'`
+
+`function({ reqId, rc }) {}`
+
+Emitted when the device-management server responds to a device request.
+
+#### `'dmAction'`
+
+`function({ reqId, action }) {}`
+
+Emitted when the device-management server requests an action for the device. Currently the ManagedDeviceClient only supports reboot and factory_reset actions.
 
 # Contributing
 The client code is in the `src` folder and the tests are in the `test` folder.
