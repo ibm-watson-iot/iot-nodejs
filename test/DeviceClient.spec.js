@@ -11,10 +11,9 @@
  *
  */
 import { default as IBMIoTF } from '../src/iotf-client.js';
-import chai from 'chai';
+import { expect } from 'chai';
 import sinon from 'sinon';
 import mqtt from 'mqtt';
-let expect = chai.expect;
 
 console.info = () => {};
 

@@ -1,8 +1,7 @@
 import { default as IBMIoTF } from '../src/iotf-client.js';
-import chai from 'chai';
+import { expect } from 'chai';
 import sinon from 'sinon';
 import mqtt from 'mqtt';
-let expect = chai.expect;
 
 console.info = () => {};
 
@@ -27,7 +26,7 @@ describe('ManagedDeviceClient', () => {
         let client = new IBMIoTF.ManagedDeviceClient({org: false});
       }).to.throw(/org must be a string/);
     });
-    
+
     describe('Quickstart mode', () => {
       it('should throw an error if managed device attemps to run in quickstart mode', () => {
        expect(() => {
@@ -224,7 +223,7 @@ describe('ManagedDeviceClient', () => {
         client.updateLocation(20);
       }).to.throw(/longitude and latitude are required for updating location/);
     });
-    
+
     it('should throw an error if longitude and latitude are not numbers', () => {
       expect(() => {
         let client = new IBMIoTF.ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
@@ -298,7 +297,7 @@ describe('ManagedDeviceClient', () => {
         client.addErrorCode();
       }).to.throw(/error code is required for adding an error code/);
     });
-    
+
     it('should throw an error if error code is not a number', () => {
       expect(() => {
         let client = new IBMIoTF.ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
