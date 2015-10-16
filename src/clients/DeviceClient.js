@@ -11,6 +11,10 @@
  *
  */
 import format from 'format';
+import xhr from 'axios';
+import Promise from 'bluebird';
+import nodeBtoa from 'btoa';
+const btoa = btoa || nodeBtoa; // if browser btoa is available use it otherwise use node module
 
 import { isDefined, isString, isNode } from '../util/util.js';
 import { default as BaseClient } from './BaseClient.js';
@@ -45,6 +49,10 @@ export default class DeviceClient extends BaseClient {
       this.mqttConfig.username = 'use-token-auth';
     }
 
+    this.org = config.org;
+    this.typeId = config.type;
+    this.deviceId = config.id;
+    this.deviceToken = config['auth-token'];
     this.mqttConfig.clientId = "d:" + config.org + ":" + config.type + ":" + config.id;
 
     console.info("IBMIoTF.DeviceClient initialized for organization : " + config.org);
@@ -97,5 +105,32 @@ export default class DeviceClient extends BaseClient {
     this.mqtt.publish(topic,payload,{qos: QOS});
 
     return this;
+  }
+
+  publishHTTPS(eventType, eventFormat, payload){
+    console.info("Publishing event of Type: "+ eventType + " with payload : "+payload);
+    return new Promise((resolve, reject) => {
+      let uri = format("https://%s.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", this.org, this.typeId, this.deviceId, eventType);
+
+      let xhrConfig = {
+        url: uri,
+        method: 'POST',
+        data : payload,
+        headers : {
+
+        }
+      };
+
+      if(eventFormat === 'json') {
+        xhrConfig.headers['Content-Type'] = 'application/json';
+      }
+
+      if(this.org !== QUICKSTART_ORG_ID) {
+        xhrConfig.headers['Authorization'] = 'Basic ' + btoa('use-token-auth' + ':' + this.deviceToken);
+      }
+      console.log(xhrConfig);
+
+      xhr(xhrConfig).then(resolve, reject);
+    });
   }
 }
