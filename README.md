@@ -3,11 +3,11 @@ Supports to be loaded in node.js, browserify and the browser
 
 ## Usage
 ### Install
-`npm install ibm-iotf`
+`npm install ibmiotf`
 
 ### Load the library (node.js / browserify)
 ```JavaScript
-var IBMIoTF = require('ibm-iotf');
+var IBMIoTF = require('ibmiotf');
 ```
 ### Load the library (browser)
 load `iotf-client-bundle.js` or `iotf-client-bundle-min.js` from the `dist` directory
