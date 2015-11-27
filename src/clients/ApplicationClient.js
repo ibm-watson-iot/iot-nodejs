@@ -288,9 +288,30 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('GET', 200, true, ['device', 'types' , type, 'devices'], null);
   }
 
-  listAllDeviceTypes(){
-    console.info("listAllDeviceTypes()");
+  deleteDeviceType(type){
+    console.info("deleteDeviceType("+type+")");
+    return this.callApi('DELETE', 204, false, ['device', 'types' , type], null);
+  }
+
+  getDeviceType(type){
+    console.info("getDeviceType("+type+")");
+    return this.callApi('GET', 200, true, ['device', 'types' , type], null);
+  }
+
+  getAllDeviceTypes(){
+    console.info("getAllDeviceTypes()");
     return this.callApi('GET', 200, true, ['device', 'types'], null);
+  }
+
+  updateDeviceType(type, description, deviceInfo, metadata){
+    console.info("updateDeviceType("+type+", "+description+", "+deviceInfo+", "+metadata+")");
+    let body = {
+      deviceInfo : deviceInfo,
+      description : description,
+      metadata: metadata
+    };
+
+    return this.callApi('PUT', 200, true, ['device', 'types' , type], JSON.stringify(body));
   }
 
   registerDevice(type, deviceId, authToken, deviceInfo, location, metadata){
@@ -323,8 +344,8 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('PUT', 200, true, ['device', 'types' , type, 'devices', deviceId], JSON.stringify(body));
   }
 
-  getDeviceDetails(type, deviceId){
-    console.info("getDeviceDetails("+type+", "+deviceId+")");
+  getDevice(type, deviceId){
+    console.info("getDevice("+type+", "+deviceId+")");
     return this.callApi('GET', 200, true, ['device', 'types' , type, 'devices', deviceId], null);
   }
 
@@ -334,23 +355,23 @@ export default class ApplicationClient extends BaseClient {
   }
 
   updateDeviceLocation(type, deviceId, location){
-    console.info("updateDeviceLocation("+type+", "+deviceId+")");
+    console.info("updateDeviceLocation("+type+", "+deviceId+", "+location+")");
 
     return this.callApi('PUT', 200, true, ['device', 'types' , type, 'devices', deviceId, 'location'], JSON.stringify(location));
   }
 
-  getDeviceMgmtInfo(type, deviceId){
-    console.info("getDeviceMgmtInfo("+type+", "+deviceId+")");
+  getDeviceManagementInformation(type, deviceId){
+    console.info("getDeviceManagementInformation("+type+", "+deviceId+")");
     return this.callApi('GET', 200, true, ['device', 'types' , type, 'devices', deviceId, 'mgmt'], null);
   }
 
-  getDeviceAllDiagLogs(type, deviceId){
-    console.info("getDeviceAllDiagLogs("+type+", "+deviceId+")");
+  getAllDiagnosticLogs(type, deviceId){
+    console.info("getAllDiagnosticLogs("+type+", "+deviceId+")");
     return this.callApi('GET', 200, true, ['device', 'types' , type, 'devices', deviceId, 'diag','logs'], null);
   }
 
-  clearDeviceDiagLogs(type, deviceId){
-    console.info("clearDeviceDiagLogs("+type+", "+deviceId+")");
+  clearAllDiagnosticLogs(type, deviceId){
+    console.info("clearAllDiagnosticLogs("+type+", "+deviceId+")");
     return this.callApi('DELETE', 204, false, ['device', 'types' , type, 'devices', deviceId, 'diag','logs'], null);
   }
 
@@ -359,13 +380,13 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('POST', 201, false, ['device', 'types' , type, 'devices', deviceId, 'diag','logs'], JSON.stringify(log));
   }
 
-  getDeviceDiagLog(type, deviceId, logId){
-    console.info("getDeviceDiagLog("+type+", "+deviceId+", "+logId+")");
+  getDiagnosticLog(type, deviceId, logId){
+    console.info("getAllDiagnosticLogs("+type+", "+deviceId+", "+logId+")");
     return this.callApi('GET', 200, true, ['device', 'types' , type, 'devices', deviceId, 'diag','logs',logId], null);
   }
 
-  removeDeviceDiagLog(type, deviceId, logId){
-    console.info("removeDeviceDiagLog("+type+", "+deviceId+", "+logId+")");
+  deleteDiagnosticLog(type, deviceId, logId){
+    console.info("deleteDiagnosticLog("+type+", "+deviceId+", "+logId+")");
     return this.callApi('DELETE', 204, true, ['device', 'types' , type, 'devices', deviceId, 'diag','logs',logId], null);
   }
 
@@ -379,13 +400,13 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('DELETE', 204, false, ['device', 'types' , type, 'devices', deviceId, 'diag','errorCodes'], null);
   }
 
-  addDeviceDiagLogs(type, deviceId, error){
-    console.info("addDeviceDiagLogs("+type+", "+deviceId+", "+error+")");
-    return this.callApi('POST', 201, false, ['device', 'types' , type, 'devices', deviceId, 'diag','errorCodes'], JSON.stringify(error));
+  addErrorCode(type, deviceId, log){
+    console.info("addErrorCode("+type+", "+deviceId+", "+log+")");
+    return this.callApi('POST', 201, false, ['device', 'types' , type, 'devices', deviceId, 'diag','errorCodes'], JSON.stringify(log));
   }
 
-  getDeviceConnectLogs(typeId, deviceId){
-    console.info("getDeviceConnectLogs("+typeId+", "+deviceId+")");
+  getDeviceConnectionLogs(typeId, deviceId){
+    console.info("getDeviceConnectionLogs("+typeId+", "+deviceId+")");
     let params = {
       typeId : typeId,
       deviceId : deviceId
@@ -398,13 +419,13 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('GET', 200, true, ['service-status'], null);
   }
 
-  getDeviceMgmtRequests(){
-    console.info("getDeviceMgmtRequests()");
+  getAllDeviceManagementRequests(){
+    console.info("getAllDeviceManagementRequests()");
     return this.callApi('GET', 200, true, ['mgmt', 'requests'], null);
   }
 
-  initiateDeviceMgmtRequest(action, parameters, devices){
-    console.info("initiateDeviceMgmtRequest("+action+", "+parameters+", "+devices+")");
+  initiateDeviceManagementRequest(action, parameters, devices){
+    console.info("initiateDeviceManagementRequest("+action+", "+parameters+", "+devices+")");
     let body = {
       action : action,
       parameters : parameters,
@@ -413,29 +434,30 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('POST', 202, true, ['mgmt', 'requests'], JSON.stringify(body));
   }
 
-  getDeviceMgmtRequestDetails(requestId){
-    console.info("getDeviceMgmtRequestDetails("+requestId+")");
+  getDeviceManagementRequest(requestId){
+    console.info("getDeviceManagementRequest("+requestId+")");
     return this.callApi('GET', 200, true, ['mgmt', 'requests', requestId], null);
   }
 
-  clearDeviceMgmtRequestDetails(requestId){
-    console.info("clearDeviceMgmtRequestDetails("+requestId+")");
+  deleteDeviceManagementRequest(requestId){
+    console.info("deleteDeviceManagementRequest("+requestId+")");
     return this.callApi('DELETE', 204, false, ['mgmt', 'requests', requestId], null);
   }
 
-  getDeviceMgmtRequestStatus(requestId){
-    console.info("getDeviceMgmtRequestStatus("+requestId+")");
+  getDeviceManagementRequestStatus(requestId){
+    console.info("getDeviceManagementRequestStatus("+requestId+")");
     return this.callApi('GET', 200, true, ['mgmt', 'requests', requestId, 'deviceStatus'], null);
   }
 
-  getDeviceMgmtRequestStatus(requestId, typeId, deviceId){
-    console.info("getDeviceMgmtRequestStatus("+requestId+", "+typeId+", "+deviceId+")");
+  getDeviceManagementRequestStatusByDevice(requestId, typeId, deviceId){
+    console.info("getDeviceManagementRequestStatusByDevice("+requestId+", "+typeId+", "+deviceId+")");
     return this.callApi('GET', 200, true, ['mgmt', 'requests', requestId, 'deviceStatus', typeId, deviceId], null);
   }
 
   //Usage Management
   getActiveDevices(start, end, detail) {
     console.info("getActiveDevices("+start+", "+end+")");
+    detail = detail | false;
     let params = {
       start : start,
       end : end,
@@ -446,6 +468,7 @@ export default class ApplicationClient extends BaseClient {
 
   getHistoricalDataUsage(start, end, detail) {
     console.info("getHistoricalDataUsage("+start+", "+end+")");
+    detail = detail | false;
     let params = {
       start : start,
       end : end,
@@ -456,6 +479,7 @@ export default class ApplicationClient extends BaseClient {
 
   getDataUsage(start, end, detail) {
     console.info("getDataUsage("+start+", "+end+")");
+    detail = detail | false;
     let params = {
       start : start,
       end : end,
