@@ -1,10 +1,10 @@
 var iotf = require("../");
 
 var appClientConfig = {
-  org: 'eu8zyd',
+  org: 'xxxxx',
   id: 'myapp',
-  "auth-key": 'a-eu8zyd-0v4qumf4t3',
-  "auth-token": 'Y95lRqIROX-0qepfn'
+  "auth-key": 'a-xxxxx-0v4qumf4t3',
+  "auth-token": 'xxxxxx-xxxxxxx'
 };
 
 var appClient = new iotf.ApplicationClient(appClientConfig);
