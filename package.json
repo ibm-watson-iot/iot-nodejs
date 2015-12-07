@@ -14,7 +14,7 @@
     "babelify": "^6.1.3",
     "browserify": "^11.0.1",
     "uglify-js" : "latest",
-    "rimraf": "latest",
+    "rimraf": "latest"
   },
   "devDependencies": {
     "chai": "^3.2.0",
@@ -28,6 +28,7 @@
     "build:min": "browserify src/iotf-client.js -t babelify -s IBMIoTF | uglifyjs > dist/iotf-client-bundle.min.js",
     "build": "npm run clean && npm run build:commonjs && npm run build:bundle && npm run build:min",
     "prepublish": "npm run build",
+    "install": "npm run build",
     "test": "mocha --compilers js:babel/register",
     "test:watch": "mocha --compilers js:babel/register --watch"
 
