@@ -80,21 +80,21 @@ export default class ApplicationClient extends BaseClient {
     });
 
     this.mqtt.on('message', (topic, payload) => {
-      console.info("mqtt: ", topic, payload.toString());
+      //console.info("mqtt: ", topic, payload.toString());
 
       // For each type of registered callback, check the incoming topic against a Regexp.
       // If matches, forward the payload and various fields from the topic (extracted using groups in the regexp)
 
       var match = DEVICE_EVT_RE.exec(topic);
       if(match){
-        this.emit('deviceEvent', {
-          type: match[1],
-          id: match[2],
-          event: match[3],
-          format: match[4],
+        this.emit('deviceEvent', 
+          match[1],
+          match[2],
+          match[3],
+          match[4],
           payload,
           topic
-        });
+        );
 
         return;
       }
@@ -102,37 +102,37 @@ export default class ApplicationClient extends BaseClient {
 
       var match = DEVICE_CMD_RE.exec(topic);
       if(match){
-        this.emit('deviceCommand', {
-          type: match[1],
-          id: match[2],
-          command: match[3],
-          format: match[4],
+        this.emit('deviceCommand', 
+          match[1],
+          match[2],
+          match[3],
+          match[4],
           payload,
           topic
-        });
+        );
 
         return;
       }
 
       var match = DEVICE_MON_RE.exec(topic);
       if(match){
-        this.emit('deviceStatus', {
-          type: match[1],
-          id: match[2],
+        this.emit('deviceStatus', 
+          match[1],
+          match[2],
           payload,
           topic
-        });
+        );
 
         return;
       }
 
       var match = APP_MON_RE.exec(topic);
         if(match){
-        this.emit('appStatus', {
-          app: match[1],
+        this.emit('appStatus', 
+          match[1],
           payload,
           topic
-        });
+        );
         return;
       }
 

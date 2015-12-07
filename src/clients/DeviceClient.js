@@ -81,12 +81,12 @@ export default class DeviceClient extends BaseClient {
       let match = CMD_RE.exec(topic);
 
       if(match){
-        this.emit('command', {
-          command: match[1],
-          format: match[2],
+        this.emit('command', 
+          match[1],
+          match[2],
           payload,
           topic
-        });
+        );
       }
     });
   }
