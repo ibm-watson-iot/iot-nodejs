@@ -60,7 +60,7 @@ If you want to use quickstart, then send only the first three
 properties.
 
 ``` {.sourceCode .javascript}
-var Client = require("ibmiotf").IotfDevice;
+var Client = require("ibmiotf");
 var config = {
     "org" : "organization",
     "id" : "deviceId",
@@ -69,7 +69,7 @@ var config = {
     "auth-token" : "authToken"
 };
 
-var deviceClient = new IBMIoTF.DeviceClient(config);
+var deviceClient = new Client.IotfDevice(config);
 
 ....
 ```
@@ -121,7 +121,7 @@ Events can be published by using
 
 ``` {.sourceCode .javascript}
 
-var deviceClient = new IBMIoTF.DeviceClient(config);
+var deviceClient = new Client.IotfDevice(config);
 
 deviceClient.connect();
 
@@ -152,7 +152,7 @@ properties
 -   topic - actual topic where the command was received
 
 ``` {.sourceCode .javascript}
-var deviceClient = new IBMIoTF.DeviceClient(config);
+var deviceClient = new Client.IotfDevice(config);
 
 deviceClient.connect();
 
@@ -180,7 +180,7 @@ Handling errors
 When the device clients encounters an error, it emits an *error* event.
 
 ``` {.sourceCode .javascript}
-var deviceClient = new IBMIoTF.DeviceClient(config);
+var deviceClient = new Client.IotfDevice(config);
 
 deviceClient.connect();
 
@@ -202,7 +202,7 @@ Disconnect Client
 Disconnects the client and releases the connections
 
 ``` {.sourceCode .javascript}
-var deviceClient = new IBMIoTF.DeviceClient(config);
+var deviceClient = new Client.IotfDevice(config);
 
 deviceClient.connect();
 
@@ -243,7 +243,7 @@ configuration json containing the following :
 If you want to use quickstart, then send only the first two properties.
 
 ``` {.sourceCode .javascript}
-var Client = require("ibmiotf").IotfApplication;
+var Client = require("ibmiotf");
 var config = {
     "org" : orgId,
     "id" : appId,
@@ -251,7 +251,7 @@ var config = {
     "auth-token" : apiToken
 }
 
-var appClient = new IBMIoTF.ApplicationClient(appClientConfig);
+var appClient = new Client.IotfApplication(appClientConfig);
 
 ....
 ```
@@ -263,7 +263,7 @@ Connect to the Internet of Things Foundation by calling the *connect*
 function
 
 ``` {.sourceCode .javascript}
-var appClient = new IBMIoTF.ApplicationClient(appClientConfig);
+var appClient = new Client.IotfApplication(appClientConfig);
 
 appClient.connect();
 
@@ -285,7 +285,7 @@ Handling errors
 When the application clients encounters an error, it emits an *error* event.
 
 ``` {.sourceCode .javascript}
-var appClient = new IBMIoTF.ApplicationClient(appClientConfig);
+var appClient = new Client.IotfApplication(appClientConfig);
 
 appClient.connect();
 
@@ -321,7 +321,7 @@ to devices dependent on device type, id, event and msgFormat parameters.
 ### To subscribe to all events from all devices
 
 ``` {.sourceCode .javascript}
-var appClient = new IBMIoTF.ApplicationClient(appClientConfig);
+var appClient = new Client.IotfApplication(appClientConfig);
 
 appClient.connect();
 
@@ -337,7 +337,7 @@ appClient.on("connect", function () {
 
 ``` {.sourceCode .javascript}
 
-var appClient = new IBMIoTF.ApplicationClient(appClientConfig);
+var appClient = new Client.IotfApplication(appClientConfig);
 
 appClient.connect();
 
@@ -352,7 +352,7 @@ appClient.on("connect", function () {
 #### To subscribe to a specific event from all devices
 
 ``` {.sourceCode .javascript}
-var appClient = new IBMIoTF.ApplicationClient(appClientConfig);
+var appClient = new Client.IotfApplication(appClientConfig);
 
 appClient.connect();
 
@@ -367,7 +367,7 @@ appClient.on("connect", function () {
 #### To subscribe to a specific event from two or more different devices
 
 ``` {.sourceCode .javascript}
-var appClient = new IBMIoTF.ApplicationClient(appClientConfig);
+var appClient = new Client.IotfApplication(appClientConfig);
 
 appClient.connect();
 
@@ -383,7 +383,7 @@ appClient.on("connect", function () {
 #### To subscribe to all events published by a device in json format
 
 ``` {.sourceCode .javascript}
-var appClient = new IBMIoTF.ApplicationClient(appClientConfig);
+var appClient = new Client.IotfApplication(appClientConfig);
 
 appClient.connect();
 
@@ -412,7 +412,7 @@ properties
 -   topic - Original topic
 
 ``` {.sourceCode .javascript}
-var appClient = new IBMIoTF.ApplicationClient(appClientConfig);
+var appClient = new Client.IotfApplication(appClientConfig);
 
 appClient.connect();
 
@@ -440,7 +440,7 @@ subscription. A single client can support multiple subscriptions.
 ### Subscribe to status updates for all devices
 
 ``` {.sourceCode .javascript}
-var appClient = new IBMIoTF.ApplicationClient(appClientConfig);
+var appClient = new Client.IotfApplication(appClientConfig);
 
 appClient.connect();
 
@@ -454,7 +454,7 @@ appClient.on("connect", function () {
 #### Subscribe to status updates for all devices of a specific type
 
 ``` {.sourceCode .javascript}
-var appClient = new IBMIoTF.ApplicationClient(appClientConfig);
+var appClient = new Client.IotfApplication(appClientConfig);
 
 appClient.connect();
 
@@ -468,7 +468,7 @@ appClient.on("connect", function () {
 #### Subscribe to status updates for two different devices
 
 ``` {.sourceCode .javascript}
-var appClient = new IBMIoTF.ApplicationClient(appClientConfig);
+var appClient = new Client.IotfApplication(appClientConfig);
 
 appClient.connect();
 
@@ -494,7 +494,7 @@ properties
 -   topic
 
 ``` {.sourceCode .javascript}
-var appClient = new IBMIoTF.ApplicationClient(appClientConfig);
+var appClient = new Client.IotfApplication(appClientConfig);
 
 appClient.connect();
 
@@ -524,7 +524,7 @@ function requires
 -   Data
 
 ``` {.sourceCode .javascript}
-var appClient = new IBMIoTF.ApplicationClient(appClientConfig);
+var appClient = new Client.IotfApplication(appClientConfig);
 
 appClient.connect();
 
@@ -549,7 +549,7 @@ requires
 -   Data
 
 ``` {.sourceCode .javascript}
-var appClient = new IBMIoTF.ApplicationClient(appClientConfig);
+var appClient = new Client.IotfApplication(appClientConfig);
 
 appClient.connect();
 
@@ -567,7 +567,7 @@ Disconnect Client
 Disconnects the client and releases the connections
 
 ``` {.sourceCode .javascript}
-var appClient = new IBMIoTF.ApplicationClient(appClientConfig);
+var appClient = new Client.IotfApplication(appClientConfig);
 
 appClient.connect();
 

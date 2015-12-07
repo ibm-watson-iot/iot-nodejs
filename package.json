@@ -42,5 +42,9 @@
     "name": "Amit M Mangalvedkar",
     "email": "amitmangalvedkar@gmail.com"
   }],
-  "license": "Apache"
+  "repository" :
+  { "type" : "git", 
+    "url" : "https://github.com/ibm-messaging/iot-nodejs.git"
+  },
+  "license": "Apache-2.0"
 }
