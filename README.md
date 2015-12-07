@@ -27,7 +27,7 @@ Load the library in node.js / browserify
 -------------------------------------------
 
 ```JavaScript
-var IBMIoTF = require('ibmiotf');
+var Client = require('ibmiotf');
 ```
 
 Load the library in browser
