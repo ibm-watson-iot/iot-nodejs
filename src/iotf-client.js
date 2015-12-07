@@ -7,15 +7,16 @@
  http://www.eclipse.org/legal/epl-v10.html
  Contributors:
  Tim-Daniel Jacobi - Initial Contribution
+ Jeffrey Dare
  *****************************************************************************
  *
  */
-import { default as DeviceClient } from './clients/DeviceClient.js';
-import { default as ManagedDeviceClient } from './clients/ManagedDeviceClient.js';
-import { default as ApplicationClient } from './clients/ApplicationClient.js';
+import { default as IotfDevice } from './clients/DeviceClient.js';
+import { default as IotfManagedDevice } from './clients/ManagedDeviceClient.js';
+import { default as IotfApplication } from './clients/ApplicationClient.js';
 
 export default {
-  DeviceClient,
-  ManagedDeviceClient,
-  ApplicationClient
+  IotfDevice,
+  IotfManagedDevice,
+  IotfApplication
 }

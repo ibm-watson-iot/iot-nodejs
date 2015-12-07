@@ -7,7 +7,7 @@ var deviceClientConfig = {
   id: '001122334455'
 };
 
-var deviceClient = new iotf.DeviceClient(deviceClientConfig);
+var deviceClient = new iotf.IotfDevice(deviceClientConfig);
 
 deviceClient.connect();
 

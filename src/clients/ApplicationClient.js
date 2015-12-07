@@ -7,6 +7,7 @@
  http://www.eclipse.org/legal/epl-v10.html
  Contributors:
  Tim-Daniel Jacobi - Initial Contribution
+ Jeffrey Dare
  *****************************************************************************
  *
  */

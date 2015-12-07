@@ -174,6 +174,28 @@ deviceClient.on("command", function (commandName,format,payload,topic) {
 .... 
 ```
 
+Handling errors
+------------------
+
+When the device clients encounters an error, it emits an *error* event.
+
+``` {.sourceCode .javascript}
+var deviceClient = new IBMIoTF.DeviceClient(config);
+
+deviceClient.connect();
+
+deviceClient.on("connect", function () {
+    //publishing event using the default quality of service
+    deviceClient.publish("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}');
+
+});
+
+deviceClient.on("error", function (err) {
+    console.log("Error : "+err);
+});
+.... 
+```
+
 Disconnect Client
 --------------------
 
@@ -256,6 +278,27 @@ appClient.on("connect", function () {
 After the successful connection to the IoTF service, the application
 client emits *connect* event. So all the logic can be implemented inside
 this callback function.
+
+Handling errors
+------------------
+
+When the application clients encounters an error, it emits an *error* event.
+
+``` {.sourceCode .javascript}
+var appClient = new IBMIoTF.ApplicationClient(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+
+//Add your code here
+});
+
+appClient.on("error", function (err) {
+    console.log("Error : "+err);
+});
+.... 
+```
 
 Subscribing to device events
 ----------------------------

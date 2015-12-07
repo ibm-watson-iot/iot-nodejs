@@ -1,13 +1,13 @@
 var iotf = require("../");
 
 var appClientConfig = {
-  org: 'xxxxx',
+  org: 'xxxxxx',
   id: 'myapp',
-  "auth-key": 'a-xxxxx-0v4qumf4t3',
-  "auth-token": 'xxxxxx-xxxxxxx'
+  "auth-key": 'a-xxxxxx-xxxxxxxx',
+  "auth-token": 'xxxxxxx-xxxxxxxx'
 };
 
-var appClient = new iotf.ApplicationClient(appClientConfig);
+var appClient = new iotf.IotfApplication(appClientConfig);
 
 appClient.
 publishHTTPS("deviceType", "deviceId", "eventType", "json", { d : { 'temp' : 3}}). then (function onSuccess (argument) {
