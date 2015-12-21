@@ -32,7 +32,7 @@ The following code snippet shows how to construct the ApplicationClient instance
 	  "auth-key": 'a-myorg-oitb14jbjv',
 	  "auth-token": '6mpuLv0aB0b&8WjbOv'
 	};
-	var appClient = new IBMIoTF.ApplicationClient(appClientConfig);
+	var appClient = new IBMIoTF.IotfApplication(appClientConfig);
         
 ----
 
