@@ -20,7 +20,7 @@ The constructor builds the application client instance. It accepts an configurat
 * auth-token - API key token
 
 If you want to use the quickstart, then pass only the org and id in the configuration.
-The following code snippet shows how to construct the ApplicationClient instance using the configuration.
+The following code snippet shows how to construct the IotfApplication instance using the configuration.
 
 .. code:: javascript
     
@@ -235,7 +235,7 @@ The function updateDevice() can be used to modify one or more properties of a de
 .. code:: javascript
 
 	var status = { "alert": { "enabled": True }  }
-    appClient.updateDevice(type, deviceId, deviceInfo, status, metadata).then (function onSuccess (response) {
+    appClient.updateDevice(type, deviceId, deviceInfo, status, metadata,extensions).then (function onSuccess (response) {
 		console.log("Success");
 		console.log(response);
 	}, function onError (error) {

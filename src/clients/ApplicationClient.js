@@ -334,12 +334,13 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('DELETE', 204, false, ['device', 'types' , type, 'devices', deviceId], null);
   }
 
-  updateDevice(type, deviceId, deviceInfo, status, metadata){
+  updateDevice(type, deviceId, deviceInfo, status, metadata, extensions){
     console.info("updateDevice("+type+", "+deviceId+", "+deviceInfo+", "+status+", "+metadata+")");
     let body = {
       deviceInfo : deviceInfo,
       status : status,
-      metadata: metadata
+      metadata: metadata,
+      extensions: extensions
     };
 
     return this.callApi('PUT', 200, true, ['device', 'types' , type, 'devices', deviceId], JSON.stringify(body));

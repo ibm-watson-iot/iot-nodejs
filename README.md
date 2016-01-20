@@ -1,5 +1,5 @@
 Node.js Client Library
-======================
+========================
 
 The node.js client is used for simplifying the interacting with the Internet of Things Foundation. The following libraries contain instructions and guidance on using the nodejs ibmiotf node to interact with devices and applications within your organizations.
 
@@ -7,8 +7,7 @@ This client library is divided into three parts, Device, ManagedDevice and Appli
 
 This library supports to be loaded in node.js and the browser.
 
-Contributing
-------------
+# Contributing
 The client code is in the `src` folder and the tests are in the `test` folder.
 All code is written in [JavaScript 6](https://babeljs.io/docs/learn-es2015/) and automatically transpiled to JavaScript 5 for testing and building the production version of the library.
 
@@ -16,50 +15,36 @@ All code is written in [JavaScript 6](https://babeljs.io/docs/learn-es2015/) and
 * `npm install -g babel mocha`
 * `npm install`
 
-###NPM commands
+## NPM commands
 * `npm run test` - run the tests once
 * `npm run test:watch` - run the tests in watch mode
 * `npm build` - build the client and browser bundles
 
 
-Installation
--------------
-
-.. code::
-    
-    [root@localhost ~]# npm install ibmiotf
-	
-	
-Uninstall
-----------
-
-.. code::
-    
-    [root@localhost ~]# npm uninstall ibmiotf
-
-
 Usage
------
-
-###Load the library in node.js / browserify
+============
+Load the library in node.js / browserify
+-------------------------------------------
 
 ```JavaScript
 var Client = require('ibmiotf');
 ```
 
-###Load the library in browser
+Load the library in browser
+------------------------------
 
 load `iotf-client-bundle.js` or `iotf-client-bundle-min.js` from the `dist` directory
 
 
-Device Client
--------------
+Devices
+===============================
 
 *DeviceClient* is device client for the Internet of Things Foundation
 service. You can use this client to connect to the service, publish
 events from the device and subscribe to commands.
 
-###Constructor
+Constructor
+-----------
 
 The constructor builds the device client instance. It accepts an
 configuration json containing the following :
@@ -89,7 +74,8 @@ var deviceClient = new Client.IotfDevice(config);
 ....
 ```
 
-###Connect
+Connect
+-------
 
 Connect to the Internet of Things Foundation by calling the *connect*
 function
@@ -110,7 +96,8 @@ After the successful connection to the IoTF service, the device client
 emits *connect* event. So all the device logic can be implemented inside
 this callback function.
 
-###Publishing events
+Publishing events
+------------------
 
 Events are the mechanism by which devices publish data to the Internet
 of Things Foundation. The device controls the content of the event and
@@ -150,7 +137,8 @@ deviceClient.on("connect", function () {
 ....
 ```
 
-###Handling commands
+Handling commands
+------------------
 
 When the device client connects, it automatically subscribes to any
 command for this device. To process specific commands you need to
@@ -186,7 +174,8 @@ deviceClient.on("command", function (commandName,format,payload,topic) {
 .... 
 ```
 
-###Handling errors
+Handling errors
+------------------
 
 When the device clients encounters an error, it emits an *error* event.
 
@@ -207,7 +196,8 @@ deviceClient.on("error", function (err) {
 .... 
 ```
 
-###Disconnect Client
+Disconnect Client
+--------------------
 
 Disconnects the client and releases the connections
 
@@ -232,14 +222,15 @@ client.on("connect", function () {
 ```
 
 
-Application Client
-------------------
+Application
+==============
 
 *ApplicationClient* is application client for the Internet of Things
 Foundation service. This section contains information on how
 applications interact with devices.
 
-###Constructor
+Constructor
+-----------
 
 The constructor builds the application client instance. It accepts an
 configuration json containing the following :
@@ -265,7 +256,8 @@ var appClient = new Client.IotfApplication(appClientConfig);
 ....
 ```
 
-###Connect
+Connect
+-------
 
 Connect to the Internet of Things Foundation by calling the *connect*
 function
@@ -287,7 +279,8 @@ After the successful connection to the IoTF service, the application
 client emits *connect* event. So all the logic can be implemented inside
 this callback function.
 
-###Handling errors
+Handling errors
+------------------
 
 When the application clients encounters an error, it emits an *error* event.
 
@@ -307,7 +300,8 @@ appClient.on("error", function (err) {
 .... 
 ```
 
-###Subscribing to device events
+Subscribing to device events
+----------------------------
 
 Events are the mechanism by which devices publish data to the Internet
 of Things Foundation. The device controls the content of the event and
@@ -324,7 +318,7 @@ scope of the subscription. A single client can support multiple
 subscriptions. The code samples below give examples of how to subscribe
 to devices dependent on device type, id, event and msgFormat parameters.
 
-#### To subscribe to all events from all devices
+### To subscribe to all events from all devices
 
 ``` {.sourceCode .javascript}
 var appClient = new Client.IotfApplication(appClientConfig);
@@ -402,7 +396,8 @@ appClient.on("connect", function () {
 ....
 ```
 
-###Handling events from devices
+Handling events from devices
+----------------------------
 
 To process the events received by your subscriptions you need to
 implement an device event callback method. The ibmiotf application
@@ -435,13 +430,14 @@ appClient.on("deviceEvent", function (deviceType, deviceId, eventType, format, p
 ....
 ```
 
-###Subscribing to device status
+Subscribing to device status
+----------------------------
 
 By default, this will subscribe to status updates for all connected
 devices. Use the type and id parameters to control the scope of the
 subscription. A single client can support multiple subscriptions.
 
-#### Subscribe to status updates for all devices
+### Subscribe to status updates for all devices
 
 ``` {.sourceCode .javascript}
 var appClient = new Client.IotfApplication(appClientConfig);
@@ -484,7 +480,8 @@ appClient.on("connect", function () {
 });
 ```
 
-###Handling status updates from devices
+Handling status updates from devices
+------------------------------------
 
 To process the status updates received by your subscriptions you need to
 implement an device status callback method. The ibmiotf application
@@ -514,7 +511,8 @@ appClient.on("deviceStatus", function (deviceType, deviceId, payload, topic) {
 });
 ```
 
-###Publishing events from devices
+Publishing events from devices
+------------------------------
 
 Applications can publish events as if they originated from a Device. The
 function requires
@@ -538,7 +536,8 @@ appClient.on("connect", function () {
 });
 ```
 
-###Publishing commands to devices
+Publishing commands to devices
+------------------------------
 
 Applications can publish commands to connected devices. The function
 requires
@@ -562,7 +561,8 @@ appClient.on("connect", function () {
 });
 ```
 
-###Disconnect Client
+Disconnect Client
+-----------------
 
 Disconnects the client and releases the connections
 
@@ -581,6 +581,6 @@ appClient.on("connect", function () {
 ```
 
 APIs
-----
+========
 
 The API documentation can be found [here](https://github.com/ibm-messaging/iot-nodejs/blob/master/samples/api.rst).
