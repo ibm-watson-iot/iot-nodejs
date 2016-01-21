@@ -19124,6 +19124,21 @@ var ApplicationClient = (function (_BaseClient) {
       return this.callApi('PUT', 200, true, ['device', 'types', type], JSON.stringify(body));
     }
   }, {
+    key: 'registerDeviceType',
+    value: function registerDeviceType(typeId, description, deviceInfo, metadata) {
+      console.info("registerDeviceType(" + typeId + ", " + description + ", " + deviceInfo + ", " + metadata + ")");
+      // TODO: field validation
+      var body = {
+        id: typeId,
+        classId: "Device",
+        deviceInfo: deviceInfo,
+        description: description,
+        metadata: metadata
+      };
+
+      return this.callApi('POST', 201, true, ['device', 'types'], JSON.stringify(body));
+    }
+  }, {
     key: 'registerDevice',
     value: function registerDevice(type, deviceId, authToken, deviceInfo, location, metadata) {
       console.info("registerDevice(" + type + ", " + deviceId + ", " + deviceInfo + ", " + location + ", " + metadata + ")");

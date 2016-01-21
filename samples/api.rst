@@ -73,6 +73,28 @@ Applications can use device type operations to list all, create, delete, view an
 
 Refer to the Device Types section of the `IBM IoT Foundation API <https://docs.internetofthings.ibmcloud.com/swagger/v0002.html>`__ for information about the list of query parameters, the request & response model and http status code.
 
+Add a Device Type
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The function registerDeviceType() can be used to register a new device type in Internet of Things Foundation. For example,
+
+.. code:: javascript
+
+	var type = "myDeviceType";
+    var desc = "My Device Type"
+    var metadata = {"customField1": "customValue3", "customField2": "customValue4"}
+    var deviceInfo = {"serialNumber": "001", "manufacturer": "Blueberry", "model": "e2", "deviceClass": "A", "descriptiveLocation" : "Bangalore", "fwVersion" : "1.0.1", "hwVersion" : "12.01"}
+		
+	appClient.
+	registerDeviceType(type,desc,deviceInfo,metadata).then (function onSuccess (argument) {
+		console.log("Success");
+		console.log(argument);
+	}, function onError (argument) {
+		
+		console.log("Fail");
+		console.log(argument);
+	});
+
 Get all Device Types
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

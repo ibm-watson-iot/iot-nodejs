@@ -1,6 +1,6 @@
 {
   "name": "ibmiotf",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "A library for developing device and application clients for IBM Internet of Things Foundation",
   "main": "dist/iotf-client.js",
   "dependencies": {
