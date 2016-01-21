@@ -244,7 +244,7 @@ If you want to use quickstart, then send only the first two properties.
 
 ``` {.sourceCode .javascript}
 var Client = require("ibmiotf");
-var config = {
+var appClientConfig = {
     "org" : orgId,
     "id" : appId,
     "auth-key" : apiKey,
