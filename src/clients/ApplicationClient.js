@@ -59,7 +59,7 @@ export default class ApplicationClient extends BaseClient {
     super.connect();
 
     this.mqtt.on('connect', () => {
-      this.log.info("ApplicationClient Connected : " + config.org);
+      this.log.info("ApplicationClient Connected");
       this.isConnected = true;
 
       try	{
