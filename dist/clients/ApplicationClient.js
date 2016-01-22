@@ -83,7 +83,7 @@
       this.mqttConfig.clientId = "a:" + config.org + ":" + config.id;
       this.subscriptions = [];
 
-      console.info("IBMIoTF.ApplicationClient initialized for organization : " + config.org);
+      this.log.info("ApplicationClient initialized for organization : " + config.org);
     }
 
     _createClass(ApplicationClient, [{
@@ -94,7 +94,7 @@
         _get(Object.getPrototypeOf(ApplicationClient.prototype), 'connect', this).call(this);
 
         this.mqtt.on('connect', function () {
-
+          _this.log.info("ApplicationClient Connected : " + config.org);
           _this.isConnected = true;
 
           try {
@@ -102,7 +102,7 @@
               _this.mqtt.subscribe(_this.subscriptions[i], { qos: 0 });
             }
           } catch (err) {
-            console.error("Error while trying to subscribe : " + err);
+            _this.log.error("Error while trying to subscribe : " + err);
           }
 
           //reset the counter to 0 incase of reconnection
@@ -113,7 +113,7 @@
         });
 
         this.mqtt.on('message', function (topic, payload) {
-          //console.info("mqtt: ", topic, payload.toString());
+          _this.log.trace("mqtt: ", topic, payload.toString());
 
           // For each type of registered callback, check the incoming topic against a Regexp.
           // If matches, forward the payload and various fields from the topic (extracted using groups in the regexp)
@@ -146,41 +146,41 @@
           }
 
           // catch all which logs the receipt of an unexpected message
-          console.info("Message received on unexpected topic" + ", " + topic + ", " + payload);
+          _this.log.warn("Message received on unexpected topic" + ", " + topic + ", " + payload);
         });
       }
     }, {
       key: 'subscribe',
       value: function subscribe(topic) {
         if (!this.isConnected) {
-          console.error("Client is not connected");
+          this.log.error("Client is not connected");
           throw new Error("Client is not connected");
         }
 
-        console.info("Subscribe: " + ", " + topic);
+        this.log.trace("Subscribe: " + ", " + topic);
         this.subscriptions.push(topic);
 
         if (this.isConnected) {
           this.mqtt.subscribe(topic, { qos: 0 });
-          console.info("Freshly Subscribed to: " + topic);
+          this.log.debug("Freshly Subscribed to: " + topic);
         } else {
-          console.error("Unable to subscribe as application is not currently connected");
+          this.log.error("Unable to subscribe as application is not currently connected");
         }
       }
     }, {
       key: 'publish',
       value: function publish(topic, msg) {
         if (!this.mqtt) {
-          console.error("Client is not connected");
+          this.log.error("Client is not connected");
           throw new Error("Client is not connected");
         }
 
-        console.info("Publish: " + topic + ", " + msg);
+        this.log.debug("Publish: " + topic + ", " + msg);
 
         if (this.isConnected) {
           this.mqtt.publish(topic, msg);
         } else {
-          console.warn("Unable to publish as application is not currently connected");
+          this.log.warn("Unable to publish as application is not currently connected");
         }
       }
     }, {
@@ -292,44 +292,44 @@
               reject(new Error(method + " " + uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.status + ". Error Body: " + data));
             }
           }
-          console.log(xhrConfig);
+          _this2.log.debug(xhrConfig);
           (0, _xhr['default'])(xhrConfig).then(transformResponse, reject);
         });
       }
     }, {
       key: 'getOrganizationDetails',
       value: function getOrganizationDetails() {
-        console.info("getOrganizationDetails()");
+        this.log.debug("getOrganizationDetails()");
         return this.callApi('GET', 200, true, null, null);
       }
     }, {
       key: 'listAllDevicesOfType',
       value: function listAllDevicesOfType(type) {
-        console.info("listAllDevicesOfType(" + type + ")");
+        this.log.debug("listAllDevicesOfType(" + type + ")");
         return this.callApi('GET', 200, true, ['device', 'types', type, 'devices'], null);
       }
     }, {
       key: 'deleteDeviceType',
       value: function deleteDeviceType(type) {
-        console.info("deleteDeviceType(" + type + ")");
+        this.log.debug("deleteDeviceType(" + type + ")");
         return this.callApi('DELETE', 204, false, ['device', 'types', type], null);
       }
     }, {
       key: 'getDeviceType',
       value: function getDeviceType(type) {
-        console.info("getDeviceType(" + type + ")");
+        this.log.debug("getDeviceType(" + type + ")");
         return this.callApi('GET', 200, true, ['device', 'types', type], null);
       }
     }, {
       key: 'getAllDeviceTypes',
       value: function getAllDeviceTypes() {
-        console.info("getAllDeviceTypes()");
+        this.log.debug("getAllDeviceTypes()");
         return this.callApi('GET', 200, true, ['device', 'types'], null);
       }
     }, {
       key: 'updateDeviceType',
       value: function updateDeviceType(type, description, deviceInfo, metadata) {
-        console.info("updateDeviceType(" + type + ", " + description + ", " + deviceInfo + ", " + metadata + ")");
+        this.log.debug("updateDeviceType(" + type + ", " + description + ", " + deviceInfo + ", " + metadata + ")");
         var body = {
           deviceInfo: deviceInfo,
           description: description,
@@ -341,7 +341,7 @@
     }, {
       key: 'registerDeviceType',
       value: function registerDeviceType(typeId, description, deviceInfo, metadata) {
-        console.info("registerDeviceType(" + typeId + ", " + description + ", " + deviceInfo + ", " + metadata + ")");
+        this.log.debug("registerDeviceType(" + typeId + ", " + description + ", " + deviceInfo + ", " + metadata + ")");
         // TODO: field validation
         var body = {
           id: typeId,
@@ -356,7 +356,7 @@
     }, {
       key: 'registerDevice',
       value: function registerDevice(type, deviceId, authToken, deviceInfo, location, metadata) {
-        console.info("registerDevice(" + type + ", " + deviceId + ", " + deviceInfo + ", " + location + ", " + metadata + ")");
+        this.log.debug("registerDevice(" + type + ", " + deviceId + ", " + deviceInfo + ", " + location + ", " + metadata + ")");
         // TODO: field validation
         var body = {
           deviceId: deviceId,
@@ -371,13 +371,13 @@
     }, {
       key: 'unregisterDevice',
       value: function unregisterDevice(type, deviceId) {
-        console.info("unregisterDevice(" + type + ", " + deviceId + ")");
+        this.log.debug("unregisterDevice(" + type + ", " + deviceId + ")");
         return this.callApi('DELETE', 204, false, ['device', 'types', type, 'devices', deviceId], null);
       }
     }, {
       key: 'updateDevice',
       value: function updateDevice(type, deviceId, deviceInfo, status, metadata, extensions) {
-        console.info("updateDevice(" + type + ", " + deviceId + ", " + deviceInfo + ", " + status + ", " + metadata + ")");
+        this.log.debug("updateDevice(" + type + ", " + deviceId + ", " + deviceInfo + ", " + status + ", " + metadata + ")");
         var body = {
           deviceInfo: deviceInfo,
           status: status,
@@ -390,80 +390,80 @@
     }, {
       key: 'getDevice',
       value: function getDevice(type, deviceId) {
-        console.info("getDevice(" + type + ", " + deviceId + ")");
+        this.log.debug("getDevice(" + type + ", " + deviceId + ")");
         return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId], null);
       }
     }, {
       key: 'getDeviceLocation',
       value: function getDeviceLocation(type, deviceId) {
-        console.info("getDeviceLocation(" + type + ", " + deviceId + ")");
+        this.log.debug("getDeviceLocation(" + type + ", " + deviceId + ")");
         return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'location'], null);
       }
     }, {
       key: 'updateDeviceLocation',
       value: function updateDeviceLocation(type, deviceId, location) {
-        console.info("updateDeviceLocation(" + type + ", " + deviceId + ", " + location + ")");
+        this.log.debug("updateDeviceLocation(" + type + ", " + deviceId + ", " + location + ")");
 
         return this.callApi('PUT', 200, true, ['device', 'types', type, 'devices', deviceId, 'location'], JSON.stringify(location));
       }
     }, {
       key: 'getDeviceManagementInformation',
       value: function getDeviceManagementInformation(type, deviceId) {
-        console.info("getDeviceManagementInformation(" + type + ", " + deviceId + ")");
+        this.log.debug("getDeviceManagementInformation(" + type + ", " + deviceId + ")");
         return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'mgmt'], null);
       }
     }, {
       key: 'getAllDiagnosticLogs',
       value: function getAllDiagnosticLogs(type, deviceId) {
-        console.info("getAllDiagnosticLogs(" + type + ", " + deviceId + ")");
+        this.log.debug("getAllDiagnosticLogs(" + type + ", " + deviceId + ")");
         return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs'], null);
       }
     }, {
       key: 'clearAllDiagnosticLogs',
       value: function clearAllDiagnosticLogs(type, deviceId) {
-        console.info("clearAllDiagnosticLogs(" + type + ", " + deviceId + ")");
+        this.log.debug("clearAllDiagnosticLogs(" + type + ", " + deviceId + ")");
         return this.callApi('DELETE', 204, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs'], null);
       }
     }, {
       key: 'addDeviceDiagLogs',
       value: function addDeviceDiagLogs(type, deviceId, log) {
-        console.info("addDeviceDiagLogs(" + type + ", " + deviceId + ", " + log + ")");
+        this.log.debug("addDeviceDiagLogs(" + type + ", " + deviceId + ", " + log + ")");
         return this.callApi('POST', 201, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs'], JSON.stringify(log));
       }
     }, {
       key: 'getDiagnosticLog',
       value: function getDiagnosticLog(type, deviceId, logId) {
-        console.info("getAllDiagnosticLogs(" + type + ", " + deviceId + ", " + logId + ")");
+        this.log.debug("getAllDiagnosticLogs(" + type + ", " + deviceId + ", " + logId + ")");
         return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs', logId], null);
       }
     }, {
       key: 'deleteDiagnosticLog',
       value: function deleteDiagnosticLog(type, deviceId, logId) {
-        console.info("deleteDiagnosticLog(" + type + ", " + deviceId + ", " + logId + ")");
+        this.log.debug("deleteDiagnosticLog(" + type + ", " + deviceId + ", " + logId + ")");
         return this.callApi('DELETE', 204, true, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs', logId], null);
       }
     }, {
       key: 'getDeviceErrorCodes',
       value: function getDeviceErrorCodes(type, deviceId) {
-        console.info("getDeviceErrorCodes(" + type + ", " + deviceId + ")");
+        this.log.debug("getDeviceErrorCodes(" + type + ", " + deviceId + ")");
         return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'diag', 'errorCodes'], null);
       }
     }, {
       key: 'clearDeviceErrorCodes',
       value: function clearDeviceErrorCodes(type, deviceId) {
-        console.info("clearDeviceErrorCodes(" + type + ", " + deviceId + ")");
+        this.log.debug("clearDeviceErrorCodes(" + type + ", " + deviceId + ")");
         return this.callApi('DELETE', 204, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'errorCodes'], null);
       }
     }, {
       key: 'addErrorCode',
       value: function addErrorCode(type, deviceId, log) {
-        console.info("addErrorCode(" + type + ", " + deviceId + ", " + log + ")");
+        this.log.debug("addErrorCode(" + type + ", " + deviceId + ", " + log + ")");
         return this.callApi('POST', 201, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'errorCodes'], JSON.stringify(log));
       }
     }, {
       key: 'getDeviceConnectionLogs',
       value: function getDeviceConnectionLogs(typeId, deviceId) {
-        console.info("getDeviceConnectionLogs(" + typeId + ", " + deviceId + ")");
+        this.log.debug("getDeviceConnectionLogs(" + typeId + ", " + deviceId + ")");
         var params = {
           typeId: typeId,
           deviceId: deviceId
@@ -473,19 +473,19 @@
     }, {
       key: 'getServiceStatus',
       value: function getServiceStatus() {
-        console.info("getServiceStatus()");
+        this.log.debug("getServiceStatus()");
         return this.callApi('GET', 200, true, ['service-status'], null);
       }
     }, {
       key: 'getAllDeviceManagementRequests',
       value: function getAllDeviceManagementRequests() {
-        console.info("getAllDeviceManagementRequests()");
+        this.log.debug("getAllDeviceManagementRequests()");
         return this.callApi('GET', 200, true, ['mgmt', 'requests'], null);
       }
     }, {
       key: 'initiateDeviceManagementRequest',
       value: function initiateDeviceManagementRequest(action, parameters, devices) {
-        console.info("initiateDeviceManagementRequest(" + action + ", " + parameters + ", " + devices + ")");
+        this.log.debug("initiateDeviceManagementRequest(" + action + ", " + parameters + ", " + devices + ")");
         var body = {
           action: action,
           parameters: parameters,
@@ -496,25 +496,25 @@
     }, {
       key: 'getDeviceManagementRequest',
       value: function getDeviceManagementRequest(requestId) {
-        console.info("getDeviceManagementRequest(" + requestId + ")");
+        this.log.debug("getDeviceManagementRequest(" + requestId + ")");
         return this.callApi('GET', 200, true, ['mgmt', 'requests', requestId], null);
       }
     }, {
       key: 'deleteDeviceManagementRequest',
       value: function deleteDeviceManagementRequest(requestId) {
-        console.info("deleteDeviceManagementRequest(" + requestId + ")");
+        this.log.debug("deleteDeviceManagementRequest(" + requestId + ")");
         return this.callApi('DELETE', 204, false, ['mgmt', 'requests', requestId], null);
       }
     }, {
       key: 'getDeviceManagementRequestStatus',
       value: function getDeviceManagementRequestStatus(requestId) {
-        console.info("getDeviceManagementRequestStatus(" + requestId + ")");
+        this.log.debug("getDeviceManagementRequestStatus(" + requestId + ")");
         return this.callApi('GET', 200, true, ['mgmt', 'requests', requestId, 'deviceStatus'], null);
       }
     }, {
       key: 'getDeviceManagementRequestStatusByDevice',
       value: function getDeviceManagementRequestStatusByDevice(requestId, typeId, deviceId) {
-        console.info("getDeviceManagementRequestStatusByDevice(" + requestId + ", " + typeId + ", " + deviceId + ")");
+        this.log.debug("getDeviceManagementRequestStatusByDevice(" + requestId + ", " + typeId + ", " + deviceId + ")");
         return this.callApi('GET', 200, true, ['mgmt', 'requests', requestId, 'deviceStatus', typeId, deviceId], null);
       }
 
@@ -522,7 +522,7 @@
     }, {
       key: 'getActiveDevices',
       value: function getActiveDevices(start, end, detail) {
-        console.info("getActiveDevices(" + start + ", " + end + ")");
+        this.log.debug("getActiveDevices(" + start + ", " + end + ")");
         detail = detail | false;
         var params = {
           start: start,
@@ -534,7 +534,7 @@
     }, {
       key: 'getHistoricalDataUsage',
       value: function getHistoricalDataUsage(start, end, detail) {
-        console.info("getHistoricalDataUsage(" + start + ", " + end + ")");
+        this.log.debug("getHistoricalDataUsage(" + start + ", " + end + ")");
         detail = detail | false;
         var params = {
           start: start,
@@ -546,7 +546,7 @@
     }, {
       key: 'getDataUsage',
       value: function getDataUsage(start, end, detail) {
-        console.info("getDataUsage(" + start + ", " + end + ")");
+        this.log.debug("getDataUsage(" + start + ", " + end + ")");
         detail = detail | false;
         var params = {
           start: start,
@@ -560,7 +560,7 @@
     }, {
       key: 'getAllHistoricalEvents',
       value: function getAllHistoricalEvents(evtType, start, end) {
-        console.info("getAllHistoricalEvents(" + evtType + ", " + start + ", " + end + ")");
+        this.log.debug("getAllHistoricalEvents(" + evtType + ", " + start + ", " + end + ")");
         var params = {
           start: start,
           end: end,
@@ -571,7 +571,7 @@
     }, {
       key: 'getAllHistoricalEventsByDeviceType',
       value: function getAllHistoricalEventsByDeviceType(evtType, start, end, typeId) {
-        console.info("getAllHistoricalEvents(" + evtType + ", " + start + ", " + end + ")");
+        this.log.debug("getAllHistoricalEvents(" + evtType + ", " + start + ", " + end + ")");
         var params = {
           start: start,
           end: end,
@@ -582,7 +582,7 @@
     }, {
       key: 'getAllHistoricalEventsByDeviceId',
       value: function getAllHistoricalEventsByDeviceId(evtType, start, end, typeId, deviceId) {
-        console.info("getAllHistoricalEvents(" + evtType + ", " + start + ", " + end + ")");
+        this.log.debug("getAllHistoricalEvents(" + evtType + ", " + start + ", " + end + ")");
         var params = {
           start: start,
           end: end,
@@ -595,7 +595,7 @@
       value: function publishHTTPS(deviceType, deviceId, eventType, eventFormat, payload) {
         var _this3 = this;
 
-        console.info("Publishing event of Type: " + eventType + " with payload : " + payload);
+        this.log.debug("Publishing event of Type: " + eventType + " with payload : " + payload);
         return new _Promise['default'](function (resolve, reject) {
           var uri = (0, _format2['default'])("https://%s.internetofthings.ibmcloud.com/api/v0002/application/types/%s/devices/%s/events/%s", _this3.org, deviceType, deviceId, eventType);
 
@@ -613,7 +613,7 @@
           if (_this3.org !== QUICKSTART_ORG_ID) {
             xhrConfig.headers['Authorization'] = 'Basic ' + btoa(_this3.apiKey + ':' + _this3.apiToken);
           }
-          console.log(xhrConfig);
+          _this3.log.debug(xhrConfig);
 
           (0, _xhr['default'])(xhrConfig).then(resolve, reject);
         });

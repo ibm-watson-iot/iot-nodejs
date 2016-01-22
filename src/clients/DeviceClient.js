@@ -56,7 +56,7 @@ export default class DeviceClient extends BaseClient {
     this.deviceToken = config['auth-token'];
     this.mqttConfig.clientId = "d:" + config.org + ":" + config.type + ":" + config.id;
 
-    console.info("IBMIoTF.DeviceClient initialized for organization : " + config.org);
+    this.log.info("DeviceClient initialized for organization : " + config.org + " for ID : "+config.id);
   }
 
   connect(){
@@ -66,7 +66,7 @@ export default class DeviceClient extends BaseClient {
 
     this.mqtt.on('connect', () => {
       this.isConnected = true;
-
+      this.log.info("DeviceClient Connected");
       if(this.retryCount === 0){
         this.emit('connect');
       }
@@ -77,7 +77,7 @@ export default class DeviceClient extends BaseClient {
     });
 
     this.mqtt.on('message', (topic, payload) => {
-      console.info("Message received on topic : "+ topic + " with payload : "+ payload);
+      this.log.debug("Message received on topic : "+ topic + " with payload : "+ payload);
       
       let match = CMD_RE.exec(topic);
 
@@ -94,14 +94,14 @@ export default class DeviceClient extends BaseClient {
 
   publish(eventType, eventFormat, payload, qos){
     if (!this.isConnected) {
-      console.error("Client is not connected");
+      this.log.error("Client is not connected");
       throw new Error("Client is not connected");
     }
 
     let topic = format("iot-2/evt/%s/fmt/%s", eventType, eventFormat);
     let QOS = qos || 0;
 
-    console.info("Publishing to topic : "+ topic + " with payload : "+payload);
+    this.log.debug("Publishing to topic : "+ topic + " with payload : "+payload);
 
     this.mqtt.publish(topic,payload,{qos: QOS});
 
@@ -109,7 +109,7 @@ export default class DeviceClient extends BaseClient {
   }
 
   publishHTTPS(eventType, eventFormat, payload){
-    console.info("Publishing event of Type: "+ eventType + " with payload : "+payload);
+    this.log.debug("Publishing event of Type: "+ eventType + " with payload : "+payload);
     return new Promise((resolve, reject) => {
       let uri = format("https://%s.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", this.org, this.typeId, this.deviceId, eventType);
 
@@ -129,7 +129,7 @@ export default class DeviceClient extends BaseClient {
       if(this.org !== QUICKSTART_ORG_ID) {
         xhrConfig.headers['Authorization'] = 'Basic ' + btoa('use-token-auth' + ':' + this.deviceToken);
       }
-      console.log(xhrConfig);
+      this.log.debug(xhrConfig);
 
       xhr(xhrConfig).then(resolve, reject);
     });

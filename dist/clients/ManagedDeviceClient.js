@@ -160,7 +160,7 @@
 
         this._deviceRequests[reqId] = { topic: MANAGE_TOPIC, payload: payload };
 
-        console.info("Publishing manage request with payload : %s", payload);
+        this.log.debug("Publishing manage request with payload : %s", payload);
         this.mqtt.publish(MANAGE_TOPIC, payload, QOS);
 
         return reqId;
@@ -180,7 +180,7 @@
 
         this._deviceRequests[reqId] = { topic: UNMANAGE_TOPIC, payload: payload };
 
-        console.info("Publishing unmanage request with payload : %s", payload);
+        this.log.debug("Publishing unmanage request with payload : %s", payload);
         this.mqtt.publish(UNMANAGE_TOPIC, payload, QOS);
 
         return reqId;
@@ -239,7 +239,7 @@
 
         this._deviceRequests[reqId] = { topic: UPDATE_LOCATION_TOPIC, payload: payload };
 
-        console.info("Publishing update location request with payload : %s", payload);
+        this.log.debug("Publishing update location request with payload : %s", payload);
         this.mqtt.publish(UPDATE_LOCATION_TOPIC, payload, QOS);
 
         return reqId;
@@ -271,7 +271,7 @@
 
         this._deviceRequests[reqId] = { topic: ADD_ERROR_CODE_TOPIC, payload: payload };
 
-        console.info("Publishing add error code request with payload : %s", payload);
+        this.log.debug("Publishing add error code request with payload : %s", payload);
         this.mqtt.publish(ADD_ERROR_CODE_TOPIC, payload, QOS);
 
         return reqId;
@@ -291,7 +291,7 @@
 
         this._deviceRequests[reqId] = { topic: CLEAR_ERROR_CODES_TOPIC, payload: payload };
 
-        console.info("Publishing clear error codes request with payload : %s", payload);
+        this.log.debug("Publishing clear error codes request with payload : %s", payload);
         this.mqtt.publish(CLEAR_ERROR_CODES_TOPIC, payload, QOS);
 
         return reqId;
@@ -341,7 +341,7 @@
 
         this._deviceRequests[reqId] = { topic: ADD_LOG_TOPIC, payload: payload };
 
-        console.info("Publishing add log request with payload : %s", payload);
+        this.log.debug("Publishing add log request with payload : %s", payload);
         this.mqtt.publish(ADD_LOG_TOPIC, payload, QOS);
 
         return reqId;
@@ -361,7 +361,7 @@
 
         this._deviceRequests[reqId] = { topic: CLEAR_LOGS_TOPIC, payload: payload };
 
-        console.info("Publishing clear logs request with payload : %s", payload);
+        this.log.debug("Publishing clear logs request with payload : %s", payload);
         this.mqtt.publish(CLEAR_LOGS_TOPIC, payload, QOS);
 
         return reqId;
@@ -402,7 +402,7 @@
         payload.reqId = reqId;
         payload = JSON.stringify(payload);
 
-        console.info("Publishing device action response with payload : %s", payload);
+        this.log.debug("Publishing device action response with payload : %s", payload);
         this.mqtt.publish(RESPONSE_TOPIC, payload, QOS);
 
         delete this._dmRequests[reqId];
@@ -424,51 +424,51 @@
         switch (request.topic) {
           case MANAGE_TOPIC:
             if (rc == 200) {
-              console.info("[%s] Manage action completed : %s", rc, request.payload);
+              this.log.debug("[%s] Manage action completed : %s", rc, request.payload);
             } else {
-              console.error("[%s] Manage action failed : %s", rc, request.payload);
+              this.log.error("[%s] Manage action failed : %s", rc, request.payload);
             }
             break;
           case UNMANAGE_TOPIC:
             if (rc == 200) {
-              console.info("[%s] Unmanage action completed : %s", rc, request.payload);
+              this.log.debug("[%s] Unmanage action completed : %s", rc, request.payload);
             } else {
-              console.error("[%s] Unmanage action failed : %s", rc, request.payload);
+              this.log.error("[%s] Unmanage action failed : %s", rc, request.payload);
             }
             break;
           case UPDATE_LOCATION_TOPIC:
             if (rc == 200) {
-              console.info("[%s] Update location action completed : %s", rc, request.payload);
+              this.log.debug("[%s] Update location action completed : %s", rc, request.payload);
             } else {
-              console.error("[%s] Update location failed : %s", rc, request.payload);
+              this.log.error("[%s] Update location failed : %s", rc, request.payload);
             }
             break;
           case ADD_LOG_TOPIC:
             if (rc == 200) {
-              console.info("[%s] Add log action completed : %s", rc, request.payload);
+              this.log.debug("[%s] Add log action completed : %s", rc, request.payload);
             } else {
-              console.error("[%s] Add log action failed : %s", rc, request.payload);
+              this.log.error("[%s] Add log action failed : %s", rc, request.payload);
             }
             break;
           case CLEAR_LOGS_TOPIC:
             if (rc == 200) {
-              console.info("[%s] Clear logs action completed : %s", rc, request.payload);
+              this.log.debug("[%s] Clear logs action completed : %s", rc, request.payload);
             } else {
-              console.error("[%s] Clear logs action failed : %s", rc, request.payload);
+              this.log.error("[%s] Clear logs action failed : %s", rc, request.payload);
             }
             break;
           case ADD_ERROR_CODE_TOPIC:
             if (rc == 200) {
-              console.info("[%s] Add error code action completed : %s", rc, request.payload);
+              this.log.debug("[%s] Add error code action completed : %s", rc, request.payload);
             } else {
-              console.error("[%s] Add error code action failed : %s", rc, request.payload);
+              this.log.error("[%s] Add error code action failed : %s", rc, request.payload);
             }
             break;
           case CLEAR_ERROR_CODES_TOPIC:
             if (rc == 200) {
-              console.info("[%s] Clear error codes action completed : %s", rc, request.payload);
+              this.log.debug("[%s] Clear error codes action completed : %s", rc, request.payload);
             } else {
-              console.error("[%s] Clear error codes action failed : %s", rc, request.payload);
+              this.log.error("[%s] Clear error codes action failed : %s", rc, request.payload);
             }
             break;
           default:

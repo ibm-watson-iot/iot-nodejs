@@ -9,6 +9,9 @@ var appClientConfig = {
 
 var appClient = new iotf.IotfApplication(appClientConfig);
 
+//setting the log level to trace. By default its 'warn'
+appClient.log.setLevel('info');
+
 appClient.
 publishHTTPS("deviceType", "deviceId", "eventType", "json", { d : { 'temp' : 3}}). then (function onSuccess (argument) {
 	console.log("Success");

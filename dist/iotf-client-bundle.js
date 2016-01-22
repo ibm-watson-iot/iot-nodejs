@@ -13480,6 +13480,231 @@ function hasOwnProperty(obj, prop) {
 }());
 
 },{}],51:[function(require,module,exports){
+/*
+* loglevel - https://github.com/pimterry/loglevel
+*
+* Copyright (c) 2013 Tim Perry
+* Licensed under the MIT license.
+*/
+(function (root, definition) {
+    "use strict";
+    if (typeof module === 'object' && module.exports && typeof require === 'function') {
+        module.exports = definition();
+    } else if (typeof define === 'function' && typeof define.amd === 'object') {
+        define(definition);
+    } else {
+        root.log = definition();
+    }
+}(this, function () {
+    "use strict";
+    var noop = function() {};
+    var undefinedType = "undefined";
+
+    function realMethod(methodName) {
+        if (typeof console === undefinedType) {
+            return false; // We can't build a real method without a console to log to
+        } else if (console[methodName] !== undefined) {
+            return bindMethod(console, methodName);
+        } else if (console.log !== undefined) {
+            return bindMethod(console, 'log');
+        } else {
+            return noop;
+        }
+    }
+
+    function bindMethod(obj, methodName) {
+        var method = obj[methodName];
+        if (typeof method.bind === 'function') {
+            return method.bind(obj);
+        } else {
+            try {
+                return Function.prototype.bind.call(method, obj);
+            } catch (e) {
+                // Missing bind shim or IE8 + Modernizr, fallback to wrapping
+                return function() {
+                    return Function.prototype.apply.apply(method, [obj, arguments]);
+                };
+            }
+        }
+    }
+
+    // these private functions always need `this` to be set properly
+
+    function enableLoggingWhenConsoleArrives(methodName, level, loggerName) {
+        return function () {
+            if (typeof console !== undefinedType) {
+                replaceLoggingMethods.call(this, level, loggerName);
+                this[methodName].apply(this, arguments);
+            }
+        };
+    }
+
+    function replaceLoggingMethods(level, loggerName) {
+        /*jshint validthis:true */
+        for (var i = 0; i < logMethods.length; i++) {
+            var methodName = logMethods[i];
+            this[methodName] = (i < level) ?
+                noop :
+                this.methodFactory(methodName, level, loggerName);
+        }
+    }
+
+    function defaultMethodFactory(methodName, level, loggerName) {
+        /*jshint validthis:true */
+        return realMethod(methodName) ||
+               enableLoggingWhenConsoleArrives.apply(this, arguments);
+    }
+
+    var logMethods = [
+        "trace",
+        "debug",
+        "info",
+        "warn",
+        "error"
+    ];
+
+    function Logger(name, defaultLevel, factory) {
+      var self = this;
+      var currentLevel;
+      var storageKey = "loglevel";
+      if (name) {
+        storageKey += ":" + name;
+      }
+
+      function persistLevelIfPossible(levelNum) {
+          var levelName = (logMethods[levelNum] || 'silent').toUpperCase();
+
+          // Use localStorage if available
+          try {
+              window.localStorage[storageKey] = levelName;
+              return;
+          } catch (ignore) {}
+
+          // Use session cookie as fallback
+          try {
+              window.document.cookie =
+                encodeURIComponent(storageKey) + "=" + levelName + ";";
+          } catch (ignore) {}
+      }
+
+      function getPersistedLevel() {
+          var storedLevel;
+
+          try {
+              storedLevel = window.localStorage[storageKey];
+          } catch (ignore) {}
+
+          if (typeof storedLevel === undefinedType) {
+              try {
+                  var cookie = window.document.cookie;
+                  var location = cookie.indexOf(
+                      encodeURIComponent(storageKey) + "=");
+                  if (location) {
+                      storedLevel = /^([^;]+)/.exec(cookie.slice(location))[1];
+                  }
+              } catch (ignore) {}
+          }
+
+          // If the stored level is not valid, treat it as if nothing was stored.
+          if (self.levels[storedLevel] === undefined) {
+              storedLevel = undefined;
+          }
+
+          return storedLevel;
+      }
+
+      /*
+       *
+       * Public API
+       *
+       */
+
+      self.levels = { "TRACE": 0, "DEBUG": 1, "INFO": 2, "WARN": 3,
+          "ERROR": 4, "SILENT": 5};
+
+      self.methodFactory = factory || defaultMethodFactory;
+
+      self.getLevel = function () {
+          return currentLevel;
+      };
+
+      self.setLevel = function (level, persist) {
+          if (typeof level === "string" && self.levels[level.toUpperCase()] !== undefined) {
+              level = self.levels[level.toUpperCase()];
+          }
+          if (typeof level === "number" && level >= 0 && level <= self.levels.SILENT) {
+              currentLevel = level;
+              if (persist !== false) {  // defaults to true
+                  persistLevelIfPossible(level);
+              }
+              replaceLoggingMethods.call(self, level, name);
+              if (typeof console === undefinedType && level < self.levels.SILENT) {
+                  return "No console available for logging";
+              }
+          } else {
+              throw "log.setLevel() called with invalid level: " + level;
+          }
+      };
+
+      self.setDefaultLevel = function (level) {
+          if (!getPersistedLevel()) {
+              self.setLevel(level, false);
+          }
+      };
+
+      self.enableAll = function(persist) {
+          self.setLevel(self.levels.TRACE, persist);
+      };
+
+      self.disableAll = function(persist) {
+          self.setLevel(self.levels.SILENT, persist);
+      };
+
+      // Initialize with the right level
+      var initialLevel = getPersistedLevel();
+      if (initialLevel == null) {
+          initialLevel = defaultLevel == null ? "WARN" : defaultLevel;
+      }
+      self.setLevel(initialLevel, false);
+    }
+
+    /*
+     *
+     * Package-level API
+     *
+     */
+
+    var defaultLogger = new Logger();
+
+    var _loggersByName = {};
+    defaultLogger.getLogger = function getLogger(name) {
+        if (typeof name !== "string" || name === "") {
+          throw new TypeError("You must supply a name when creating a logger.");
+        }
+
+        var logger = _loggersByName[name];
+        if (!logger) {
+          logger = _loggersByName[name] = new Logger(
+            name, defaultLogger.getLevel(), defaultLogger.methodFactory);
+        }
+        return logger;
+    };
+
+    // Grab the current global log variable in case of overwrite
+    var _log = (typeof window !== undefinedType) ? window.log : undefined;
+    defaultLogger.noConflict = function() {
+        if (typeof window !== undefinedType &&
+               window.log === defaultLogger) {
+            window.log = _log;
+        }
+
+        return defaultLogger;
+    };
+
+    return defaultLogger;
+}));
+
+},{}],52:[function(require,module,exports){
 (function (process,global){
 'use strict';
 /**
@@ -14342,7 +14567,7 @@ MqttClient.prototype._nextId = function () {
 module.exports = MqttClient;
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./store":56,"_process":26,"end-of-stream":57,"events":22,"inherits":60,"mqtt-packet":63,"readable-stream":76}],52:[function(require,module,exports){
+},{"./store":57,"_process":26,"end-of-stream":58,"events":22,"inherits":61,"mqtt-packet":64,"readable-stream":77}],53:[function(require,module,exports){
 (function (process){
 'use strict';
 var MqttClient = require('../client'),
@@ -14481,7 +14706,7 @@ module.exports = connect;
 module.exports.connect = connect;
 
 }).call(this,require('_process'))
-},{"../client":51,"./tcp":53,"./tls":54,"./ws":55,"_process":26,"url":46,"xtend":105}],53:[function(require,module,exports){
+},{"../client":52,"./tcp":54,"./tls":55,"./ws":56,"_process":26,"url":46,"xtend":106}],54:[function(require,module,exports){
 'use strict';
 var net = require('net');
 
@@ -14502,7 +14727,7 @@ function buildBuilder (client, opts) {
 
 module.exports = buildBuilder;
 
-},{"net":17}],54:[function(require,module,exports){
+},{"net":17}],55:[function(require,module,exports){
 'use strict';
 var tls = require('tls');
 
@@ -14552,7 +14777,7 @@ function buildBuilder (mqttClient, opts) {
 
 module.exports = buildBuilder;
 
-},{"tls":17}],55:[function(require,module,exports){
+},{"tls":17}],56:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -14628,7 +14853,7 @@ if ('browser' !== process.title) {
 }
 
 }).call(this,require('_process'))
-},{"_process":26,"url":46,"websocket-stream":104}],56:[function(require,module,exports){
+},{"_process":26,"url":46,"websocket-stream":105}],57:[function(require,module,exports){
 (function (process){
 'use strict';
 var Readable = require('readable-stream').Readable,
@@ -14740,7 +14965,7 @@ Store.prototype.close = function (cb) {
 module.exports = Store;
 
 }).call(this,require('_process'))
-},{"_process":26,"readable-stream":76}],57:[function(require,module,exports){
+},{"_process":26,"readable-stream":77}],58:[function(require,module,exports){
 var once = require('once');
 
 var noop = function() {};
@@ -14824,7 +15049,7 @@ var eos = function(stream, opts, callback) {
 };
 
 module.exports = eos;
-},{"once":59}],58:[function(require,module,exports){
+},{"once":60}],59:[function(require,module,exports){
 // Returns a wrapper function that returns a wrapped callback
 // The wrapper function should do some stuff, and return a
 // presumably different callback function.
@@ -14859,7 +15084,7 @@ function wrappy (fn, cb) {
   }
 }
 
-},{}],59:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 var wrappy = require('wrappy')
 module.exports = wrappy(once)
 
@@ -14882,9 +15107,9 @@ function once (fn) {
   return f
 }
 
-},{"wrappy":58}],60:[function(require,module,exports){
+},{"wrappy":59}],61:[function(require,module,exports){
 arguments[4][23][0].apply(exports,arguments)
-},{"dup":23}],61:[function(require,module,exports){
+},{"dup":23}],62:[function(require,module,exports){
 /* Protocol - protocol constants */
 
 /* Command code => mnemonic */
@@ -14938,7 +15163,7 @@ module.exports.WILL_QOS_SHIFT = 3;
 module.exports.WILL_FLAG_MASK = 0x04;
 module.exports.CLEAN_SESSION_MASK = 0x02;
 
-},{}],62:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 (function (Buffer){
 
 'use strict';
@@ -15556,14 +15781,14 @@ function byteLength(bufOrString) {
 module.exports = generate
 
 }).call(this,require("buffer").Buffer)
-},{"./constants":61,"buffer":18}],63:[function(require,module,exports){
+},{"./constants":62,"buffer":18}],64:[function(require,module,exports){
 
 'use strict';
 
 exports.parser          = require('./parser')
 exports.generate        = require('./generate')
 
-},{"./generate":62,"./parser":66}],64:[function(require,module,exports){
+},{"./generate":63,"./parser":67}],65:[function(require,module,exports){
 (function (Buffer){
 var DuplexStream = require('readable-stream/duplex')
   , util         = require('util')
@@ -15788,7 +16013,7 @@ BufferList.prototype.destroy = function () {
 module.exports = BufferList
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":18,"readable-stream/duplex":67,"util":48}],65:[function(require,module,exports){
+},{"buffer":18,"readable-stream/duplex":68,"util":48}],66:[function(require,module,exports){
 
 function Packet() {
   this.cmd = null
@@ -15802,7 +16027,7 @@ function Packet() {
 
 module.exports = Packet
 
-},{}],66:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 
 var bl        = require('bl')
   , inherits  = require('inherits')
@@ -16192,9 +16417,9 @@ Parser.prototype._parseNum = function() {
 
 module.exports = Parser
 
-},{"./constants":61,"./packet":65,"bl":64,"events":22,"inherits":60}],67:[function(require,module,exports){
+},{"./constants":62,"./packet":66,"bl":65,"events":22,"inherits":61}],68:[function(require,module,exports){
 arguments[4][31][0].apply(exports,arguments)
-},{"./lib/_stream_duplex.js":68,"dup":31}],68:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":69,"dup":31}],69:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -16287,7 +16512,7 @@ function forEach (xs, f) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_readable":70,"./_stream_writable":72,"_process":26,"core-util-is":73,"inherits":60}],69:[function(require,module,exports){
+},{"./_stream_readable":71,"./_stream_writable":73,"_process":26,"core-util-is":74,"inherits":61}],70:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -16335,7 +16560,7 @@ PassThrough.prototype._transform = function(chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-},{"./_stream_transform":71,"core-util-is":73,"inherits":60}],70:[function(require,module,exports){
+},{"./_stream_transform":72,"core-util-is":74,"inherits":61}],71:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -17321,7 +17546,7 @@ function indexOf (xs, x) {
 }
 
 }).call(this,require('_process'))
-},{"_process":26,"buffer":18,"core-util-is":73,"events":22,"inherits":60,"isarray":74,"stream":44,"string_decoder/":75}],71:[function(require,module,exports){
+},{"_process":26,"buffer":18,"core-util-is":74,"events":22,"inherits":61,"isarray":75,"stream":44,"string_decoder/":76}],72:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -17533,7 +17758,7 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-},{"./_stream_duplex":68,"core-util-is":73,"inherits":60}],72:[function(require,module,exports){
+},{"./_stream_duplex":69,"core-util-is":74,"inherits":61}],73:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -17923,7 +18148,7 @@ function endWritable(stream, state, cb) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":68,"_process":26,"buffer":18,"core-util-is":73,"inherits":60,"stream":44}],73:[function(require,module,exports){
+},{"./_stream_duplex":69,"_process":26,"buffer":18,"core-util-is":74,"inherits":61,"stream":44}],74:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -18034,11 +18259,11 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../../../../../browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js")})
-},{"../../../../../../browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js":24}],74:[function(require,module,exports){
+},{"../../../../../../browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js":24}],75:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],75:[function(require,module,exports){
+},{"dup":25}],76:[function(require,module,exports){
 arguments[4][45][0].apply(exports,arguments)
-},{"buffer":18,"dup":45}],76:[function(require,module,exports){
+},{"buffer":18,"dup":45}],77:[function(require,module,exports){
 var Stream = require('stream'); // hack to fix a circular dependency issue when used with browserify
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = Stream;
@@ -18048,7 +18273,7 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":68,"./lib/_stream_passthrough.js":69,"./lib/_stream_readable.js":70,"./lib/_stream_transform.js":71,"./lib/_stream_writable.js":72,"stream":44}],77:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":69,"./lib/_stream_passthrough.js":70,"./lib/_stream_readable.js":71,"./lib/_stream_transform.js":72,"./lib/_stream_writable.js":73,"stream":44}],78:[function(require,module,exports){
 (function (process,Buffer){
 var stream = require('readable-stream')
 var eos = require('end-of-stream')
@@ -18278,7 +18503,7 @@ Duplexify.prototype.end = function(data, enc, cb) {
 
 module.exports = Duplexify
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":26,"buffer":18,"end-of-stream":78,"readable-stream":91,"util":48}],78:[function(require,module,exports){
+},{"_process":26,"buffer":18,"end-of-stream":79,"readable-stream":92,"util":48}],79:[function(require,module,exports){
 var once = require('once');
 
 var noop = function() {};
@@ -18351,21 +18576,21 @@ var eos = function(stream, opts, callback) {
 };
 
 module.exports = eos;
-},{"once":80}],79:[function(require,module,exports){
-arguments[4][58][0].apply(exports,arguments)
-},{"dup":58}],80:[function(require,module,exports){
+},{"once":81}],80:[function(require,module,exports){
 arguments[4][59][0].apply(exports,arguments)
-},{"dup":59,"wrappy":79}],81:[function(require,module,exports){
+},{"dup":59}],81:[function(require,module,exports){
+arguments[4][60][0].apply(exports,arguments)
+},{"dup":60,"wrappy":80}],82:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"./_stream_readable":83,"./_stream_writable":85,"core-util-is":86,"dup":32,"inherits":60,"process-nextick-args":88}],82:[function(require,module,exports){
+},{"./_stream_readable":84,"./_stream_writable":86,"core-util-is":87,"dup":32,"inherits":61,"process-nextick-args":89}],83:[function(require,module,exports){
 arguments[4][33][0].apply(exports,arguments)
-},{"./_stream_transform":84,"core-util-is":86,"dup":33,"inherits":60}],83:[function(require,module,exports){
+},{"./_stream_transform":85,"core-util-is":87,"dup":33,"inherits":61}],84:[function(require,module,exports){
 arguments[4][34][0].apply(exports,arguments)
-},{"./_stream_duplex":81,"_process":26,"buffer":18,"core-util-is":86,"dup":34,"events":22,"inherits":60,"isarray":87,"process-nextick-args":88,"string_decoder/":89,"util":17}],84:[function(require,module,exports){
+},{"./_stream_duplex":82,"_process":26,"buffer":18,"core-util-is":87,"dup":34,"events":22,"inherits":61,"isarray":88,"process-nextick-args":89,"string_decoder/":90,"util":17}],85:[function(require,module,exports){
 arguments[4][35][0].apply(exports,arguments)
-},{"./_stream_duplex":81,"core-util-is":86,"dup":35,"inherits":60}],85:[function(require,module,exports){
+},{"./_stream_duplex":82,"core-util-is":87,"dup":35,"inherits":61}],86:[function(require,module,exports){
 arguments[4][36][0].apply(exports,arguments)
-},{"./_stream_duplex":81,"buffer":18,"core-util-is":86,"dup":36,"events":22,"inherits":60,"process-nextick-args":88,"util-deprecate":90}],86:[function(require,module,exports){
+},{"./_stream_duplex":82,"buffer":18,"core-util-is":87,"dup":36,"events":22,"inherits":61,"process-nextick-args":89,"util-deprecate":91}],87:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -18476,37 +18701,37 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../../../../../../../../../browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js")})
-},{"../../../../../../../../../../browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js":24}],87:[function(require,module,exports){
+},{"../../../../../../../../../../browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js":24}],88:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],88:[function(require,module,exports){
+},{"dup":25}],89:[function(require,module,exports){
 arguments[4][38][0].apply(exports,arguments)
-},{"_process":26,"dup":38}],89:[function(require,module,exports){
+},{"_process":26,"dup":38}],90:[function(require,module,exports){
 arguments[4][45][0].apply(exports,arguments)
-},{"buffer":18,"dup":45}],90:[function(require,module,exports){
+},{"buffer":18,"dup":45}],91:[function(require,module,exports){
 arguments[4][39][0].apply(exports,arguments)
-},{"dup":39}],91:[function(require,module,exports){
+},{"dup":39}],92:[function(require,module,exports){
 arguments[4][41][0].apply(exports,arguments)
-},{"./lib/_stream_duplex.js":81,"./lib/_stream_passthrough.js":82,"./lib/_stream_readable.js":83,"./lib/_stream_transform.js":84,"./lib/_stream_writable.js":85,"dup":41}],92:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":82,"./lib/_stream_passthrough.js":83,"./lib/_stream_readable.js":84,"./lib/_stream_transform.js":85,"./lib/_stream_writable.js":86,"dup":41}],93:[function(require,module,exports){
 arguments[4][32][0].apply(exports,arguments)
-},{"./_stream_readable":93,"./_stream_writable":95,"core-util-is":96,"dup":32,"inherits":60,"process-nextick-args":98}],93:[function(require,module,exports){
+},{"./_stream_readable":94,"./_stream_writable":96,"core-util-is":97,"dup":32,"inherits":61,"process-nextick-args":99}],94:[function(require,module,exports){
 arguments[4][34][0].apply(exports,arguments)
-},{"./_stream_duplex":92,"_process":26,"buffer":18,"core-util-is":96,"dup":34,"events":22,"inherits":60,"isarray":97,"process-nextick-args":98,"string_decoder/":99,"util":17}],94:[function(require,module,exports){
+},{"./_stream_duplex":93,"_process":26,"buffer":18,"core-util-is":97,"dup":34,"events":22,"inherits":61,"isarray":98,"process-nextick-args":99,"string_decoder/":100,"util":17}],95:[function(require,module,exports){
 arguments[4][35][0].apply(exports,arguments)
-},{"./_stream_duplex":92,"core-util-is":96,"dup":35,"inherits":60}],95:[function(require,module,exports){
+},{"./_stream_duplex":93,"core-util-is":97,"dup":35,"inherits":61}],96:[function(require,module,exports){
 arguments[4][36][0].apply(exports,arguments)
-},{"./_stream_duplex":92,"buffer":18,"core-util-is":96,"dup":36,"events":22,"inherits":60,"process-nextick-args":98,"util-deprecate":100}],96:[function(require,module,exports){
-arguments[4][86][0].apply(exports,arguments)
-},{"../../../../../../../../../../browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js":24,"dup":86}],97:[function(require,module,exports){
+},{"./_stream_duplex":93,"buffer":18,"core-util-is":97,"dup":36,"events":22,"inherits":61,"process-nextick-args":99,"util-deprecate":101}],97:[function(require,module,exports){
+arguments[4][87][0].apply(exports,arguments)
+},{"../../../../../../../../../../browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js":24,"dup":87}],98:[function(require,module,exports){
 arguments[4][25][0].apply(exports,arguments)
-},{"dup":25}],98:[function(require,module,exports){
+},{"dup":25}],99:[function(require,module,exports){
 arguments[4][38][0].apply(exports,arguments)
-},{"_process":26,"dup":38}],99:[function(require,module,exports){
+},{"_process":26,"dup":38}],100:[function(require,module,exports){
 arguments[4][45][0].apply(exports,arguments)
-},{"buffer":18,"dup":45}],100:[function(require,module,exports){
+},{"buffer":18,"dup":45}],101:[function(require,module,exports){
 arguments[4][39][0].apply(exports,arguments)
-},{"dup":39}],101:[function(require,module,exports){
+},{"dup":39}],102:[function(require,module,exports){
 arguments[4][42][0].apply(exports,arguments)
-},{"./lib/_stream_transform.js":94,"dup":42}],102:[function(require,module,exports){
+},{"./lib/_stream_transform.js":95,"dup":42}],103:[function(require,module,exports){
 (function (process){
 var Transform = require('readable-stream/transform')
   , inherits  = require('util').inherits
@@ -18606,7 +18831,7 @@ module.exports.obj = through2(function (options, transform, flush) {
 })
 
 }).call(this,require('_process'))
-},{"_process":26,"readable-stream/transform":101,"util":48,"xtend":105}],103:[function(require,module,exports){
+},{"_process":26,"readable-stream/transform":102,"util":48,"xtend":106}],104:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -18651,7 +18876,7 @@ function ws(uri, protocols, opts) {
 
 if (WebSocket) ws.prototype = WebSocket.prototype;
 
-},{}],104:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 (function (process,Buffer){
 var through = require('through2')
 var duplexify = require('duplexify')
@@ -18756,7 +18981,7 @@ function WebSocketStream(target, protocols, options) {
 }
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":26,"buffer":18,"duplexify":77,"through2":102,"ws":103}],105:[function(require,module,exports){
+},{"_process":26,"buffer":18,"duplexify":78,"through2":103,"ws":104}],106:[function(require,module,exports){
 module.exports = extend
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -18777,7 +19002,7 @@ function extend() {
     return target
 }
 
-},{}],106:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 /**
  *****************************************************************************
  Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
@@ -18868,7 +19093,7 @@ var ApplicationClient = (function (_BaseClient) {
     this.mqttConfig.clientId = "a:" + config.org + ":" + config.id;
     this.subscriptions = [];
 
-    console.info("IBMIoTF.ApplicationClient initialized for organization : " + config.org);
+    this.log.info("ApplicationClient initialized for organization : " + config.org);
   }
 
   _createClass(ApplicationClient, [{
@@ -18879,7 +19104,7 @@ var ApplicationClient = (function (_BaseClient) {
       _get(Object.getPrototypeOf(ApplicationClient.prototype), 'connect', this).call(this);
 
       this.mqtt.on('connect', function () {
-
+        _this.log.info("ApplicationClient Connected : " + config.org);
         _this.isConnected = true;
 
         try {
@@ -18887,7 +19112,7 @@ var ApplicationClient = (function (_BaseClient) {
             _this.mqtt.subscribe(_this.subscriptions[i], { qos: 0 });
           }
         } catch (err) {
-          console.error("Error while trying to subscribe : " + err);
+          _this.log.error("Error while trying to subscribe : " + err);
         }
 
         //reset the counter to 0 incase of reconnection
@@ -18898,7 +19123,7 @@ var ApplicationClient = (function (_BaseClient) {
       });
 
       this.mqtt.on('message', function (topic, payload) {
-        //console.info("mqtt: ", topic, payload.toString());
+        _this.log.trace("mqtt: ", topic, payload.toString());
 
         // For each type of registered callback, check the incoming topic against a Regexp.
         // If matches, forward the payload and various fields from the topic (extracted using groups in the regexp)
@@ -18931,41 +19156,41 @@ var ApplicationClient = (function (_BaseClient) {
         }
 
         // catch all which logs the receipt of an unexpected message
-        console.info("Message received on unexpected topic" + ", " + topic + ", " + payload);
+        _this.log.warn("Message received on unexpected topic" + ", " + topic + ", " + payload);
       });
     }
   }, {
     key: 'subscribe',
     value: function subscribe(topic) {
       if (!this.isConnected) {
-        console.error("Client is not connected");
+        this.log.error("Client is not connected");
         throw new Error("Client is not connected");
       }
 
-      console.info("Subscribe: " + ", " + topic);
+      this.log.trace("Subscribe: " + ", " + topic);
       this.subscriptions.push(topic);
 
       if (this.isConnected) {
         this.mqtt.subscribe(topic, { qos: 0 });
-        console.info("Freshly Subscribed to: " + topic);
+        this.log.debug("Freshly Subscribed to: " + topic);
       } else {
-        console.error("Unable to subscribe as application is not currently connected");
+        this.log.error("Unable to subscribe as application is not currently connected");
       }
     }
   }, {
     key: 'publish',
     value: function publish(topic, msg) {
       if (!this.mqtt) {
-        console.error("Client is not connected");
+        this.log.error("Client is not connected");
         throw new Error("Client is not connected");
       }
 
-      console.info("Publish: " + topic + ", " + msg);
+      this.log.debug("Publish: " + topic + ", " + msg);
 
       if (this.isConnected) {
         this.mqtt.publish(topic, msg);
       } else {
-        console.warn("Unable to publish as application is not currently connected");
+        this.log.warn("Unable to publish as application is not currently connected");
       }
     }
   }, {
@@ -19077,44 +19302,44 @@ var ApplicationClient = (function (_BaseClient) {
             reject(new Error(method + " " + uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.status + ". Error Body: " + data));
           }
         }
-        console.log(xhrConfig);
+        _this2.log.debug(xhrConfig);
         (0, _axios2['default'])(xhrConfig).then(transformResponse, reject);
       });
     }
   }, {
     key: 'getOrganizationDetails',
     value: function getOrganizationDetails() {
-      console.info("getOrganizationDetails()");
+      this.log.debug("getOrganizationDetails()");
       return this.callApi('GET', 200, true, null, null);
     }
   }, {
     key: 'listAllDevicesOfType',
     value: function listAllDevicesOfType(type) {
-      console.info("listAllDevicesOfType(" + type + ")");
+      this.log.debug("listAllDevicesOfType(" + type + ")");
       return this.callApi('GET', 200, true, ['device', 'types', type, 'devices'], null);
     }
   }, {
     key: 'deleteDeviceType',
     value: function deleteDeviceType(type) {
-      console.info("deleteDeviceType(" + type + ")");
+      this.log.debug("deleteDeviceType(" + type + ")");
       return this.callApi('DELETE', 204, false, ['device', 'types', type], null);
     }
   }, {
     key: 'getDeviceType',
     value: function getDeviceType(type) {
-      console.info("getDeviceType(" + type + ")");
+      this.log.debug("getDeviceType(" + type + ")");
       return this.callApi('GET', 200, true, ['device', 'types', type], null);
     }
   }, {
     key: 'getAllDeviceTypes',
     value: function getAllDeviceTypes() {
-      console.info("getAllDeviceTypes()");
+      this.log.debug("getAllDeviceTypes()");
       return this.callApi('GET', 200, true, ['device', 'types'], null);
     }
   }, {
     key: 'updateDeviceType',
     value: function updateDeviceType(type, description, deviceInfo, metadata) {
-      console.info("updateDeviceType(" + type + ", " + description + ", " + deviceInfo + ", " + metadata + ")");
+      this.log.debug("updateDeviceType(" + type + ", " + description + ", " + deviceInfo + ", " + metadata + ")");
       var body = {
         deviceInfo: deviceInfo,
         description: description,
@@ -19126,7 +19351,7 @@ var ApplicationClient = (function (_BaseClient) {
   }, {
     key: 'registerDeviceType',
     value: function registerDeviceType(typeId, description, deviceInfo, metadata) {
-      console.info("registerDeviceType(" + typeId + ", " + description + ", " + deviceInfo + ", " + metadata + ")");
+      this.log.debug("registerDeviceType(" + typeId + ", " + description + ", " + deviceInfo + ", " + metadata + ")");
       // TODO: field validation
       var body = {
         id: typeId,
@@ -19141,7 +19366,7 @@ var ApplicationClient = (function (_BaseClient) {
   }, {
     key: 'registerDevice',
     value: function registerDevice(type, deviceId, authToken, deviceInfo, location, metadata) {
-      console.info("registerDevice(" + type + ", " + deviceId + ", " + deviceInfo + ", " + location + ", " + metadata + ")");
+      this.log.debug("registerDevice(" + type + ", " + deviceId + ", " + deviceInfo + ", " + location + ", " + metadata + ")");
       // TODO: field validation
       var body = {
         deviceId: deviceId,
@@ -19156,13 +19381,13 @@ var ApplicationClient = (function (_BaseClient) {
   }, {
     key: 'unregisterDevice',
     value: function unregisterDevice(type, deviceId) {
-      console.info("unregisterDevice(" + type + ", " + deviceId + ")");
+      this.log.debug("unregisterDevice(" + type + ", " + deviceId + ")");
       return this.callApi('DELETE', 204, false, ['device', 'types', type, 'devices', deviceId], null);
     }
   }, {
     key: 'updateDevice',
     value: function updateDevice(type, deviceId, deviceInfo, status, metadata, extensions) {
-      console.info("updateDevice(" + type + ", " + deviceId + ", " + deviceInfo + ", " + status + ", " + metadata + ")");
+      this.log.debug("updateDevice(" + type + ", " + deviceId + ", " + deviceInfo + ", " + status + ", " + metadata + ")");
       var body = {
         deviceInfo: deviceInfo,
         status: status,
@@ -19175,80 +19400,80 @@ var ApplicationClient = (function (_BaseClient) {
   }, {
     key: 'getDevice',
     value: function getDevice(type, deviceId) {
-      console.info("getDevice(" + type + ", " + deviceId + ")");
+      this.log.debug("getDevice(" + type + ", " + deviceId + ")");
       return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId], null);
     }
   }, {
     key: 'getDeviceLocation',
     value: function getDeviceLocation(type, deviceId) {
-      console.info("getDeviceLocation(" + type + ", " + deviceId + ")");
+      this.log.debug("getDeviceLocation(" + type + ", " + deviceId + ")");
       return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'location'], null);
     }
   }, {
     key: 'updateDeviceLocation',
     value: function updateDeviceLocation(type, deviceId, location) {
-      console.info("updateDeviceLocation(" + type + ", " + deviceId + ", " + location + ")");
+      this.log.debug("updateDeviceLocation(" + type + ", " + deviceId + ", " + location + ")");
 
       return this.callApi('PUT', 200, true, ['device', 'types', type, 'devices', deviceId, 'location'], JSON.stringify(location));
     }
   }, {
     key: 'getDeviceManagementInformation',
     value: function getDeviceManagementInformation(type, deviceId) {
-      console.info("getDeviceManagementInformation(" + type + ", " + deviceId + ")");
+      this.log.debug("getDeviceManagementInformation(" + type + ", " + deviceId + ")");
       return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'mgmt'], null);
     }
   }, {
     key: 'getAllDiagnosticLogs',
     value: function getAllDiagnosticLogs(type, deviceId) {
-      console.info("getAllDiagnosticLogs(" + type + ", " + deviceId + ")");
+      this.log.debug("getAllDiagnosticLogs(" + type + ", " + deviceId + ")");
       return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs'], null);
     }
   }, {
     key: 'clearAllDiagnosticLogs',
     value: function clearAllDiagnosticLogs(type, deviceId) {
-      console.info("clearAllDiagnosticLogs(" + type + ", " + deviceId + ")");
+      this.log.debug("clearAllDiagnosticLogs(" + type + ", " + deviceId + ")");
       return this.callApi('DELETE', 204, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs'], null);
     }
   }, {
     key: 'addDeviceDiagLogs',
     value: function addDeviceDiagLogs(type, deviceId, log) {
-      console.info("addDeviceDiagLogs(" + type + ", " + deviceId + ", " + log + ")");
+      this.log.debug("addDeviceDiagLogs(" + type + ", " + deviceId + ", " + log + ")");
       return this.callApi('POST', 201, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs'], JSON.stringify(log));
     }
   }, {
     key: 'getDiagnosticLog',
     value: function getDiagnosticLog(type, deviceId, logId) {
-      console.info("getAllDiagnosticLogs(" + type + ", " + deviceId + ", " + logId + ")");
+      this.log.debug("getAllDiagnosticLogs(" + type + ", " + deviceId + ", " + logId + ")");
       return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs', logId], null);
     }
   }, {
     key: 'deleteDiagnosticLog',
     value: function deleteDiagnosticLog(type, deviceId, logId) {
-      console.info("deleteDiagnosticLog(" + type + ", " + deviceId + ", " + logId + ")");
+      this.log.debug("deleteDiagnosticLog(" + type + ", " + deviceId + ", " + logId + ")");
       return this.callApi('DELETE', 204, true, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs', logId], null);
     }
   }, {
     key: 'getDeviceErrorCodes',
     value: function getDeviceErrorCodes(type, deviceId) {
-      console.info("getDeviceErrorCodes(" + type + ", " + deviceId + ")");
+      this.log.debug("getDeviceErrorCodes(" + type + ", " + deviceId + ")");
       return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'diag', 'errorCodes'], null);
     }
   }, {
     key: 'clearDeviceErrorCodes',
     value: function clearDeviceErrorCodes(type, deviceId) {
-      console.info("clearDeviceErrorCodes(" + type + ", " + deviceId + ")");
+      this.log.debug("clearDeviceErrorCodes(" + type + ", " + deviceId + ")");
       return this.callApi('DELETE', 204, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'errorCodes'], null);
     }
   }, {
     key: 'addErrorCode',
     value: function addErrorCode(type, deviceId, log) {
-      console.info("addErrorCode(" + type + ", " + deviceId + ", " + log + ")");
+      this.log.debug("addErrorCode(" + type + ", " + deviceId + ", " + log + ")");
       return this.callApi('POST', 201, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'errorCodes'], JSON.stringify(log));
     }
   }, {
     key: 'getDeviceConnectionLogs',
     value: function getDeviceConnectionLogs(typeId, deviceId) {
-      console.info("getDeviceConnectionLogs(" + typeId + ", " + deviceId + ")");
+      this.log.debug("getDeviceConnectionLogs(" + typeId + ", " + deviceId + ")");
       var params = {
         typeId: typeId,
         deviceId: deviceId
@@ -19258,19 +19483,19 @@ var ApplicationClient = (function (_BaseClient) {
   }, {
     key: 'getServiceStatus',
     value: function getServiceStatus() {
-      console.info("getServiceStatus()");
+      this.log.debug("getServiceStatus()");
       return this.callApi('GET', 200, true, ['service-status'], null);
     }
   }, {
     key: 'getAllDeviceManagementRequests',
     value: function getAllDeviceManagementRequests() {
-      console.info("getAllDeviceManagementRequests()");
+      this.log.debug("getAllDeviceManagementRequests()");
       return this.callApi('GET', 200, true, ['mgmt', 'requests'], null);
     }
   }, {
     key: 'initiateDeviceManagementRequest',
     value: function initiateDeviceManagementRequest(action, parameters, devices) {
-      console.info("initiateDeviceManagementRequest(" + action + ", " + parameters + ", " + devices + ")");
+      this.log.debug("initiateDeviceManagementRequest(" + action + ", " + parameters + ", " + devices + ")");
       var body = {
         action: action,
         parameters: parameters,
@@ -19281,25 +19506,25 @@ var ApplicationClient = (function (_BaseClient) {
   }, {
     key: 'getDeviceManagementRequest',
     value: function getDeviceManagementRequest(requestId) {
-      console.info("getDeviceManagementRequest(" + requestId + ")");
+      this.log.debug("getDeviceManagementRequest(" + requestId + ")");
       return this.callApi('GET', 200, true, ['mgmt', 'requests', requestId], null);
     }
   }, {
     key: 'deleteDeviceManagementRequest',
     value: function deleteDeviceManagementRequest(requestId) {
-      console.info("deleteDeviceManagementRequest(" + requestId + ")");
+      this.log.debug("deleteDeviceManagementRequest(" + requestId + ")");
       return this.callApi('DELETE', 204, false, ['mgmt', 'requests', requestId], null);
     }
   }, {
     key: 'getDeviceManagementRequestStatus',
     value: function getDeviceManagementRequestStatus(requestId) {
-      console.info("getDeviceManagementRequestStatus(" + requestId + ")");
+      this.log.debug("getDeviceManagementRequestStatus(" + requestId + ")");
       return this.callApi('GET', 200, true, ['mgmt', 'requests', requestId, 'deviceStatus'], null);
     }
   }, {
     key: 'getDeviceManagementRequestStatusByDevice',
     value: function getDeviceManagementRequestStatusByDevice(requestId, typeId, deviceId) {
-      console.info("getDeviceManagementRequestStatusByDevice(" + requestId + ", " + typeId + ", " + deviceId + ")");
+      this.log.debug("getDeviceManagementRequestStatusByDevice(" + requestId + ", " + typeId + ", " + deviceId + ")");
       return this.callApi('GET', 200, true, ['mgmt', 'requests', requestId, 'deviceStatus', typeId, deviceId], null);
     }
 
@@ -19307,7 +19532,7 @@ var ApplicationClient = (function (_BaseClient) {
   }, {
     key: 'getActiveDevices',
     value: function getActiveDevices(start, end, detail) {
-      console.info("getActiveDevices(" + start + ", " + end + ")");
+      this.log.debug("getActiveDevices(" + start + ", " + end + ")");
       detail = detail | false;
       var params = {
         start: start,
@@ -19319,7 +19544,7 @@ var ApplicationClient = (function (_BaseClient) {
   }, {
     key: 'getHistoricalDataUsage',
     value: function getHistoricalDataUsage(start, end, detail) {
-      console.info("getHistoricalDataUsage(" + start + ", " + end + ")");
+      this.log.debug("getHistoricalDataUsage(" + start + ", " + end + ")");
       detail = detail | false;
       var params = {
         start: start,
@@ -19331,7 +19556,7 @@ var ApplicationClient = (function (_BaseClient) {
   }, {
     key: 'getDataUsage',
     value: function getDataUsage(start, end, detail) {
-      console.info("getDataUsage(" + start + ", " + end + ")");
+      this.log.debug("getDataUsage(" + start + ", " + end + ")");
       detail = detail | false;
       var params = {
         start: start,
@@ -19345,7 +19570,7 @@ var ApplicationClient = (function (_BaseClient) {
   }, {
     key: 'getAllHistoricalEvents',
     value: function getAllHistoricalEvents(evtType, start, end) {
-      console.info("getAllHistoricalEvents(" + evtType + ", " + start + ", " + end + ")");
+      this.log.debug("getAllHistoricalEvents(" + evtType + ", " + start + ", " + end + ")");
       var params = {
         start: start,
         end: end,
@@ -19356,7 +19581,7 @@ var ApplicationClient = (function (_BaseClient) {
   }, {
     key: 'getAllHistoricalEventsByDeviceType',
     value: function getAllHistoricalEventsByDeviceType(evtType, start, end, typeId) {
-      console.info("getAllHistoricalEvents(" + evtType + ", " + start + ", " + end + ")");
+      this.log.debug("getAllHistoricalEvents(" + evtType + ", " + start + ", " + end + ")");
       var params = {
         start: start,
         end: end,
@@ -19367,7 +19592,7 @@ var ApplicationClient = (function (_BaseClient) {
   }, {
     key: 'getAllHistoricalEventsByDeviceId',
     value: function getAllHistoricalEventsByDeviceId(evtType, start, end, typeId, deviceId) {
-      console.info("getAllHistoricalEvents(" + evtType + ", " + start + ", " + end + ")");
+      this.log.debug("getAllHistoricalEvents(" + evtType + ", " + start + ", " + end + ")");
       var params = {
         start: start,
         end: end,
@@ -19380,7 +19605,7 @@ var ApplicationClient = (function (_BaseClient) {
     value: function publishHTTPS(deviceType, deviceId, eventType, eventFormat, payload) {
       var _this3 = this;
 
-      console.info("Publishing event of Type: " + eventType + " with payload : " + payload);
+      this.log.debug("Publishing event of Type: " + eventType + " with payload : " + payload);
       return new _bluebird2['default'](function (resolve, reject) {
         var uri = (0, _format2['default'])("https://%s.internetofthings.ibmcloud.com/api/v0002/application/types/%s/devices/%s/events/%s", _this3.org, deviceType, deviceId, eventType);
 
@@ -19398,7 +19623,7 @@ var ApplicationClient = (function (_BaseClient) {
         if (_this3.org !== QUICKSTART_ORG_ID) {
           xhrConfig.headers['Authorization'] = 'Basic ' + btoa(_this3.apiKey + ':' + _this3.apiToken);
         }
-        console.log(xhrConfig);
+        _this3.log.debug(xhrConfig);
 
         (0, _axios2['default'])(xhrConfig).then(resolve, reject);
       });
@@ -19411,7 +19636,7 @@ var ApplicationClient = (function (_BaseClient) {
 exports['default'] = ApplicationClient;
 module.exports = exports['default'];
 
-},{"../util/util.js":111,"./BaseClient.js":107,"axios":1,"bluebird":16,"btoa":49,"format":50}],107:[function(require,module,exports){
+},{"../util/util.js":112,"./BaseClient.js":108,"axios":1,"bluebird":16,"btoa":49,"format":50}],108:[function(require,module,exports){
 (function (__dirname){
 /**
  *****************************************************************************
@@ -19450,6 +19675,10 @@ var _mqtt = require('mqtt');
 
 var _mqtt2 = _interopRequireDefault(_mqtt);
 
+var _loglevel = require('loglevel');
+
+var _loglevel2 = _interopRequireDefault(_loglevel);
+
 var _utilUtilJs = require('../util/util.js');
 
 var QUICKSTART_ORG_ID = "quickstart";
@@ -19461,6 +19690,8 @@ var BaseClient = (function (_events$EventEmitter) {
     _classCallCheck(this, BaseClient);
 
     _get(Object.getPrototypeOf(BaseClient.prototype), 'constructor', this).call(this);
+    this.log = _loglevel2['default'];
+    this.log.setDefaultLevel("warn");
     if (!config) {
       throw new Error('Client instantiated with missing properties');
     }
@@ -19510,36 +19741,36 @@ var BaseClient = (function (_events$EventEmitter) {
     value: function connect() {
       var _this = this;
 
-      console.info("Connecting to IoTF with host : " + this.host);
+      this.log.info("Connecting to IoTF with host : " + this.host);
 
       this.mqtt = _mqtt2['default'].connect(this.host, this.mqttConfig);
 
       this.mqtt.on('offline', function () {
-        console.info("Iotfclient is offline. Retrying connection");
+        _this.log.warn("Iotfclient is offline. Retrying connection");
 
         _this.isConnected = false;
         _this.retryCount++;
 
         if (_this.retryCount < 5) {
-          console.info("Retry in 3 sec. Count : " + _this.retryCount);
+          _this.log.debug("Retry in 3 sec. Count : " + _this.retryCount);
           _this.mqtt.options.reconnectPeriod = 3000;
         } else if (_this.retryCount < 10) {
-          console.info("Retry in 10 sec. Count : " + _this.retryCount);
+          _this.log.debug("Retry in 10 sec. Count : " + _this.retryCount);
           _this.mqtt.options.reconnectPeriod = 10000;
         } else {
-          console.info("Retry in 60 sec. Count : " + _this.retryCount);
+          _this.log.debug("Retry in 60 sec. Count : " + _this.retryCount);
           _this.mqtt.options.reconnectPeriod = 60000;
         }
       });
 
       this.mqtt.on('close', function () {
-        console.info("Connection was closed.");
+        _this.log.info("Connection was closed.");
         _this.isConnected = false;
         _this.emit('disconnect');
       });
 
       this.mqtt.on('error', function (error) {
-        console.error("Connection Error :: " + error);
+        _this.log.error("Connection Error :: " + error);
         _this.isConnected = false;
         _this.emit('error', error);
       });
@@ -19547,13 +19778,15 @@ var BaseClient = (function (_events$EventEmitter) {
   }, {
     key: 'disconnect',
     value: function disconnect() {
+      var _this2 = this;
+
       if (!this.isConnected) {
         throw new Error("Client is not connected");
       }
 
       this.isConnected = false;
       this.mqtt.end(false, function () {
-        console.info("Disconnected from the client.");
+        _this2.log.info("Disconnected from the client.");
       });
 
       delete this.mqtt;
@@ -19567,7 +19800,7 @@ exports['default'] = BaseClient;
 module.exports = exports['default'];
 
 }).call(this,"/src\\clients")
-},{"../util/util.js":111,"events":22,"mqtt":52}],108:[function(require,module,exports){
+},{"../util/util.js":112,"events":22,"loglevel":51,"mqtt":53}],109:[function(require,module,exports){
 /**
  *****************************************************************************
  Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
@@ -19659,7 +19892,7 @@ var DeviceClient = (function (_BaseClient) {
     this.deviceToken = config['auth-token'];
     this.mqttConfig.clientId = "d:" + config.org + ":" + config.type + ":" + config.id;
 
-    console.info("IBMIoTF.DeviceClient initialized for organization : " + config.org);
+    this.log.info("DeviceClient initialized for organization : " + config.org + " for ID : " + config.id);
   }
 
   _createClass(DeviceClient, [{
@@ -19673,7 +19906,7 @@ var DeviceClient = (function (_BaseClient) {
 
       this.mqtt.on('connect', function () {
         _this.isConnected = true;
-
+        _this.log.info("DeviceClient Connected");
         if (_this.retryCount === 0) {
           _this.emit('connect');
         }
@@ -19684,7 +19917,7 @@ var DeviceClient = (function (_BaseClient) {
       });
 
       this.mqtt.on('message', function (topic, payload) {
-        console.info("Message received on topic : " + topic + " with payload : " + payload);
+        _this.log.debug("Message received on topic : " + topic + " with payload : " + payload);
 
         var match = CMD_RE.exec(topic);
 
@@ -19697,14 +19930,14 @@ var DeviceClient = (function (_BaseClient) {
     key: 'publish',
     value: function publish(eventType, eventFormat, payload, qos) {
       if (!this.isConnected) {
-        console.error("Client is not connected");
+        this.log.error("Client is not connected");
         throw new Error("Client is not connected");
       }
 
       var topic = (0, _format2['default'])("iot-2/evt/%s/fmt/%s", eventType, eventFormat);
       var QOS = qos || 0;
 
-      console.info("Publishing to topic : " + topic + " with payload : " + payload);
+      this.log.debug("Publishing to topic : " + topic + " with payload : " + payload);
 
       this.mqtt.publish(topic, payload, { qos: QOS });
 
@@ -19715,7 +19948,7 @@ var DeviceClient = (function (_BaseClient) {
     value: function publishHTTPS(eventType, eventFormat, payload) {
       var _this2 = this;
 
-      console.info("Publishing event of Type: " + eventType + " with payload : " + payload);
+      this.log.debug("Publishing event of Type: " + eventType + " with payload : " + payload);
       return new _bluebird2['default'](function (resolve, reject) {
         var uri = (0, _format2['default'])("https://%s.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.typeId, _this2.deviceId, eventType);
 
@@ -19733,7 +19966,7 @@ var DeviceClient = (function (_BaseClient) {
         if (_this2.org !== QUICKSTART_ORG_ID) {
           xhrConfig.headers['Authorization'] = 'Basic ' + btoa('use-token-auth' + ':' + _this2.deviceToken);
         }
-        console.log(xhrConfig);
+        _this2.log.debug(xhrConfig);
 
         (0, _axios2['default'])(xhrConfig).then(resolve, reject);
       });
@@ -19746,7 +19979,7 @@ var DeviceClient = (function (_BaseClient) {
 exports['default'] = DeviceClient;
 module.exports = exports['default'];
 
-},{"../util/util.js":111,"./BaseClient.js":107,"axios":1,"bluebird":16,"btoa":49,"format":50}],109:[function(require,module,exports){
+},{"../util/util.js":112,"./BaseClient.js":108,"axios":1,"bluebird":16,"btoa":49,"format":50}],110:[function(require,module,exports){
 /**
  *****************************************************************************
  Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
@@ -19906,7 +20139,7 @@ var ManagedDeviceClient = (function (_DeviceClient) {
 
       this._deviceRequests[reqId] = { topic: MANAGE_TOPIC, payload: payload };
 
-      console.info("Publishing manage request with payload : %s", payload);
+      this.log.debug("Publishing manage request with payload : %s", payload);
       this.mqtt.publish(MANAGE_TOPIC, payload, QOS);
 
       return reqId;
@@ -19926,7 +20159,7 @@ var ManagedDeviceClient = (function (_DeviceClient) {
 
       this._deviceRequests[reqId] = { topic: UNMANAGE_TOPIC, payload: payload };
 
-      console.info("Publishing unmanage request with payload : %s", payload);
+      this.log.debug("Publishing unmanage request with payload : %s", payload);
       this.mqtt.publish(UNMANAGE_TOPIC, payload, QOS);
 
       return reqId;
@@ -19985,7 +20218,7 @@ var ManagedDeviceClient = (function (_DeviceClient) {
 
       this._deviceRequests[reqId] = { topic: UPDATE_LOCATION_TOPIC, payload: payload };
 
-      console.info("Publishing update location request with payload : %s", payload);
+      this.log.debug("Publishing update location request with payload : %s", payload);
       this.mqtt.publish(UPDATE_LOCATION_TOPIC, payload, QOS);
 
       return reqId;
@@ -20017,7 +20250,7 @@ var ManagedDeviceClient = (function (_DeviceClient) {
 
       this._deviceRequests[reqId] = { topic: ADD_ERROR_CODE_TOPIC, payload: payload };
 
-      console.info("Publishing add error code request with payload : %s", payload);
+      this.log.debug("Publishing add error code request with payload : %s", payload);
       this.mqtt.publish(ADD_ERROR_CODE_TOPIC, payload, QOS);
 
       return reqId;
@@ -20037,7 +20270,7 @@ var ManagedDeviceClient = (function (_DeviceClient) {
 
       this._deviceRequests[reqId] = { topic: CLEAR_ERROR_CODES_TOPIC, payload: payload };
 
-      console.info("Publishing clear error codes request with payload : %s", payload);
+      this.log.debug("Publishing clear error codes request with payload : %s", payload);
       this.mqtt.publish(CLEAR_ERROR_CODES_TOPIC, payload, QOS);
 
       return reqId;
@@ -20087,7 +20320,7 @@ var ManagedDeviceClient = (function (_DeviceClient) {
 
       this._deviceRequests[reqId] = { topic: ADD_LOG_TOPIC, payload: payload };
 
-      console.info("Publishing add log request with payload : %s", payload);
+      this.log.debug("Publishing add log request with payload : %s", payload);
       this.mqtt.publish(ADD_LOG_TOPIC, payload, QOS);
 
       return reqId;
@@ -20107,7 +20340,7 @@ var ManagedDeviceClient = (function (_DeviceClient) {
 
       this._deviceRequests[reqId] = { topic: CLEAR_LOGS_TOPIC, payload: payload };
 
-      console.info("Publishing clear logs request with payload : %s", payload);
+      this.log.debug("Publishing clear logs request with payload : %s", payload);
       this.mqtt.publish(CLEAR_LOGS_TOPIC, payload, QOS);
 
       return reqId;
@@ -20148,7 +20381,7 @@ var ManagedDeviceClient = (function (_DeviceClient) {
       payload.reqId = reqId;
       payload = JSON.stringify(payload);
 
-      console.info("Publishing device action response with payload : %s", payload);
+      this.log.debug("Publishing device action response with payload : %s", payload);
       this.mqtt.publish(RESPONSE_TOPIC, payload, QOS);
 
       delete this._dmRequests[reqId];
@@ -20170,51 +20403,51 @@ var ManagedDeviceClient = (function (_DeviceClient) {
       switch (request.topic) {
         case MANAGE_TOPIC:
           if (rc == 200) {
-            console.info("[%s] Manage action completed : %s", rc, request.payload);
+            this.log.debug("[%s] Manage action completed : %s", rc, request.payload);
           } else {
-            console.error("[%s] Manage action failed : %s", rc, request.payload);
+            this.log.error("[%s] Manage action failed : %s", rc, request.payload);
           }
           break;
         case UNMANAGE_TOPIC:
           if (rc == 200) {
-            console.info("[%s] Unmanage action completed : %s", rc, request.payload);
+            this.log.debug("[%s] Unmanage action completed : %s", rc, request.payload);
           } else {
-            console.error("[%s] Unmanage action failed : %s", rc, request.payload);
+            this.log.error("[%s] Unmanage action failed : %s", rc, request.payload);
           }
           break;
         case UPDATE_LOCATION_TOPIC:
           if (rc == 200) {
-            console.info("[%s] Update location action completed : %s", rc, request.payload);
+            this.log.debug("[%s] Update location action completed : %s", rc, request.payload);
           } else {
-            console.error("[%s] Update location failed : %s", rc, request.payload);
+            this.log.error("[%s] Update location failed : %s", rc, request.payload);
           }
           break;
         case ADD_LOG_TOPIC:
           if (rc == 200) {
-            console.info("[%s] Add log action completed : %s", rc, request.payload);
+            this.log.debug("[%s] Add log action completed : %s", rc, request.payload);
           } else {
-            console.error("[%s] Add log action failed : %s", rc, request.payload);
+            this.log.error("[%s] Add log action failed : %s", rc, request.payload);
           }
           break;
         case CLEAR_LOGS_TOPIC:
           if (rc == 200) {
-            console.info("[%s] Clear logs action completed : %s", rc, request.payload);
+            this.log.debug("[%s] Clear logs action completed : %s", rc, request.payload);
           } else {
-            console.error("[%s] Clear logs action failed : %s", rc, request.payload);
+            this.log.error("[%s] Clear logs action failed : %s", rc, request.payload);
           }
           break;
         case ADD_ERROR_CODE_TOPIC:
           if (rc == 200) {
-            console.info("[%s] Add error code action completed : %s", rc, request.payload);
+            this.log.debug("[%s] Add error code action completed : %s", rc, request.payload);
           } else {
-            console.error("[%s] Add error code action failed : %s", rc, request.payload);
+            this.log.error("[%s] Add error code action failed : %s", rc, request.payload);
           }
           break;
         case CLEAR_ERROR_CODES_TOPIC:
           if (rc == 200) {
-            console.info("[%s] Clear error codes action completed : %s", rc, request.payload);
+            this.log.debug("[%s] Clear error codes action completed : %s", rc, request.payload);
           } else {
-            console.error("[%s] Clear error codes action failed : %s", rc, request.payload);
+            this.log.error("[%s] Clear error codes action failed : %s", rc, request.payload);
           }
           break;
         default:
@@ -20264,7 +20497,7 @@ var ManagedDeviceClient = (function (_DeviceClient) {
 exports['default'] = ManagedDeviceClient;
 module.exports = exports['default'];
 
-},{"../util/util.js":111,"./DeviceClient.js":108,"format":50}],110:[function(require,module,exports){
+},{"../util/util.js":112,"./DeviceClient.js":109,"format":50}],111:[function(require,module,exports){
 /**
  *****************************************************************************
  Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
@@ -20305,7 +20538,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"./clients/ApplicationClient.js":106,"./clients/DeviceClient.js":108,"./clients/ManagedDeviceClient.js":109}],111:[function(require,module,exports){
+},{"./clients/ApplicationClient.js":107,"./clients/DeviceClient.js":109,"./clients/ManagedDeviceClient.js":110}],112:[function(require,module,exports){
 /**
  *****************************************************************************
  Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
@@ -20360,5 +20593,5 @@ function generateUUID() {
   });
 }
 
-},{}]},{},[110])(110)
+},{}]},{},[111])(111)
 });

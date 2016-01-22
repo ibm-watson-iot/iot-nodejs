@@ -13,6 +13,7 @@
  */
 import events from 'events';
 import mqtt from 'mqtt';
+import log from 'loglevel';
 import { isDefined, isString, isNode } from '../util/util.js';
 
 const QUICKSTART_ORG_ID = "quickstart";
@@ -20,6 +21,8 @@ const QUICKSTART_ORG_ID = "quickstart";
 export default class BaseClient extends events.EventEmitter {
   constructor(config){
     super();
+    this.log = log;
+    this.log.setDefaultLevel("warn");
     if(!config){
       throw new Error('Client instantiated with missing properties');
     }
@@ -68,36 +71,36 @@ export default class BaseClient extends events.EventEmitter {
   }
 
   connect(){
-    console.info("Connecting to IoTF with host : "+this.host);
+    this.log.info("Connecting to IoTF with host : "+this.host);
 
     this.mqtt = mqtt.connect(this.host, this.mqttConfig);
 
     this.mqtt.on('offline', () => {
-      console.info("Iotfclient is offline. Retrying connection");
+      this.log.warn("Iotfclient is offline. Retrying connection");
 
       this.isConnected = false;
       this.retryCount++;
 
       if(this.retryCount < 5){
-        console.info("Retry in 3 sec. Count : "+this.retryCount);
+        this.log.debug("Retry in 3 sec. Count : "+this.retryCount);
         this.mqtt.options.reconnectPeriod = 3000;
       } else if(this.retryCount < 10){
-        console.info("Retry in 10 sec. Count : "+this.retryCount);
+        this.log.debug("Retry in 10 sec. Count : "+this.retryCount);
         this.mqtt.options.reconnectPeriod = 10000;
       } else {
-        console.info("Retry in 60 sec. Count : "+this.retryCount);
+        this.log.debug("Retry in 60 sec. Count : "+this.retryCount);
         this.mqtt.options.reconnectPeriod = 60000;
       }
     });
 
     this.mqtt.on('close', () => {
-      console.info("Connection was closed.");
+      this.log.info("Connection was closed.");
       this.isConnected = false;
       this.emit('disconnect');
     });
 
     this.mqtt.on('error', (error) => {
-      console.error("Connection Error :: "+error);
+      this.log.error("Connection Error :: "+error);
       this.isConnected = false;
       this.emit('error', error);
     });
@@ -110,7 +113,7 @@ export default class BaseClient extends events.EventEmitter {
 
     this.isConnected = false;
     this.mqtt.end(false, () => {
-      console.info("Disconnected from the client.");
+      this.log.info("Disconnected from the client.");
     });
 
     delete this.mqtt;

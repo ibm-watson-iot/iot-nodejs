@@ -9,6 +9,9 @@ var deviceClientConfig = {
 
 var deviceClient = new iotf.IotfDevice(deviceClientConfig);
 
+//setting the log level to trace. By default its 'warn'
+deviceClient.log.setLevel('info');
+
 deviceClient.connect();
 
 deviceClient.on('connect', function(){

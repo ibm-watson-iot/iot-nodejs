@@ -96,6 +96,25 @@ After the successful connection to the IoTF service, the device client
 emits *connect* event. So all the device logic can be implemented inside
 this callback function.
 
+Logging
+--------
+
+By default, all the logs of ```warn``` are logged. If you want to enable more logs, use the *log.setLevel* function. Supported log levels - *trace, debug, info, warn, error*.
+
+``` {.sourceCode .javascript}
+
+deviceClient.connect();
+//setting the log level to 'trace'
+deviceClient.log.setLevel('trace');
+deviceClient.on('connect', function () {
+
+//Add your code here
+});
+
+....
+```
+
+
 Publishing events
 ------------------
 
@@ -278,6 +297,27 @@ appClient.on("connect", function () {
 After the successful connection to the IoTF service, the application
 client emits *connect* event. So all the logic can be implemented inside
 this callback function.
+
+Logging
+--------
+
+By default, all the logs of ```warn``` are logged. If you want to enable more logs, use the *log.setLevel* function. Supported log levels - *trace, debug, info, warn, error*.
+
+``` {.sourceCode .javascript}
+
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+//setting the log level to 'trace'
+appClient.log.setLevel('trace');
+appClient.on("connect", function () {
+
+//Add your code here
+});
+
+....
+```
+
 
 Handling errors
 ------------------

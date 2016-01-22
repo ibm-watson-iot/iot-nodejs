@@ -1,16 +1,16 @@
 (function (global, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['exports', 'module', 'events', 'mqtt', '../util/util.js'], factory);
+    define(['exports', 'module', 'events', 'mqtt', 'loglevel', '../util/util.js'], factory);
   } else if (typeof exports !== 'undefined' && typeof module !== 'undefined') {
-    factory(exports, module, require('events'), require('mqtt'), require('../util/util.js'));
+    factory(exports, module, require('events'), require('mqtt'), require('loglevel'), require('../util/util.js'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod.exports, mod, global.events, global.mqtt, global.util);
+    factory(mod.exports, mod, global.events, global.mqtt, global.log, global.util);
     global.BaseClient = mod.exports;
   }
-})(this, function (exports, module, _events, _mqtt, _utilUtilJs) {
+})(this, function (exports, module, _events, _mqtt, _loglevel, _utilUtilJs) {
   /**
    *****************************************************************************
    Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
@@ -40,6 +40,8 @@
 
   var _mqtt2 = _interopRequireDefault(_mqtt);
 
+  var _log = _interopRequireDefault(_loglevel);
+
   var QUICKSTART_ORG_ID = "quickstart";
 
   var BaseClient = (function (_events$EventEmitter) {
@@ -49,6 +51,8 @@
       _classCallCheck(this, BaseClient);
 
       _get(Object.getPrototypeOf(BaseClient.prototype), 'constructor', this).call(this);
+      this.log = _log['default'];
+      this.log.setDefaultLevel("warn");
       if (!config) {
         throw new Error('Client instantiated with missing properties');
       }
@@ -98,36 +102,36 @@
       value: function connect() {
         var _this = this;
 
-        console.info("Connecting to IoTF with host : " + this.host);
+        this.log.info("Connecting to IoTF with host : " + this.host);
 
         this.mqtt = _mqtt2['default'].connect(this.host, this.mqttConfig);
 
         this.mqtt.on('offline', function () {
-          console.info("Iotfclient is offline. Retrying connection");
+          _this.log.warn("Iotfclient is offline. Retrying connection");
 
           _this.isConnected = false;
           _this.retryCount++;
 
           if (_this.retryCount < 5) {
-            console.info("Retry in 3 sec. Count : " + _this.retryCount);
+            _this.log.debug("Retry in 3 sec. Count : " + _this.retryCount);
             _this.mqtt.options.reconnectPeriod = 3000;
           } else if (_this.retryCount < 10) {
-            console.info("Retry in 10 sec. Count : " + _this.retryCount);
+            _this.log.debug("Retry in 10 sec. Count : " + _this.retryCount);
             _this.mqtt.options.reconnectPeriod = 10000;
           } else {
-            console.info("Retry in 60 sec. Count : " + _this.retryCount);
+            _this.log.debug("Retry in 60 sec. Count : " + _this.retryCount);
             _this.mqtt.options.reconnectPeriod = 60000;
           }
         });
 
         this.mqtt.on('close', function () {
-          console.info("Connection was closed.");
+          _this.log.info("Connection was closed.");
           _this.isConnected = false;
           _this.emit('disconnect');
         });
 
         this.mqtt.on('error', function (error) {
-          console.error("Connection Error :: " + error);
+          _this.log.error("Connection Error :: " + error);
           _this.isConnected = false;
           _this.emit('error', error);
         });
@@ -135,13 +139,15 @@
     }, {
       key: 'disconnect',
       value: function disconnect() {
+        var _this2 = this;
+
         if (!this.isConnected) {
           throw new Error("Client is not connected");
         }
 
         this.isConnected = false;
         this.mqtt.end(false, function () {
-          console.info("Disconnected from the client.");
+          _this2.log.info("Disconnected from the client.");
         });
 
         delete this.mqtt;
