@@ -19104,7 +19104,7 @@ var ApplicationClient = (function (_BaseClient) {
       _get(Object.getPrototypeOf(ApplicationClient.prototype), 'connect', this).call(this);
 
       this.mqtt.on('connect', function () {
-        _this.log.info("ApplicationClient Connected : " + config.org);
+        _this.log.info("ApplicationClient Connected");
         _this.isConnected = true;
 
         try {
