@@ -19090,7 +19090,13 @@ var ApplicationClient = (function (_BaseClient) {
     this.org = config.org;
     this.apiKey = config['auth-key'];
     this.apiToken = config['auth-token'];
-    this.mqttConfig.clientId = "a:" + config.org + ":" + config.id;
+    //support for shared subscription
+    this.shared = (config['type'] + '').toLowerCase() === "shared" || false;
+    if (this.shared) {
+      this.mqttConfig.clientId = "A:" + config.org + ":" + config.id;
+    } else {
+      this.mqttConfig.clientId = "a:" + config.org + ":" + config.id;
+    }
     this.subscriptions = [];
 
     this.log.info("ApplicationClient initialized for organization : " + config.org);

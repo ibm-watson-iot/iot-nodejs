@@ -258,6 +258,7 @@ configuration json containing the following :
 -   id - The unique ID of your application within your organization.
 -   auth-key - API key
 -   auth-token - API key token
+-   type - use 'shared' to enable shared subscription
 
 If you want to use quickstart, then send only the first two properties.
 
@@ -318,6 +319,33 @@ appClient.on("connect", function () {
 ....
 ```
 
+Shared Subscription
+---------------------
+
+Use this feature to build scalable applications which will load balance messages across multiple instances of the application. To enable this, pass 'type' as 'shared' in the configuration.
+
+``` {.sourceCode .javascript}
+var appClientConfig = {
+  org: 'xxxxx',
+  id: 'myapp',
+  "auth-key": 'a-xxxxxx-xxxxxxxxx',
+  "auth-token": 'xxxxx!xxxxxxxx',
+  "type" : "shared" // make this connection as shared subscription
+};
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+
+//Add your code here
+});
+
+appClient.on("error", function (err) {
+    console.log("Error : "+err);
+});
+.... 
+```
 
 Handling errors
 ------------------
