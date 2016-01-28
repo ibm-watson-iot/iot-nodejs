@@ -5,7 +5,7 @@ Node.js Client Library - Internet of Things Foundation Connect API
 Introduction
 -------------------------------------------------------------------------------
 
-This client library describes how to use Internet of Things Foundation API with the node.js ibmiotf client library. For help with getting started with this module, see `Node.js Client Library - Introduction <https://docs.internetofthings.ibmcloud.com/nodejs/node-js_intro.html>`__. 
+This client library describes how to use Internet of Things Foundation API with the node.js ibmiotf client library. For help with getting started with this module, see `npm ibmiotf <https://www.npmjs.com/package/ibmiotf>`__ and `Node.js Client Library <https://docs.internetofthings.ibmcloud.com/applications/libraries/nodejs.html>`__. 
 
 Refer to `IBM IoT Foundation API <https://docs.internetofthings.ibmcloud.com/swagger/v0002.html>`__ for information about the all the APIs, list of query parameters, the request & response model and http status code.
 
