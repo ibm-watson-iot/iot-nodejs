@@ -154,15 +154,32 @@ export default class ApplicationClient extends BaseClient {
       throw new Error("Client is not connected");
     }
 
-    this.log.trace("Subscribe: "+", "+topic);
+    this.log.trace("Subscribe: "+topic);
     this.subscriptions.push(topic);
 
     if(this.isConnected) {
       this.mqtt.subscribe(topic, {qos: 0});
-      this.log.debug("Freshly Subscribed to: " +	topic);
+      this.log.debug("Subscribed to: " +	topic);
     } else {
       this.log.error("Unable to subscribe as application is not currently connected");
     }
+  }
+
+  unsubscribe(topic){
+    if (!this.isConnected) {
+      this.log.error("Client is not connected");
+      throw new Error("Client is not connected");
+    }
+
+    this.log.debug("Unsubscribe: "+topic);
+    var i = this.subscriptions.indexOf(topic);
+      if(i != -1) {
+        this.subscriptions.splice(i, 1);
+    }
+
+    this.mqtt.unsubscribe(topic);
+    this.log.debug("Unsubscribed to: " +  topic);
+
   }
 
   publish(topic, msg){
@@ -191,6 +208,17 @@ export default class ApplicationClient extends BaseClient {
     return this;
   }
 
+  unsubscribeToDeviceEvents(type, id, event, format){
+    type = type || '+';
+    id = id || '+';
+    event = event || '+';
+    format = format || '+';
+
+    var topic = "iot-2/type/" + type + "/id/" + id + "/evt/"+ event + "/fmt/" + format;
+    this.unsubscribe(topic);
+    return this;
+  }
+
   subscribeToDeviceCommands(type, id, command, format){
     type = type || '+';
     id = id || '+';
@@ -199,6 +227,17 @@ export default class ApplicationClient extends BaseClient {
 
     var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/"+ command + "/fmt/" + format;
     this.subscribe(topic);
+    return this;
+  }
+
+  unsubscribeToDeviceCommands(type, id, command, format){
+    type = type || '+';
+    id = id || '+';
+    command = command || '+';
+    format = format || '+';
+
+    var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/"+ command + "/fmt/" + format;
+    this.unsubscribe(topic);
     return this;
   }
 
@@ -216,6 +255,24 @@ export default class ApplicationClient extends BaseClient {
 
     var topic = "iot-2/app/" + id + "/mon";
     this.subscribe(topic);
+
+    return this;
+  }
+
+  unsubscribeToDeviceStatus(type, id){
+    type = type || '+';
+    id = id || '+';
+
+    var topic = "iot-2/type/" + type + "/id/" + id + "/mon";
+    this.unsubscribe(topic);
+    return this;
+  }
+
+  unsubscribeToAppStatus(id){
+    id = id || '+';
+
+    var topic = "iot-2/app/" + id + "/mon";
+    this.unsubscribe(topic);
 
     return this;
   }
