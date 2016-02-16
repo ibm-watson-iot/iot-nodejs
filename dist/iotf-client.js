@@ -1,16 +1,16 @@
 (function (global, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['exports', 'module', './clients/DeviceClient.js', './clients/ManagedDeviceClient.js', './clients/ApplicationClient.js'], factory);
+    define(['exports', 'module', './clients/DeviceClient.js', './clients/ManagedDeviceClient.js', './clients/GatewayClient.js', './clients/ApplicationClient.js'], factory);
   } else if (typeof exports !== 'undefined' && typeof module !== 'undefined') {
-    factory(exports, module, require('./clients/DeviceClient.js'), require('./clients/ManagedDeviceClient.js'), require('./clients/ApplicationClient.js'));
+    factory(exports, module, require('./clients/DeviceClient.js'), require('./clients/ManagedDeviceClient.js'), require('./clients/GatewayClient.js'), require('./clients/ApplicationClient.js'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod.exports, mod, global.DeviceClient, global.ManagedDeviceClient, global.ApplicationClient);
+    factory(mod.exports, mod, global.DeviceClient, global.ManagedDeviceClient, global.GatewayClient, global.ApplicationClient);
     global.iotfClient = mod.exports;
   }
-})(this, function (exports, module, _clientsDeviceClientJs, _clientsManagedDeviceClientJs, _clientsApplicationClientJs) {
+})(this, function (exports, module, _clientsDeviceClientJs, _clientsManagedDeviceClientJs, _clientsGatewayClientJs, _clientsApplicationClientJs) {
   /**
    *****************************************************************************
    Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
@@ -32,11 +32,14 @@
 
   var _IotfManagedDevice = _interopRequireDefault(_clientsManagedDeviceClientJs);
 
+  var _IotfGateway = _interopRequireDefault(_clientsGatewayClientJs);
+
   var _IotfApplication = _interopRequireDefault(_clientsApplicationClientJs);
 
   module.exports = {
     IotfDevice: _IotfDevice['default'],
     IotfManagedDevice: _IotfManagedDevice['default'],
+    IotfGateway: _IotfGateway['default'],
     IotfApplication: _IotfApplication['default']
   };
 });

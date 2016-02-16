@@ -1,13 +1,7 @@
 var iotf = require("../");
+var config = require("./device.json");
 
-// myscript.js
-var deviceClientConfig = {
-  org: 'quickstart',
-  type: 'mytype',
-  id: '001122334455'
-};
-
-var deviceClient = new iotf.IotfDevice(deviceClientConfig);
+var deviceClient = new iotf.IotfDevice(config);
 
 //setting the log level to trace. By default its 'warn'
 deviceClient.log.setLevel('info');
@@ -21,4 +15,9 @@ deviceClient.on('connect', function(){
 
 deviceClient.on('disconnect', function(){
   console.log('Disconnected from IoTF');
+});
+
+deviceClient.on('error', function (argument) {
+	console.log(argument);
+	process.exit(1);
 });
