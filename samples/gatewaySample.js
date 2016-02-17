@@ -11,8 +11,13 @@ gatewayClient.connect();
 gatewayClient.on('connect', function(){
     gatewayClient.publishGatewayEvent('myevt', 'json', '{"hello":"world"}', 1);
     gatewayClient.publishDeviceEvent('raspi','pi3' ,'myevt', 'json', '{"hello":"world"}', 1);
-    gatewayClient.subscribeToDeviceCommands('raspi','pi2');
-    //gatewayClient.disconnect();
+    gatewayClient.subscribeToDeviceCommand('raspi','pi2');
+    gatewayClient.unsubscribeToDeviceCommand('raspi','pi2');
+    gatewayClient.subscribeToDeviceCommand('raspi','pi3');
+    
+    gatewayClient.subscribeToGatewayCommand('blink');
+    gatewayClient.unsubscribeToGatewayCommand('blink');
+    gatewayClient.subscribeToGatewayCommand('blink1');
 });
 
 gatewayClient.on('command', function(type, id, commandName, commandFormat, payload, topic){

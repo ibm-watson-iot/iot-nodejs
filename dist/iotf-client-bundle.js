@@ -20169,8 +20169,8 @@ var GatewayClient = (function (_BaseClient) {
         }
 
         //subscribe to all the commands for this gateway by default
-        var gatewayWildCardTopic = (0, _format2['default'])("iot-2/type/%s/id/%s/cmd/+/fmt/+", _this.type, _this.id);
-        mqtt.subscribe(gatewayWildCardTopic, { qos: 2 }, function () {});
+        /*let gatewayWildCardTopic = format("iot-2/type/%s/id/%s/cmd/+/fmt/+", this.type, this.id);
+        mqtt.subscribe(gatewayWildCardTopic, { qos: 2 }, function(){});*/
       });
 
       this.mqtt.on('message', function (topic, payload) {
@@ -20244,8 +20244,8 @@ var GatewayClient = (function (_BaseClient) {
       });
     }
   }, {
-    key: 'subscribeToDeviceCommands',
-    value: function subscribeToDeviceCommands(type, id, command, format) {
+    key: 'subscribeToDeviceCommand',
+    value: function subscribeToDeviceCommand(type, id, command, format) {
       type = type || '+';
       id = id || '+';
       command = command || '+';
@@ -20253,7 +20253,55 @@ var GatewayClient = (function (_BaseClient) {
 
       var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/" + command + "/fmt/" + format;
 
-      this.log.trace("Subscribe: " + topic);
+      this.subscribe(topic);
+      return this;
+    }
+  }, {
+    key: 'unsubscribeToDeviceCommand',
+    value: function unsubscribeToDeviceCommand(type, id, command, format) {
+      type = type || '+';
+      id = id || '+';
+      command = command || '+';
+      format = format || '+';
+
+      var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/" + command + "/fmt/" + format;
+
+      this.unsubscribe(topic);
+
+      return this;
+    }
+  }, {
+    key: 'subscribeToGatewayCommand',
+    value: function subscribeToGatewayCommand(command, format) {
+      command = command || '+';
+      format = format || '+';
+
+      var topic = "iot-2/type/" + this.type + "/id/" + this.id + "/cmd/" + command + "/fmt/" + format;
+
+      this.subscribe(topic);
+      return this;
+    }
+  }, {
+    key: 'unsubscribeToGatewayCommand',
+    value: function unsubscribeToGatewayCommand(command, format) {
+      command = command || '+';
+      format = format || '+';
+
+      var topic = "iot-2/type/" + this.type + "/id/" + this.id + "/cmd/" + command + "/fmt/" + format;
+
+      this.unsubscribe(topic);
+
+      return this;
+    }
+  }, {
+    key: 'subscribe',
+    value: function subscribe(topic) {
+      if (!this.isConnected) {
+        this.log.error("Client is not connected");
+        throw new Error("Client is not connected");
+      }
+
+      this.log.debug("Subscribe: " + topic);
       this.subscriptions.push(topic);
 
       if (this.isConnected) {
@@ -20262,33 +20310,23 @@ var GatewayClient = (function (_BaseClient) {
       } else {
         this.log.error("Unable to subscribe as application is not currently connected");
       }
-
-      return this;
     }
   }, {
-    key: 'unsubscribeToDeviceCommands',
-    value: function unsubscribeToDeviceCommands(type, id, command, format) {
-      type = type || '+';
-      id = id || '+';
-      command = command || '+';
-      format = format || '+';
+    key: 'unsubscribe',
+    value: function unsubscribe(topic) {
+      if (!this.isConnected) {
+        this.log.error("Client is not connected");
+        throw new Error("Client is not connected");
+      }
 
-      var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/" + command + "/fmt/" + format;
-
-      this.log.trace("Unsubscribe: " + topic);
+      this.log.debug("Unsubscribe: " + topic);
       var i = this.subscriptions.indexOf(topic);
       if (i != -1) {
         this.subscriptions.splice(i, 1);
       }
 
-      if (this.isConnected) {
-        this.mqtt.unsubscribe(topic);
-        this.log.debug("Unsubscribed to: " + topic);
-      } else {
-        this.log.error("Unable to Unsubscribe as application is not currently connected");
-      }
-
-      return this;
+      this.mqtt.unsubscribe(topic);
+      this.log.debug("Unsubscribed to: " + topic);
     }
   }]);
 
