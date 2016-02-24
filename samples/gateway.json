@@ -1,7 +1,7 @@
 {
   "org": "xxxxxx",
   "type": "gw",
-  "id": "gw02",
+  "id": "gw01",
   "auth-method" : "token",
   "auth-token" : "xxxxxxxxxxxxxxxx"
 }

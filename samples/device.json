@@ -1,5 +1,7 @@
 {
-  "org": "quickstart",
-  "type": "mytype",
-  "id": "001122334455"
+  "org": "xxxxx",
+  "type": "raspi",
+  "id": "pi1",
+  "auth-method" : "token",
+  "auth-token" : "xxxxxxxxxxxxxxxx"
 }

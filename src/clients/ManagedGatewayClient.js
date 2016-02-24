@@ -14,21 +14,21 @@
 import format from 'format';
 
 import { isDefined, isString, isNumber, isBoolean, isNode, generateUUID } from '../util/util.js';
-import { default as DeviceClient } from './DeviceClient.js';
+import { default as GatewayClient } from './GatewayClient.js';
 
 const QUICKSTART_ORG_ID = 'quickstart';
 const QOS = 1;
 
 // Publish MQTT topics
-const RESPONSE_TOPIC = 'iotdevice-1/response';
-const MANAGE_TOPIC = 'iotdevice-1/mgmt/manage';
-const UNMANAGE_TOPIC = 'iotdevice-1/mgmt/unmanage';
-const UPDATE_LOCATION_TOPIC = 'iotdevice-1/device/update/location';
-const ADD_LOG_TOPIC = 'iotdevice-1/add/diag/log';
-const CLEAR_LOGS_TOPIC = 'iotdevice-1/clear/diag/log';
-const ADD_ERROR_CODE_TOPIC = 'iotdevice-1/add/diag/errorCodes';
-const CLEAR_ERROR_CODES_TOPIC = 'iotdevice-1/clear/diag/errorCodes';
-const NOTIFY_TOPIC = 'iotdevice-1/notify';
+const RESPONSE_TOPIC = 'iotdevice-1/type/%s/id/%s/response';
+const MANAGE_TOPIC = 'iotdevice-1/type/%s/id/%s/mgmt/manage';
+const UNMANAGE_TOPIC = 'iotdevice-1/type/%s/id/%s/mgmt/unmanage';
+const UPDATE_LOCATION_TOPIC = 'iotdevice-1/type/%s/id/%s/device/update/location';
+const ADD_LOG_TOPIC = 'iotdevice-1/type/%s/id/%s/add/diag/log';
+const CLEAR_LOGS_TOPIC = 'iotdevice-1/type/%s/id/%s/clear/diag/log';
+const ADD_ERROR_CODE_TOPIC = 'iotdevice-1/type/%s/id/%s/add/diag/errorCodes';
+const CLEAR_ERROR_CODES_TOPIC = 'iotdevice-1/type/%s/id/%s/clear/diag/errorCodes';
+const NOTIFY_TOPIC = 'iotdevice-1/type/%s/id/%s/notify';
 
 // Subscribe MQTT topics
 const DM_WILDCARD_TOPIC = 'iotdm-1/#';
@@ -44,8 +44,18 @@ const DM_FIRMWARE_UPDATE_TOPIC = 'iotdm-1/mgmt/initiate/firmware/update';
 // Regex topic
 const DM_REQUEST_RE = /^iotdm-1\/*/;
 const DM_ACTION_RE = /^iotdm-1\/mgmt\/initiate\/(.+)\/(.+)$/;
+const DM_RESPONSE_TOPIC_RE = /^iotdm-1\/type\/(.+)\/id\/(.+)\/response$/;
 
-export default class ManagedDeviceClient extends DeviceClient {
+//Gateway actions
+const MANAGE = "manage";
+const UNMANAGE = "unmanage";
+const UPDATE_LOCATION = "updateLocation";
+const ADD_LOG = "addLog";
+const CLEAR_LOG = "clearLog";
+const ADD_ERROR = "addErrorCode";
+const CLEAR_ERROR = "clearErrorCodes";
+
+export default class ManagedGatewayClient extends GatewayClient {
 
   constructor(config){
     super(config);
@@ -68,19 +78,34 @@ export default class ManagedDeviceClient extends DeviceClient {
     });
 
     this.mqtt.on('message', (topic, payload) => {
-      let match = DM_REQUEST_RE.exec(topic);
+      console.log("Message [%s] : %s",topic,payload);
 
+      let match = DM_RESPONSE_TOPIC_RE.exec(topic);
+
+      if(match) {
+        this._onDmResponse(match[1],match[2], payload);
+      }
+
+      /*let match = DM_REQUEST_RE.exec(topic);
+
+      
       if(match){
         if(topic == DM_RESPONSE_TOPIC){
           this._onDmResponse(payload);
         } else{
-          this._onDmRequest(topic, payload);    
+          this._onDmRequest(topic, payload);
         }
-      }
+      }*/
     });
   }
 
-  manage(lifetime, supportDeviceActions, supportFirmwareActions){
+  manageGateway(lifetime, supportDeviceActions, supportFirmwareActions){
+    //this.type and this.id, are present in the parent Gateway Class.
+    return this.manageDevice(this.type, this.id, lifetime, supportDeviceActions, supportFirmwareActions);
+  }
+  
+
+  manageDevice(type, id, lifetime, supportDeviceActions, supportFirmwareActions){
     if(!this.isConnected){
       throw new Error("client must be connected");
     }
@@ -125,16 +150,24 @@ export default class ManagedDeviceClient extends DeviceClient {
     var reqId = generateUUID();
     payload.reqId = reqId;
     payload = JSON.stringify(payload);
+    
+    
+    let builtTopic = format(MANAGE_TOPIC,type,id);
 
-    this._deviceRequests[reqId] = {topic : MANAGE_TOPIC, payload : payload};
+    this._deviceRequests[reqId] = {action : MANAGE, topic : builtTopic, payload : payload};
 
-    this.log.debug("Publishing manage request with payload : %s", payload);
-    this.mqtt.publish(MANAGE_TOPIC, payload, QOS);
+    this.log.debug("Publishing manage request on topic [%s] with payload : %s", builtTopic, payload);
+    this.mqtt.publish(builtTopic, payload, QOS);
 
     return reqId;
   }
 
-  unmanage(){
+  unmanageGateway(){
+    //this.type and this.id, are present in the parent Gateway Class.
+    return this.unmanageDevice(this.type, this.id);
+  }
+
+  unmanageDevice(type, id){
     if(!this.isConnected){
       throw new Error("client must be connected");
     }
@@ -145,15 +178,22 @@ export default class ManagedDeviceClient extends DeviceClient {
     payload.reqId = reqId;
     payload = JSON.stringify(payload);
 
-    this._deviceRequests[reqId] = {topic : UNMANAGE_TOPIC, payload : payload};
+    let builtTopic = format(UNMANAGE_TOPIC,type,id);
 
-    this.log.debug("Publishing unmanage request with payload : %s", payload);
-    this.mqtt.publish(UNMANAGE_TOPIC, payload, QOS);
+    this._deviceRequests[reqId] = {action : UNMANAGE, topic : builtTopic, payload : payload};
+
+    this.log.debug("Publishing unmanage request on topic [%s] with payload : %s", builtTopic, payload);
+    this.mqtt.publish(builtTopic, payload, QOS);
 
     return reqId;
   }
 
-  updateLocation(latitude, longitude, elevation, accuracy){
+  updateLocationGateway(latitude, longitude, elevation, accuracy){
+    //this.type and this.id, are present in the parent Gateway Class.
+    return this.updateLocationDevice(this.type, this.id, latitude, longitude, elevation, accuracy);
+  }
+
+  updateLocationDevice(type, id, latitude, longitude, elevation, accuracy){
     if(!this.isConnected){
       throw new Error("client must be connected");
     }
@@ -203,15 +243,22 @@ export default class ManagedDeviceClient extends DeviceClient {
     payload.reqId = reqId;
     payload = JSON.stringify(payload);
 
-    this._deviceRequests[reqId] = {topic : UPDATE_LOCATION_TOPIC, payload : payload};
+    let builtTopic = format(UPDATE_LOCATION_TOPIC,type,id);
+
+    this._deviceRequests[reqId] = {action : UPDATE_LOCATION, topic : builtTopic, payload : payload};
  
-    this.log.debug("Publishing update location request with payload : %s", payload);
-    this.mqtt.publish(UPDATE_LOCATION_TOPIC, payload, QOS);
+    this.log.debug("Publishing update location request on topic [%s] with payload : %s", builtTopic, payload);
+    this.mqtt.publish(builtTopic, payload, QOS);
 
     return reqId;
   }
 
-  addErrorCode(errorCode){
+  addErrorCodeGateway(errorCode){
+    //this.type and this.id, are present in the parent Gateway Class.
+    return this.addErrorCodeDevice(this.type, this.id, errorCode);
+  }
+
+  addErrorCodeDevice(type, id, errorCode){
     if(!this.isConnected){
       throw new Error("client must be connected");
     }
@@ -234,15 +281,22 @@ export default class ManagedDeviceClient extends DeviceClient {
     payload.reqId = reqId;
     payload = JSON.stringify(payload);
 
-    this._deviceRequests[reqId] = {topic : ADD_ERROR_CODE_TOPIC, payload : payload};
+    let builtTopic = format(ADD_ERROR_CODE_TOPIC,type,id);
 
-    this.log.debug("Publishing add error code request with payload : %s", payload);
-    this.mqtt.publish(ADD_ERROR_CODE_TOPIC, payload, QOS);
+    this._deviceRequests[reqId] = {action: ADD_ERROR, topic : builtTopic, payload : payload};
+
+    this.log.debug("Publishing add error code request on topic [%s] with payload : %s", builtTopic, payload);
+    this.mqtt.publish(builtTopic, payload, QOS);
 
     return reqId;
   }
 
-  clearErrorCodes(){
+  clearErrorCodesGateway(){
+    //this.type and this.id, are present in the parent Gateway Class.
+    return this.clearErrorCodesDevice(this.type, this.id);
+  }
+
+  clearErrorCodesDevice(type, id){
     if(!this.isConnected){
       throw new Error("client must be connected");
     }
@@ -253,15 +307,21 @@ export default class ManagedDeviceClient extends DeviceClient {
     payload.reqId = reqId;
     payload = JSON.stringify(payload);
 
-    this._deviceRequests[reqId] = {topic : CLEAR_ERROR_CODES_TOPIC, payload : payload};
+    let builtTopic = format(CLEAR_ERROR_CODES_TOPIC,type,id);
+
+    this._deviceRequests[reqId] = {action: CLEAR_ERROR, topic : builtTopic, payload : payload};
  
-    this.log.debug("Publishing clear error codes request with payload : %s", payload);
-    this.mqtt.publish(CLEAR_ERROR_CODES_TOPIC, payload, QOS);
+    this.log.debug("Publishing clear error codes request on topic [%s] with payload : %s", builtTopic, payload);
+    this.mqtt.publish(builtTopic, payload, QOS);
 
     return reqId;
   }
 
-  addLog(message, severity, data){
+  addLogGateway( message, severity, data){
+    return this.addLogDevice(this.type, this.id, message, severity, data);
+  }
+
+  addLogDevice(type, id, message, severity, data){
     if(!this.isConnected){
       throw new Error("client must be connected");
     }
@@ -302,15 +362,21 @@ export default class ManagedDeviceClient extends DeviceClient {
     payload.reqId = reqId;
     payload = JSON.stringify(payload);
 
-    this._deviceRequests[reqId] = {topic : ADD_LOG_TOPIC, payload : payload};
+    let builtTopic = format(ADD_LOG_TOPIC,type,id);
 
-    this.log.debug("Publishing add log request with payload : %s", payload);
-    this.mqtt.publish(ADD_LOG_TOPIC, payload, QOS);
+    this._deviceRequests[reqId] = {action: ADD_LOG, topic : builtTopic, payload : payload};
+
+    this.log.debug("Publishing add log request on topic [%s] with payload : %s", builtTopic, payload);
+    this.mqtt.publish(builtTopic, payload, QOS);
 
     return reqId;
   }
 
-  clearLogs(){
+  clearLogsGateway(){
+    return this.clearLogsDevice(this.type, this.id);
+  }
+
+  clearLogsDevice(type, id){
     if(!this.isConnected){
       throw new Error("client must be connected");
     }
@@ -321,10 +387,12 @@ export default class ManagedDeviceClient extends DeviceClient {
     payload.reqId = reqId;
     payload = JSON.stringify(payload);
 
-    this._deviceRequests[reqId] = {topic : CLEAR_LOGS_TOPIC, payload : payload};
+    let builtTopic = format(CLEAR_LOGS_TOPIC,type,id);
 
-    this.log.debug("Publishing clear logs request with payload : %s", payload);
-    this.mqtt.publish(CLEAR_LOGS_TOPIC, payload, QOS);
+    this._deviceRequests[reqId] = {action : CLEAR_LOG, topic : builtTopic, payload : payload};
+
+    this.log.debug("Publishing clear logs request on topic [%s] with payload : %s", builtTopic, payload);
+    this.mqtt.publish(builtTopic, payload, QOS);
 
     return reqId;
   }
@@ -371,7 +439,7 @@ export default class ManagedDeviceClient extends DeviceClient {
     return this;
   }
 
-  _onDmResponse(payload){
+  _onDmResponse(type, id, payload){
     payload = JSON.parse(payload);
     var reqId = payload.reqId;
     var rc = payload.rc;
@@ -381,54 +449,54 @@ export default class ManagedDeviceClient extends DeviceClient {
       throw new Error("unknown request : %s", reqId);
     }
 
-    switch(request.topic){
-      case MANAGE_TOPIC:
+    switch(request.action){
+      case MANAGE:
         if(rc == 200){
-          this.log.debug("[%s] Manage action completed : %s", rc, request.payload);
+          this.log.debug("[%s] Manage action completed for type : %s and id : %s with payload : %s", rc, type, id, request.payload);
         } else{
-          this.log.error("[%s] Manage action failed : %s", rc, request.payload); 
+          this.log.error("[%s] Manage action failed for type : %s and id : %s with payload : %s", rc, type, id, request.payload); 
         }
         break;
-      case UNMANAGE_TOPIC :
+      case UNMANAGE :
         if(rc == 200){
-          this.log.debug("[%s] Unmanage action completed : %s", rc, request.payload);
+          this.log.debug("[%s] Unmanage action completed for type : %s and id : %s with payload : %s", rc, type, id, request.payload);
         } else{
-          this.log.error("[%s] Unmanage action failed : %s", rc, request.payload); 
+          this.log.error("[%s] Unmanage action failed for type : %s and id : %s with payload : %s", rc, type, id, request.payload); 
         }
         break;
-      case UPDATE_LOCATION_TOPIC :
+      case UPDATE_LOCATION :
         if(rc == 200){
-          this.log.debug("[%s] Update location action completed : %s", rc, request.payload);
+          this.log.debug("[%s] Update location action completed for type : %s and id : %s with payload : %s", rc, type, id, request.payload);
         } else{
-          this.log.error("[%s] Update location failed : %s", rc, request.payload); 
+          this.log.error("[%s] Update location failed for type : %s and id : %s with payload : %s", rc, type, id, request.payload); 
         }
         break;
-      case ADD_LOG_TOPIC :
+      case ADD_LOG :
         if(rc == 200){
-          this.log.debug("[%s] Add log action completed : %s", rc, request.payload);
+          this.log.debug("[%s] Add log action completed for type : %s and id : %s with payload : %s", rc, type, id, request.payload);
         } else{
-          this.log.error("[%s] Add log action failed : %s", rc, request.payload); 
+          this.log.error("[%s] Add log action failed for type : %s and id : %s with payload : %s", rc, type, id, request.payload); 
         }
         break;
-      case CLEAR_LOGS_TOPIC :
+      case CLEAR_LOG :
         if(rc == 200){
-          this.log.debug("[%s] Clear logs action completed : %s", rc, request.payload);
+          this.log.debug("[%s] Clear logs action completed for type : %s and id : %s with payload : %s", rc, type, id, request.payload);
         } else{
-          this.log.error("[%s] Clear logs action failed : %s", rc, request.payload); 
+          this.log.error("[%s] Clear logs action failed for type : %s and id : %s with payload : %s", rc, type, id, request.payload); 
         }
         break;
-      case ADD_ERROR_CODE_TOPIC :
+      case ADD_ERROR :
         if(rc == 200){
-          this.log.debug("[%s] Add error code action completed : %s", rc, request.payload);
+          this.log.debug("[%s] Add error code action completed for type : %s and id : %s with payload : %s", rc, type, id, request.payload);
         } else{
-          this.log.error("[%s] Add error code action failed : %s", rc, request.payload); 
+          this.log.error("[%s] Add error code action failed for type : %s and id : %s with payload : %s", rc, type, id, request.payload); 
         }
         break;
-      case CLEAR_ERROR_CODES_TOPIC :
+      case CLEAR_ERROR :
         if(rc == 200){
-          this.log.debug("[%s] Clear error codes action completed : %s", rc, request.payload);
+          this.log.debug("[%s] Clear error codes action completed for type : %s and id : %s with payload : %s", rc, type, id, request.payload);
         } else{
-          this.log.error("[%s] Clear error codes action failed : %s", rc, request.payload); 
+          this.log.error("[%s] Clear error codes action failed for type : %s and id : %s with payload : %s", rc, type, id, request.payload); 
         }
         break;
       default :
@@ -437,6 +505,9 @@ export default class ManagedDeviceClient extends DeviceClient {
 
     this.emit('dmResponse', {
       reqId: reqId,
+      type : type,
+      id : id,
+      action: request.action,
       rc: rc
     });
 

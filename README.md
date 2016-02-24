@@ -1,7 +1,7 @@
 Node.js Client Library
 ========================
 
-The node.js client is used for simplifying the interacting with the Internet of Things Foundation. The following libraries contain instructions and guidance on using the nodejs ibmiotf node to interact with devices and applications within your organizations.
+The node.js client is used for simplifying the interacting with the IBM Watson Internet of Things Platform. The following libraries contain instructions and guidance on using the nodejs ibmiotf node to interact with devices and applications within your organizations.
 
 This client library is divided into three parts, Device, ManagedDevice and Application. The Devices section contains information on how devices publish events and handle commands using the nodejs ibmiotf module, ManagedDevice section contains information on how you can manage the device. More information on device management can be found [here.](https://docs.internetofthings.ibmcloud.com/reference/device_mgmt.html). The Applications section contains information on how applications can use the nodejs ibmiotf module to interact with devices.
 
@@ -39,7 +39,7 @@ load `iotf-client-bundle.js` or `iotf-client-bundle-min.js` from the `dist` dire
 Devices
 ===============================
 
-*DeviceClient* is device client for the Internet of Things Foundation
+*DeviceClient* is device client for the IBM Watson Internet of Things Platform
 service. You can use this client to connect to the service, publish
 events from the device and subscribe to commands.
 
@@ -77,7 +77,7 @@ var deviceClient = new Client.IotfDevice(config);
 Connect
 -------
 
-Connect to the Internet of Things Foundation by calling the *connect*
+Connect to the IBM Watson Internet of Things Platform by calling the *connect*
 function
 
 ``` {.sourceCode .javascript}
@@ -279,7 +279,7 @@ var appClient = new Client.IotfApplication(appClientConfig);
 Connect
 -------
 
-Connect to the Internet of Things Foundation by calling the *connect*
+Connect to the IBM Watson Internet of Things Platform by calling the *connect*
 function
 
 ``` {.sourceCode .javascript}
@@ -647,6 +647,250 @@ appClient.on("connect", function () {
     appClient.disconnect();
 });
 ```
+
+Gateways
+===============================
+
+*GatewayClient* is Gateway client for the IBM Watson Internet of Things Platform service. You can use this client to connect to the platform, publish gateway events, publish device events on behalf of the devices, subscribe to both gateway and device commands. 
+
+Constructor
+-----------
+
+The constructor builds the Gateway client instance. It accepts an
+configuration json containing the following :
+
+-   org - Your organization ID
+-   type - The type of your gateway
+-   id - The ID of your gateway
+-   auth-method - Method of authentication (the only value currently supported is “token”)
+-   auth-token - API key token (required if auth-method is “token”)
+
+
+``` {.sourceCode .javascript}
+var Client = require("ibmiotf");
+var config = {
+    "org" : "organization",
+    "type" : "gatewayType",
+    "id" : "gatewayId",
+    "auth-method" : "token",
+    "auth-token" : "authToken"
+};
+
+var gatewayClient = new iotf.IotfGateway(config);
+
+....
+```
+
+Connect
+-------
+
+Connect to the IBM Watson Internet of Things Platform by calling the *connect* function
+
+``` {.sourceCode .javascript}
+
+gatewayClient.connect();
+
+gatewayClient.on('connect', function(){
+
+//Add your code here
+});
+
+....
+```
+
+After the successful connection to the platform, the gateway client
+emits *connect* event. So all the programming logic can be implemented inside this callback function.
+
+Logging
+--------
+
+By default, all the logs of ```warn``` are logged. If you want to enable more logs, use the *log.setLevel* function. Supported log levels - *trace, debug, info, warn, error*.
+
+``` {.sourceCode .javascript}
+
+//setting the log level to trace. By default its 'warn'
+gatewayClient.log.setLevel('debug');
+
+gatewayClient.connect();
+
+gatewayClient.on('connect', function() {
+
+//Add your code here
+});
+
+....
+```
+
+
+Publishing events
+------------------
+
+Events are the mechanism by which devices publish data to the IBM Watson Internet of Things Platform. The gateway controls the content of the event and assigns a name for each event it sends.
+
+Events can be published at any of the three quality of service levels defined by the MQTT protocol. By default events will be published as qos level 0.
+
+Events can be published by using
+
+-   eventType - Type of event to be published e.g status, gps
+-   eventFormat - Format of the event e.g json
+-   data - Payload of the event
+-   QoS - qos for the publish event. Supported values : 0,1,2
+
+A gateway can publish events from itself and on behalf of any device connected via the gateway. 
+
+##### Publish Gateway Events
+
+``` {.sourceCode .javascript}
+
+var gatewayClient = new iotf.IotfGateway(config);
+
+//setting the log level to trace. By default its 'warn'
+gatewayClient.log.setLevel('debug');
+
+gatewayClient.connect();
+
+gatewayClient.on('connect', function(){
+    //publishing gateway events using the default quality of service
+    gatewayClient.publishGatewayEvent("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}');
+
+    //publishing event using the user-defined quality of service
+    var myQosLevel=2
+    gatewayClient.publishGatewayEvent("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel); 
+});
+
+....
+```
+
+##### Publish Device Events
+
+The Gateway can publish the device events on behalf of the device that are connected to the Gateway. Function *publishDeviceEvent* needs device Type and the Device Id to publish the device events. 
+
+``` {.sourceCode .javascript}
+
+var gatewayClient = new iotf.IotfGateway(config);
+
+//setting the log level to trace. By default its 'warn'
+gatewayClient.log.setLevel('debug');
+
+gatewayClient.connect();
+
+gatewayClient.on('connect', function(){
+    //publishing device events with deviceType 'Raspi' and deviceId 'pi01' using the default quality of service
+    gatewayClient.publishDeviceEvent("Raspi","pi01", "status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}');
+
+    //publishing event using the user-defined quality of service
+    var myQosLevel=2
+    gatewayClient.publishDeviceEvent("Raspi","pi01","status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel); 
+});
+
+....
+```
+
+
+Handling commands
+------------------
+
+Commands are the mechanism by which applications can communicate with devices. Only applications can send commands, which must be issued to specific devices.
+
+The Gateways can receive gateway commands as well as Device commands on behalf of the device. Function *subscribeToGatewayCommand* is to be used to subscribe to a Gateway command and *subscribeToDeviceCommand* is to be used to subscribe to a Device command for the device connected to the gateway. To unsubscribe to commands, you can use the functions *unsubscribeToGatewayCommand* and *unsubscribeToDeviceCommand*.
+
+To process specific commands you need to register a command callback function. The device client emits *command* when a command is eceived. The callback function has the following properties
+
+-   type - type of the Gateway/Device.
+-   id - id of the Gateway/Device.
+-   commandName - name of the command invoked
+-   format - e.g json, xml
+-   payload - payload for the command
+-   topic - actual topic where the command was received
+
+``` {.sourceCode .javascript}
+var gatewayClient = new iotf.IotfGateway(config);
+
+//setting the log level to trace. By default its 'warn'
+gatewayClient.log.setLevel('debug');
+
+gatewayClient.connect();
+
+gatewayClient.on('connect', function(){
+    
+    //subscribe to command "blink" for the device with Type 'raspi' and id 'pi2'
+    gatewayClient.subscribeToDeviceCommand('raspi','pi2','blink');
+    
+    //subscribe to all commands for the device with Type 'raspi' and id 'pi3'
+    gatewayClient.subscribeToDeviceCommand('raspi','pi3');
+    
+    //subscribe to command 'blink' for this gateway.
+    gatewayClient.subscribeToGatewayCommand('blink');
+
+    //unsubscribe command function 
+    gatewayClient.unsubscribeToGatewayCommand('blink');
+    gatewayClient.unsubscribeToDeviceCommand('raspi','pi2','blink');
+});
+
+gatewayClient.on('command', function(type, id, commandName, commandFormat, payload, topic){
+    console.log("Command received");
+    console.log("Type: %s  ID: %s  \nCommand Name : %s Format: %s",type, id, commandName, commandFormat);
+    console.log("Payload : %s",payload);
+});
+.... 
+```
+
+Handling errors
+------------------
+
+When the device clients encounters an error, it emits an *error* event.
+
+``` {.sourceCode .javascript}
+var gatewayClient = new iotf.IotfGateway(config);
+
+//setting the log level to trace. By default its 'warn'
+gatewayClient.log.setLevel('debug');
+
+gatewayClient.connect();
+
+gatewayClient.on('connect', function(){
+    //publishing gateway events using the default quality of service
+    gatewayClient.publishGatewayEvent("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}');
+
+    //publishing event using the user-defined quality of service
+    var myQosLevel=2
+    gatewayClient.publishGatewayEvent("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel); 
+});
+
+gatewayClient.on("error", function (err) {
+    console.log("Error : "+err);
+});
+.... 
+```
+
+Disconnect Client
+--------------------
+
+Disconnects the client and releases the connections
+
+``` {.sourceCode .javascript}
+var gatewayClient = new iotf.IotfGateway(config);
+
+//setting the log level to trace. By default its 'warn'
+gatewayClient.log.setLevel('debug');
+
+gatewayClient.connect();
+
+gatewayClient.on('connect', function(){
+    //publishing gateway events using the default quality of service
+    gatewayClient.publishGatewayEvent("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}');
+
+    //publishing event using the user-defined quality of service
+    var myQosLevel=2
+    gatewayClient.publishGatewayEvent("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel); 
+
+    //disconnect the client
+    gatewayClient.disconnect();
+});
+
+....
+```
+
 
 APIs
 ========
