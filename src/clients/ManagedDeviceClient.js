@@ -56,6 +56,39 @@ export default class ManagedDeviceClient extends DeviceClient {
 
     this._deviceRequests = {};
     this._dmRequests = {};
+
+    //variables for firmware update
+    this.location = {};
+    this.mgmtFirmware = {};
+
+    this.observe;
+
+    //various states in update of firmware
+    this.FIRMWARESTATE = {
+      IDLE : 0,
+      DOWNLOADING : 1,
+      DOWNLOADED : 2
+    };
+
+    this.FIRMWAREUPDATESTATE = {
+      SUCCESS : 0,
+      IN_PROGRESS : 1,
+      OUT_OF_MEMORY : 2, 
+      CONNECTION_LOST : 3,
+      VERIFICATION_FAILED : 4,
+      UNSUPPORTED_IMAGE : 5,
+      INVALID_URL : 6
+    };
+
+    this.RESPONSECODE = {
+      SUCCESS : 200,
+      ACCEPTED : 202,
+      UPDATE_SUCCESS : 204,
+      BAD_REQUEST : 400,
+      NOT_FOUND : 404,
+      INTERNAL_ERROR : 500,
+      FUNCTION_NOT_SUPPORTED : 501
+    };
   }
 
   connect(){
@@ -73,7 +106,13 @@ export default class ManagedDeviceClient extends DeviceClient {
       if(match){
         if(topic == DM_RESPONSE_TOPIC){
           this._onDmResponse(payload);
-        } else{
+        } else if(topic == DM_UPDATE_TOPIC) {
+          this._onDmUpdate(payload);
+        } else if(topic == DM_OBSERVE_TOPIC) {
+          this._onDmObserve(payload);
+        } else if(topic == DM_CANCEL_OBSERVE_TOPIC) {
+          this._onDmCancel(payload);
+        } else {
           this._onDmRequest(topic, payload);    
         }
       }
@@ -82,7 +121,10 @@ export default class ManagedDeviceClient extends DeviceClient {
 
   manage(lifetime, supportDeviceActions, supportFirmwareActions){
     if(!this.isConnected){
-      throw new Error("client must be connected");
+      this.log.error("Client is not connected");
+      //throw new Error();
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
     
     var d = new Object();
@@ -106,7 +148,7 @@ export default class ManagedDeviceClient extends DeviceClient {
         if(!isBoolean(supportDeviceActions)){
           throw new Error("supportDeviceActions must be a boolean");
         }
-
+        this.deviceActions = supportDeviceActions;
         d.supports.deviceActions = supportDeviceActions;
       }
 
@@ -115,6 +157,7 @@ export default class ManagedDeviceClient extends DeviceClient {
           throw new Error("supportFirmwareActions must be a boolean");
         }
 
+        this.supportFirmwareActions = supportFirmwareActions
         d.supports.firmwareActions = supportFirmwareActions;
       }
     }
@@ -136,7 +179,10 @@ export default class ManagedDeviceClient extends DeviceClient {
 
   unmanage(){
     if(!this.isConnected){
-      throw new Error("client must be connected");
+      this.log.error("Client is not connected");
+      //throw new Error();
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
 
     var payload = new Object();
@@ -155,7 +201,10 @@ export default class ManagedDeviceClient extends DeviceClient {
 
   updateLocation(latitude, longitude, elevation, accuracy){
     if(!this.isConnected){
-      throw new Error("client must be connected");
+      this.log.error("Client is not connected");
+      //throw new Error();
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
     
     if(!isDefined(longitude) || !isDefined(latitude)){
@@ -203,6 +252,9 @@ export default class ManagedDeviceClient extends DeviceClient {
     payload.reqId = reqId;
     payload = JSON.stringify(payload);
 
+    //update the location 
+    this.location = d;
+
     this._deviceRequests[reqId] = {topic : UPDATE_LOCATION_TOPIC, payload : payload};
  
     this.log.debug("Publishing update location request with payload : %s", payload);
@@ -213,7 +265,10 @@ export default class ManagedDeviceClient extends DeviceClient {
 
   addErrorCode(errorCode){
     if(!this.isConnected){
-      throw new Error("client must be connected");
+      this.log.error("Client is not connected");
+      //throw new Error();
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
 
     if(!isDefined(errorCode)){
@@ -244,7 +299,10 @@ export default class ManagedDeviceClient extends DeviceClient {
 
   clearErrorCodes(){
     if(!this.isConnected){
-      throw new Error("client must be connected");
+      this.log.error("Client is not connected");
+      //throw new Error();
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
 
     var payload = new Object();
@@ -263,7 +321,10 @@ export default class ManagedDeviceClient extends DeviceClient {
 
   addLog(message, severity, data){
     if(!this.isConnected){
-      throw new Error("client must be connected");
+      this.log.error("Client is not connected");
+      //throw new Error();
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
 
     if(!isDefined(message) || !isDefined(severity)){
@@ -312,7 +373,10 @@ export default class ManagedDeviceClient extends DeviceClient {
 
   clearLogs(){
     if(!this.isConnected){
-      throw new Error("client must be connected");
+      this.log.error("Client is not connected");
+      //throw new Error();
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
 
     var payload = new Object();
@@ -329,12 +393,16 @@ export default class ManagedDeviceClient extends DeviceClient {
     return reqId;
   }
 
-  respondDeviceAction(reqId, accept){
+  respondDeviceAction(request, rc, message){
+    var reqId = request.reqId;
     if(!this.isConnected){
-      throw new Error("client must be connected");
+      this.log.error("Client is not connected");
+      //throw new Error();
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
 
-    if(!isDefined(reqId) || !isDefined(accept)){
+    if(!isDefined(reqId) || !isDefined(rc)){
       throw new Error("reqId and accept are required");
     }
 
@@ -342,8 +410,8 @@ export default class ManagedDeviceClient extends DeviceClient {
       throw new Error("reqId must be a string");
     }
     
-    if(!isBoolean(accept)){
-      throw new Error("accept must be a boolean");
+    if(!isNumber(rc)){
+      throw new Error("Return code must be a Number");
     }
 
     var request = this._dmRequests[reqId];
@@ -351,16 +419,15 @@ export default class ManagedDeviceClient extends DeviceClient {
       throw new Error("unknown request : %s", reqId);
     }
 
-    var rc;
-    if(accept){
-      rc = 202;
-    } else{
-      rc = 500;
-    }
-
     var payload = new Object();
     payload.rc = rc;
     payload.reqId = reqId;
+
+    if(isDefined(message)){
+        //setting the message on the response.
+        payload.message = message;
+    }
+
     payload = JSON.stringify(payload);
     
     this.log.debug("Publishing device action response with payload : %s", payload);
@@ -369,6 +436,14 @@ export default class ManagedDeviceClient extends DeviceClient {
     delete this._dmRequests[reqId];
 
     return this;
+  }
+
+  isRebootAction(request) {
+    return (request.action === "reboot");
+  }
+
+  isFactoryResetAction(request) {
+    return (request.action === "factory_reset");
   }
 
   _onDmResponse(payload){
@@ -445,6 +520,118 @@ export default class ManagedDeviceClient extends DeviceClient {
     return this;
   }
 
+  _onDmUpdate(payload) {
+    payload = JSON.parse(payload);
+    var reqId = payload.reqId;
+
+    var fields = payload.d.fields;
+
+    for(var count = 0 ; count < fields.length ; count++) {
+
+      var field = fields[count];
+      var fieldName = field.field;
+      var value = field.value;
+
+      this.log.debug("Update called for : %s with value : %s", fieldName, value);
+
+      switch(fieldName) {
+          case "mgmt.firmware":
+              this.mgmtFirmware = value;
+              break;
+          case "location":
+              this.location = value;
+              //fire an event to notify user on location change
+              this.emit('locationUpdate', value);
+              break;
+          case "metadata":
+              //currently unsupported
+              break;
+          case "deviceInfo":
+              //currently unsupported
+              break;
+          default:
+              this.log.warn("Update called for Unknown field : "+fieldName);
+      }
+    }
+
+    var payload = new Object();
+    payload.rc = this.RESPONSECODE.UPDATE_SUCCESS;
+    payload.reqId = reqId;
+
+    payload = JSON.stringify(payload);
+
+    this.log.debug("Publishing Device Update response with payload : %s", payload);
+    this.mqtt.publish(RESPONSE_TOPIC, payload, QOS);
+
+    return this;
+  }
+
+  _onDmObserve(payload) {
+
+    payload = JSON.parse(payload);
+    var reqId = payload.reqId;
+
+    var fields = payload.d.fields;
+
+    for(var count = 0 ; count < fields.length ; count++) {
+
+      var field = fields[count];
+      var fieldName = field.field;
+      this.log.debug("Observe called for : "+fieldName);
+      if(fieldName === 'mgmt.firmware') {
+        this.observe = true;
+        var payload = new Object();
+        payload.rc = this.RESPONSECODE.SUCCESS;
+        payload.reqId = reqId;
+
+        payload.d = {};
+        payload.d.fields = [];
+
+        let fieldData = {
+          field : fieldName,
+          value : this.mgmtFirmware
+        }
+
+        payload.d.fields.push(fieldData);
+
+        payload = JSON.stringify(payload);
+
+        this.log.debug("Publishing Observe response with payload : %s", payload);
+        this.mqtt.publish(RESPONSE_TOPIC, payload, QOS);
+      }
+    }
+
+    return this;
+  }
+
+  _onDmCancel(payload) {
+
+    payload = JSON.parse(payload);
+    var reqId = payload.reqId;
+
+    var fields = payload.d.fields;
+
+    for(var count = 0 ; count < fields.length ; count++) {
+
+      var field = fields[count];
+      var fieldName = field.field;
+      this.log.debug("Cancel called for : "+fieldName);
+      if(fieldName === 'mgmt.firmware') {
+        this.observe = false;
+          var payload = new Object();
+          payload.rc = this.RESPONSECODE.SUCCESS;
+          payload.reqId = reqId;
+
+          payload = JSON.stringify(payload);
+
+          this.log.debug("Publishing Cancel response with payload : %s", payload);
+          this.mqtt.publish(RESPONSE_TOPIC, payload, QOS);
+      }
+    }
+
+    return this;
+  }
+
   _onDmRequest(topic, payload){
     payload = JSON.parse(payload);
     var reqId = payload.reqId;
@@ -457,17 +644,106 @@ export default class ManagedDeviceClient extends DeviceClient {
       var type = match[1];
       var action = match[2];
 
-      if(type == "firmware"){
-        action = type+'_'+action;
-      }
+      var data = {
+          reqId: reqId,
+          action: action
+        };
 
-      this.emit('dmAction', {
-        reqId: reqId,
-        action: action
-      });
+      if(type === "firmware"){
+        if(action === "download") {
+          this._handleFirmwareDownload(payload,data);
+        } else if(action === "update") {
+          this._handleFirmwareUpdate(payload,data);
+        }
+      } else {
+        this.emit('dmAction', data);
+      }
     }
 
     return this;
+  }
+
+  _handleFirmwareDownload(payload, request) {
+
+    this.log.debug("Called firmware Download");
+
+    this.log.debug("Current value of mgmtFirmware : "+JSON.stringify(this.mgmtFirmware));
+
+    let rc;
+    let message = "";
+    if(this.mgmtFirmware.state !== this.FIRMWARESTATE.IDLE) {
+      rc = this.RESPONSECODE.BAD_REQUEST;
+      message = "Cannot download as the device is not in idle state";
+    } else {
+      rc = this.RESPONSECODE.ACCEPTED;
+      this.emit('firmwareDownload', this.mgmtFirmware);
+    }
+
+    this.respondDeviceAction(request,rc,message);
+
+    return this;
+  }
+
+  _handleFirmwareUpdate(payload, request) {
+
+    this.log.debug("Called firmware Update");
+
+    this.log.debug("Current value of mgmtFirmware : "+JSON.stringify(this.mgmtFirmware));
+
+    let rc;
+    let message = "";
+    if(this.mgmtFirmware.state !== this.FIRMWARESTATE.DOWNLOADED) {
+      rc = this.RESPONSECODE.BAD_REQUEST;
+      message = "Firmware is still not successfully downloaded.";
+    } else {
+      rc = this.RESPONSECODE.ACCEPTED;
+      this.emit('firmwareUpdate', this.mgmtFirmware);
+    }
+
+    this.respondDeviceAction(request,rc,message);
+
+    return this;
+  }
+
+  changeState(state) {
+    
+    if(this.observe) {
+      this.mgmtFirmware.state = state;
+      this._notify('mgmt.firmware','state', state);
+    } else {
+      this.log.warn("changeState called, but the mgmt.firmware is not observed now")
+    }
+  }
+
+  changeUpdateState(state) {
+    
+    if(this.observe) {
+      this.mgmtFirmware.updateStatus = state;
+      this._notify('mgmt.firmware','updateStatus', state);
+    } else {
+      this.log.warn("changeUpdateState called, but the mgmt.firmware is not observed now")
+    }
+  }
+
+  _notify(property,field, newValue) {
+    this.log.debug("Notify called : %s field : %s newValue : %s",property, field, newValue);
+
+    let payload = {};
+    payload.d = {};
+    payload.d.fields = [];
+
+    let data = {};
+    data[field] = newValue;
+    let fieldData = {
+      field : property,
+      value : data
+    }
+    payload.d.fields.push(fieldData);
+
+    payload = JSON.stringify(payload);
+    this.log.debug("Notify with %s",payload);
+
+    this.mqtt.publish(NOTIFY_TOPIC, payload, QOS);
   }
 
 }

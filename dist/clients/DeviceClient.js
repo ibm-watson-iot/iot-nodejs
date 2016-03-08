@@ -123,7 +123,9 @@
       value: function publish(eventType, eventFormat, payload, qos) {
         if (!this.isConnected) {
           this.log.error("Client is not connected");
-          throw new Error("Client is not connected");
+          //throw new Error();
+          //instead of throwing error, will emit 'error' event.
+          this.emit('error', "Client is not connected");
         }
 
         var topic = (0, _format2['default'])("iot-2/evt/%s/fmt/%s", eventType, eventFormat);

@@ -22,7 +22,7 @@ All code is written in [JavaScript 6](https://babeljs.io/docs/learn-es2015/) and
 
 
 Usage
-============
+=======
 Load the library in node.js / browserify
 -------------------------------------------
 

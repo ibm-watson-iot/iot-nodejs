@@ -19998,7 +19998,9 @@ var DeviceClient = (function (_BaseClient) {
     value: function publish(eventType, eventFormat, payload, qos) {
       if (!this.isConnected) {
         this.log.error("Client is not connected");
-        throw new Error("Client is not connected");
+        //throw new Error();
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       var topic = (0, _format2['default'])("iot-2/evt/%s/fmt/%s", eventType, eventFormat);
@@ -20198,7 +20200,9 @@ var GatewayClient = (function (_BaseClient) {
     value: function publishEvent(type, id, eventType, eventFormat, payload, qos) {
       if (!this.isConnected) {
         this.log.error("Client is not connected");
-        throw new Error("Client is not connected");
+        //throw new Error("Client is not connected");
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       if (!(0, _utilUtilJs.isDefined)(payload)) {
@@ -20298,7 +20302,9 @@ var GatewayClient = (function (_BaseClient) {
     value: function subscribe(topic) {
       if (!this.isConnected) {
         this.log.error("Client is not connected");
-        throw new Error("Client is not connected");
+        //throw new Error("Client is not connected");
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected. So cannot subscribe to topic :" + topic);
       }
 
       this.log.debug("Subscribe: " + topic);
@@ -20316,7 +20322,9 @@ var GatewayClient = (function (_BaseClient) {
     value: function unsubscribe(topic) {
       if (!this.isConnected) {
         this.log.error("Client is not connected");
-        throw new Error("Client is not connected");
+        //throw new Error("Client is not connected");
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       this.log.debug("Unsubscribe: " + topic);
@@ -20419,6 +20427,39 @@ var ManagedDeviceClient = (function (_DeviceClient) {
 
     this._deviceRequests = {};
     this._dmRequests = {};
+
+    //variables for firmware update
+    this.location = {};
+    this.mgmtFirmware = {};
+
+    this.observe;
+
+    //various states in update of firmware
+    this.FIRMWARESTATE = {
+      IDLE: 0,
+      DOWNLOADING: 1,
+      DOWNLOADED: 2
+    };
+
+    this.FIRMWAREUPDATESTATE = {
+      SUCCESS: 0,
+      IN_PROGRESS: 1,
+      OUT_OF_MEMORY: 2,
+      CONNECTION_LOST: 3,
+      VERIFICATION_FAILED: 4,
+      UNSUPPORTED_IMAGE: 5,
+      INVALID_URL: 6
+    };
+
+    this.RESPONSECODE = {
+      SUCCESS: 200,
+      ACCEPTED: 202,
+      UPDATE_SUCCESS: 204,
+      BAD_REQUEST: 400,
+      NOT_FOUND: 404,
+      INTERNAL_ERROR: 500,
+      FUNCTION_NOT_SUPPORTED: 501
+    };
   }
 
   _createClass(ManagedDeviceClient, [{
@@ -20440,6 +20481,12 @@ var ManagedDeviceClient = (function (_DeviceClient) {
         if (match) {
           if (topic == DM_RESPONSE_TOPIC) {
             _this._onDmResponse(payload);
+          } else if (topic == DM_UPDATE_TOPIC) {
+            _this._onDmUpdate(payload);
+          } else if (topic == DM_OBSERVE_TOPIC) {
+            _this._onDmObserve(payload);
+          } else if (topic == DM_CANCEL_OBSERVE_TOPIC) {
+            _this._onDmCancel(payload);
           } else {
             _this._onDmRequest(topic, payload);
           }
@@ -20450,7 +20497,10 @@ var ManagedDeviceClient = (function (_DeviceClient) {
     key: 'manage',
     value: function manage(lifetime, supportDeviceActions, supportFirmwareActions) {
       if (!this.isConnected) {
-        throw new Error("client must be connected");
+        this.log.error("Client is not connected");
+        //throw new Error();
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       var d = new Object();
@@ -20474,7 +20524,7 @@ var ManagedDeviceClient = (function (_DeviceClient) {
           if (!(0, _utilUtilJs.isBoolean)(supportDeviceActions)) {
             throw new Error("supportDeviceActions must be a boolean");
           }
-
+          this.deviceActions = supportDeviceActions;
           d.supports.deviceActions = supportDeviceActions;
         }
 
@@ -20483,6 +20533,7 @@ var ManagedDeviceClient = (function (_DeviceClient) {
             throw new Error("supportFirmwareActions must be a boolean");
           }
 
+          this.supportFirmwareActions = supportFirmwareActions;
           d.supports.firmwareActions = supportFirmwareActions;
         }
       }
@@ -20505,7 +20556,10 @@ var ManagedDeviceClient = (function (_DeviceClient) {
     key: 'unmanage',
     value: function unmanage() {
       if (!this.isConnected) {
-        throw new Error("client must be connected");
+        this.log.error("Client is not connected");
+        //throw new Error();
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       var payload = new Object();
@@ -20525,7 +20579,10 @@ var ManagedDeviceClient = (function (_DeviceClient) {
     key: 'updateLocation',
     value: function updateLocation(latitude, longitude, elevation, accuracy) {
       if (!this.isConnected) {
-        throw new Error("client must be connected");
+        this.log.error("Client is not connected");
+        //throw new Error();
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       if (!(0, _utilUtilJs.isDefined)(longitude) || !(0, _utilUtilJs.isDefined)(latitude)) {
@@ -20573,6 +20630,9 @@ var ManagedDeviceClient = (function (_DeviceClient) {
       payload.reqId = reqId;
       payload = JSON.stringify(payload);
 
+      //update the location
+      this.location = d;
+
       this._deviceRequests[reqId] = { topic: UPDATE_LOCATION_TOPIC, payload: payload };
 
       this.log.debug("Publishing update location request with payload : %s", payload);
@@ -20584,7 +20644,10 @@ var ManagedDeviceClient = (function (_DeviceClient) {
     key: 'addErrorCode',
     value: function addErrorCode(errorCode) {
       if (!this.isConnected) {
-        throw new Error("client must be connected");
+        this.log.error("Client is not connected");
+        //throw new Error();
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       if (!(0, _utilUtilJs.isDefined)(errorCode)) {
@@ -20616,7 +20679,10 @@ var ManagedDeviceClient = (function (_DeviceClient) {
     key: 'clearErrorCodes',
     value: function clearErrorCodes() {
       if (!this.isConnected) {
-        throw new Error("client must be connected");
+        this.log.error("Client is not connected");
+        //throw new Error();
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       var payload = new Object();
@@ -20636,7 +20702,10 @@ var ManagedDeviceClient = (function (_DeviceClient) {
     key: 'addLog',
     value: function addLog(message, severity, data) {
       if (!this.isConnected) {
-        throw new Error("client must be connected");
+        this.log.error("Client is not connected");
+        //throw new Error();
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       if (!(0, _utilUtilJs.isDefined)(message) || !(0, _utilUtilJs.isDefined)(severity)) {
@@ -20686,7 +20755,10 @@ var ManagedDeviceClient = (function (_DeviceClient) {
     key: 'clearLogs',
     value: function clearLogs() {
       if (!this.isConnected) {
-        throw new Error("client must be connected");
+        this.log.error("Client is not connected");
+        //throw new Error();
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       var payload = new Object();
@@ -20704,12 +20776,16 @@ var ManagedDeviceClient = (function (_DeviceClient) {
     }
   }, {
     key: 'respondDeviceAction',
-    value: function respondDeviceAction(reqId, accept) {
+    value: function respondDeviceAction(request, rc, message) {
+      var reqId = request.reqId;
       if (!this.isConnected) {
-        throw new Error("client must be connected");
+        this.log.error("Client is not connected");
+        //throw new Error();
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
-      if (!(0, _utilUtilJs.isDefined)(reqId) || !(0, _utilUtilJs.isDefined)(accept)) {
+      if (!(0, _utilUtilJs.isDefined)(reqId) || !(0, _utilUtilJs.isDefined)(rc)) {
         throw new Error("reqId and accept are required");
       }
 
@@ -20717,8 +20793,8 @@ var ManagedDeviceClient = (function (_DeviceClient) {
         throw new Error("reqId must be a string");
       }
 
-      if (!(0, _utilUtilJs.isBoolean)(accept)) {
-        throw new Error("accept must be a boolean");
+      if (!(0, _utilUtilJs.isNumber)(rc)) {
+        throw new Error("Return code must be a Number");
       }
 
       var request = this._dmRequests[reqId];
@@ -20726,16 +20802,15 @@ var ManagedDeviceClient = (function (_DeviceClient) {
         throw new Error("unknown request : %s", reqId);
       }
 
-      var rc;
-      if (accept) {
-        rc = 202;
-      } else {
-        rc = 500;
-      }
-
       var payload = new Object();
       payload.rc = rc;
       payload.reqId = reqId;
+
+      if ((0, _utilUtilJs.isDefined)(message)) {
+        //setting the message on the response.
+        payload.message = message;
+      }
+
       payload = JSON.stringify(payload);
 
       this.log.debug("Publishing device action response with payload : %s", payload);
@@ -20744,6 +20819,16 @@ var ManagedDeviceClient = (function (_DeviceClient) {
       delete this._dmRequests[reqId];
 
       return this;
+    }
+  }, {
+    key: 'isRebootAction',
+    value: function isRebootAction(request) {
+      return request.action === "reboot";
+    }
+  }, {
+    key: 'isFactoryResetAction',
+    value: function isFactoryResetAction(request) {
+      return request.action === "factory_reset";
     }
   }, {
     key: '_onDmResponse',
@@ -20821,6 +20906,121 @@ var ManagedDeviceClient = (function (_DeviceClient) {
       return this;
     }
   }, {
+    key: '_onDmUpdate',
+    value: function _onDmUpdate(payload) {
+      payload = JSON.parse(payload);
+      var reqId = payload.reqId;
+
+      var fields = payload.d.fields;
+
+      for (var count = 0; count < fields.length; count++) {
+
+        var field = fields[count];
+        var fieldName = field.field;
+        var value = field.value;
+
+        this.log.debug("Update called for : %s with value : %s", fieldName, value);
+
+        switch (fieldName) {
+          case "mgmt.firmware":
+            this.mgmtFirmware = value;
+            break;
+          case "location":
+            this.location = value;
+            //fire an event to notify user on location change
+            this.emit('locationUpdate', value);
+            break;
+          case "metadata":
+            //currently unsupported
+            break;
+          case "deviceInfo":
+            //currently unsupported
+            break;
+          default:
+            this.log.warn("Update called for Unknown field : " + fieldName);
+        }
+      }
+
+      var payload = new Object();
+      payload.rc = this.RESPONSECODE.UPDATE_SUCCESS;
+      payload.reqId = reqId;
+
+      payload = JSON.stringify(payload);
+
+      this.log.debug("Publishing Device Update response with payload : %s", payload);
+      this.mqtt.publish(RESPONSE_TOPIC, payload, QOS);
+
+      return this;
+    }
+  }, {
+    key: '_onDmObserve',
+    value: function _onDmObserve(payload) {
+
+      payload = JSON.parse(payload);
+      var reqId = payload.reqId;
+
+      var fields = payload.d.fields;
+
+      for (var count = 0; count < fields.length; count++) {
+
+        var field = fields[count];
+        var fieldName = field.field;
+        this.log.debug("Observe called for : " + fieldName);
+        if (fieldName === 'mgmt.firmware') {
+          this.observe = true;
+          var payload = new Object();
+          payload.rc = this.RESPONSECODE.SUCCESS;
+          payload.reqId = reqId;
+
+          payload.d = {};
+          payload.d.fields = [];
+
+          var fieldData = {
+            field: fieldName,
+            value: this.mgmtFirmware
+          };
+
+          payload.d.fields.push(fieldData);
+
+          payload = JSON.stringify(payload);
+
+          this.log.debug("Publishing Observe response with payload : %s", payload);
+          this.mqtt.publish(RESPONSE_TOPIC, payload, QOS);
+        }
+      }
+
+      return this;
+    }
+  }, {
+    key: '_onDmCancel',
+    value: function _onDmCancel(payload) {
+
+      payload = JSON.parse(payload);
+      var reqId = payload.reqId;
+
+      var fields = payload.d.fields;
+
+      for (var count = 0; count < fields.length; count++) {
+
+        var field = fields[count];
+        var fieldName = field.field;
+        this.log.debug("Cancel called for : " + fieldName);
+        if (fieldName === 'mgmt.firmware') {
+          this.observe = false;
+          var payload = new Object();
+          payload.rc = this.RESPONSECODE.SUCCESS;
+          payload.reqId = reqId;
+
+          payload = JSON.stringify(payload);
+
+          this.log.debug("Publishing Cancel response with payload : %s", payload);
+          this.mqtt.publish(RESPONSE_TOPIC, payload, QOS);
+        }
+      }
+
+      return this;
+    }
+  }, {
     key: '_onDmRequest',
     value: function _onDmRequest(topic, payload) {
       payload = JSON.parse(payload);
@@ -20834,17 +21034,111 @@ var ManagedDeviceClient = (function (_DeviceClient) {
         var type = match[1];
         var action = match[2];
 
-        if (type == "firmware") {
-          action = type + '_' + action;
-        }
-
-        this.emit('dmAction', {
+        var data = {
           reqId: reqId,
           action: action
-        });
+        };
+
+        if (type === "firmware") {
+          if (action === "download") {
+            this._handleFirmwareDownload(payload, data);
+          } else if (action === "update") {
+            this._handleFirmwareUpdate(payload, data);
+          }
+        } else {
+          this.emit('dmAction', data);
+        }
       }
 
       return this;
+    }
+  }, {
+    key: '_handleFirmwareDownload',
+    value: function _handleFirmwareDownload(payload, request) {
+
+      this.log.debug("Called firmware Download");
+
+      this.log.debug("Current value of mgmtFirmware : " + JSON.stringify(this.mgmtFirmware));
+
+      var rc = undefined;
+      var message = "";
+      if (this.mgmtFirmware.state !== this.FIRMWARESTATE.IDLE) {
+        rc = this.RESPONSECODE.BAD_REQUEST;
+        message = "Cannot download as the device is not in idle state";
+      } else {
+        rc = this.RESPONSECODE.ACCEPTED;
+        this.emit('firmwareDownload', this.mgmtFirmware);
+      }
+
+      this.respondDeviceAction(request, rc, message);
+
+      return this;
+    }
+  }, {
+    key: '_handleFirmwareUpdate',
+    value: function _handleFirmwareUpdate(payload, request) {
+
+      this.log.debug("Called firmware Update");
+
+      this.log.debug("Current value of mgmtFirmware : " + JSON.stringify(this.mgmtFirmware));
+
+      var rc = undefined;
+      var message = "";
+      if (this.mgmtFirmware.state !== this.FIRMWARESTATE.DOWNLOADED) {
+        rc = this.RESPONSECODE.BAD_REQUEST;
+        message = "Firmware is still not successfully downloaded.";
+      } else {
+        rc = this.RESPONSECODE.ACCEPTED;
+        this.emit('firmwareUpdate', this.mgmtFirmware);
+      }
+
+      this.respondDeviceAction(request, rc, message);
+
+      return this;
+    }
+  }, {
+    key: 'changeState',
+    value: function changeState(state) {
+
+      if (this.observe) {
+        this.mgmtFirmware.state = state;
+        this._notify('mgmt.firmware', 'state', state);
+      } else {
+        this.log.warn("changeState called, but the mgmt.firmware is not observed now");
+      }
+    }
+  }, {
+    key: 'changeUpdateState',
+    value: function changeUpdateState(state) {
+
+      if (this.observe) {
+        this.mgmtFirmware.updateStatus = state;
+        this._notify('mgmt.firmware', 'updateStatus', state);
+      } else {
+        this.log.warn("changeUpdateState called, but the mgmt.firmware is not observed now");
+      }
+    }
+  }, {
+    key: '_notify',
+    value: function _notify(property, field, newValue) {
+      this.log.debug("Notify called : %s field : %s newValue : %s", property, field, newValue);
+
+      var payload = {};
+      payload.d = {};
+      payload.d.fields = [];
+
+      var data = {};
+      data[field] = newValue;
+      var fieldData = {
+        field: property,
+        value: data
+      };
+      payload.d.fields.push(fieldData);
+
+      payload = JSON.stringify(payload);
+      this.log.debug("Notify with %s", payload);
+
+      this.mqtt.publish(NOTIFY_TOPIC, payload, QOS);
     }
   }]);
 
@@ -20992,7 +21286,10 @@ var ManagedGatewayClient = (function (_GatewayClient) {
     key: 'manageDevice',
     value: function manageDevice(type, id, lifetime, supportDeviceActions, supportFirmwareActions) {
       if (!this.isConnected) {
-        throw new Error("client must be connected");
+        this.log.error("Client is not connected");
+        //throw new Error("Client is not connected");
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       var d = new Object();
@@ -21055,7 +21352,10 @@ var ManagedGatewayClient = (function (_GatewayClient) {
     key: 'unmanageDevice',
     value: function unmanageDevice(type, id) {
       if (!this.isConnected) {
-        throw new Error("client must be connected");
+        this.log.error("Client is not connected");
+        //throw new Error("Client is not connected");
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       var payload = new Object();
@@ -21083,7 +21383,10 @@ var ManagedGatewayClient = (function (_GatewayClient) {
     key: 'updateLocationDevice',
     value: function updateLocationDevice(type, id, latitude, longitude, elevation, accuracy) {
       if (!this.isConnected) {
-        throw new Error("client must be connected");
+        this.log.error("Client is not connected");
+        //throw new Error("Client is not connected");
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       if (!(0, _utilUtilJs.isDefined)(longitude) || !(0, _utilUtilJs.isDefined)(latitude)) {
@@ -21150,7 +21453,10 @@ var ManagedGatewayClient = (function (_GatewayClient) {
     key: 'addErrorCodeDevice',
     value: function addErrorCodeDevice(type, id, errorCode) {
       if (!this.isConnected) {
-        throw new Error("client must be connected");
+        this.log.error("Client is not connected");
+        //throw new Error("Client is not connected");
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       if (!(0, _utilUtilJs.isDefined)(errorCode)) {
@@ -21190,7 +21496,10 @@ var ManagedGatewayClient = (function (_GatewayClient) {
     key: 'clearErrorCodesDevice',
     value: function clearErrorCodesDevice(type, id) {
       if (!this.isConnected) {
-        throw new Error("client must be connected");
+        this.log.error("Client is not connected");
+        //throw new Error("Client is not connected");
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       var payload = new Object();
@@ -21217,7 +21526,10 @@ var ManagedGatewayClient = (function (_GatewayClient) {
     key: 'addLogDevice',
     value: function addLogDevice(type, id, message, severity, data) {
       if (!this.isConnected) {
-        throw new Error("client must be connected");
+        this.log.error("Client is not connected");
+        //throw new Error("Client is not connected");
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       if (!(0, _utilUtilJs.isDefined)(message) || !(0, _utilUtilJs.isDefined)(severity)) {

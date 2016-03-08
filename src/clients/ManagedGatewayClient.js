@@ -107,7 +107,10 @@ export default class ManagedGatewayClient extends GatewayClient {
 
   manageDevice(type, id, lifetime, supportDeviceActions, supportFirmwareActions){
     if(!this.isConnected){
-      throw new Error("client must be connected");
+      this.log.error("Client is not connected");
+      //throw new Error("Client is not connected");
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
     
     var d = new Object();
@@ -169,7 +172,10 @@ export default class ManagedGatewayClient extends GatewayClient {
 
   unmanageDevice(type, id){
     if(!this.isConnected){
-      throw new Error("client must be connected");
+      this.log.error("Client is not connected");
+      //throw new Error("Client is not connected");
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
 
     var payload = new Object();
@@ -195,7 +201,10 @@ export default class ManagedGatewayClient extends GatewayClient {
 
   updateLocationDevice(type, id, latitude, longitude, elevation, accuracy){
     if(!this.isConnected){
-      throw new Error("client must be connected");
+      this.log.error("Client is not connected");
+      //throw new Error("Client is not connected");
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
     
     if(!isDefined(longitude) || !isDefined(latitude)){
@@ -260,7 +269,10 @@ export default class ManagedGatewayClient extends GatewayClient {
 
   addErrorCodeDevice(type, id, errorCode){
     if(!this.isConnected){
-      throw new Error("client must be connected");
+      this.log.error("Client is not connected");
+      //throw new Error("Client is not connected");
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
 
     if(!isDefined(errorCode)){
@@ -298,7 +310,10 @@ export default class ManagedGatewayClient extends GatewayClient {
 
   clearErrorCodesDevice(type, id){
     if(!this.isConnected){
-      throw new Error("client must be connected");
+      this.log.error("Client is not connected");
+      //throw new Error("Client is not connected");
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
 
     var payload = new Object();
@@ -323,7 +338,10 @@ export default class ManagedGatewayClient extends GatewayClient {
 
   addLogDevice(type, id, message, severity, data){
     if(!this.isConnected){
-      throw new Error("client must be connected");
+      this.log.error("Client is not connected");
+      //throw new Error("Client is not connected");
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
 
     if(!isDefined(message) || !isDefined(severity)){

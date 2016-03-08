@@ -138,7 +138,10 @@
       key: 'manageDevice',
       value: function manageDevice(type, id, lifetime, supportDeviceActions, supportFirmwareActions) {
         if (!this.isConnected) {
-          throw new Error("client must be connected");
+          this.log.error("Client is not connected");
+          //throw new Error("Client is not connected");
+          //instead of throwing error, will emit 'error' event.
+          this.emit('error', "Client is not connected");
         }
 
         var d = new Object();
@@ -201,7 +204,10 @@
       key: 'unmanageDevice',
       value: function unmanageDevice(type, id) {
         if (!this.isConnected) {
-          throw new Error("client must be connected");
+          this.log.error("Client is not connected");
+          //throw new Error("Client is not connected");
+          //instead of throwing error, will emit 'error' event.
+          this.emit('error', "Client is not connected");
         }
 
         var payload = new Object();
@@ -229,7 +235,10 @@
       key: 'updateLocationDevice',
       value: function updateLocationDevice(type, id, latitude, longitude, elevation, accuracy) {
         if (!this.isConnected) {
-          throw new Error("client must be connected");
+          this.log.error("Client is not connected");
+          //throw new Error("Client is not connected");
+          //instead of throwing error, will emit 'error' event.
+          this.emit('error', "Client is not connected");
         }
 
         if (!(0, _utilUtilJs.isDefined)(longitude) || !(0, _utilUtilJs.isDefined)(latitude)) {
@@ -296,7 +305,10 @@
       key: 'addErrorCodeDevice',
       value: function addErrorCodeDevice(type, id, errorCode) {
         if (!this.isConnected) {
-          throw new Error("client must be connected");
+          this.log.error("Client is not connected");
+          //throw new Error("Client is not connected");
+          //instead of throwing error, will emit 'error' event.
+          this.emit('error', "Client is not connected");
         }
 
         if (!(0, _utilUtilJs.isDefined)(errorCode)) {
@@ -336,7 +348,10 @@
       key: 'clearErrorCodesDevice',
       value: function clearErrorCodesDevice(type, id) {
         if (!this.isConnected) {
-          throw new Error("client must be connected");
+          this.log.error("Client is not connected");
+          //throw new Error("Client is not connected");
+          //instead of throwing error, will emit 'error' event.
+          this.emit('error', "Client is not connected");
         }
 
         var payload = new Object();
@@ -363,7 +378,10 @@
       key: 'addLogDevice',
       value: function addLogDevice(type, id, message, severity, data) {
         if (!this.isConnected) {
-          throw new Error("client must be connected");
+          this.log.error("Client is not connected");
+          //throw new Error("Client is not connected");
+          //instead of throwing error, will emit 'error' event.
+          this.emit('error', "Client is not connected");
         }
 
         if (!(0, _utilUtilJs.isDefined)(message) || !(0, _utilUtilJs.isDefined)(severity)) {

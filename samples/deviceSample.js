@@ -4,13 +4,17 @@ var config = require("./device.json");
 var deviceClient = new iotf.IotfDevice(config);
 
 //setting the log level to trace. By default its 'warn'
-deviceClient.log.setLevel('info');
+deviceClient.log.setLevel('debug');
 
 deviceClient.connect();
 
-deviceClient.on('connect', function(){
-    deviceClient.publish('myevt', 'json', '{"hello":"world"}', 0);
-    deviceClient.disconnect();
+deviceClient.on('connect', function(){ 
+    var i=0;
+    console.log("connected");
+    setInterval(function function_name () {
+    	i++;
+    	deviceClient.publish('myevt', 'json', '{"value":'+i+'}', 2);
+    },2000);
 });
 
 deviceClient.on('disconnect', function(){
@@ -19,5 +23,4 @@ deviceClient.on('disconnect', function(){
 
 deviceClient.on('error', function (argument) {
 	console.log(argument);
-	process.exit(1);
 });

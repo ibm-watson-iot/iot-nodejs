@@ -17,8 +17,29 @@ deviceClient.on('connect', function(){
     //deviceClient.disconnect();
 });
 
-deviceClient.on('dmAction', function(request){
-  console.log('Action : '+request.Action);
+deviceClient.on('firmwareDownload', function(request){
+  console.log('Action : ' + JSON.stringify(request));
+
+  deviceClient.changeState(deviceClient.FIRMWARESTATE.DOWNLOADING);
+
+  setTimeout(function(){ 
+  	deviceClient.changeState(deviceClient.FIRMWARESTATE.DOWNLOADED);
+  }, 5000);
+
+});
+
+deviceClient.on('firmwareUpdate', function(request){
+  console.log('Action : ' + JSON.stringify(request));
+
+  deviceClient.changeUpdateState(deviceClient.FIRMWAREUPDATESTATE.IN_PROGRESS);
+
+  //Update the firmware
+
+  setTimeout(function(){ 
+  	deviceClient.changeUpdateState(deviceClient.FIRMWAREUPDATESTATE.SUCCESS);
+  	deviceClient.changeState(deviceClient.FIRMWARESTATE.IDLE);
+  }, 5000);
+
 });
 
 deviceClient.on('disconnect', function(){

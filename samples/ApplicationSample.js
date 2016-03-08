@@ -1,10 +1,10 @@
 var iotf = require("../");
 
 var appClientConfig = {
-  org: 'xxxx',
+  org: 'xxxxx',
   id: 'myapp',
-  "auth-key": 'a-xxxxx-xxxxxxxx',
-  "auth-token": 'xxxxxx-xxxx-xxxx'
+  "auth-key": 'a-xxxxxxx-zenkqyfiea',
+  "auth-token": 'xxxxxxxxxx'
 };
 
 var appClient = new iotf.IotfApplication(appClientConfig);
@@ -42,4 +42,14 @@ registerDeviceType('newType1',"New Type").then (function onSuccess (argument) {
 	
 	console.log("Fail");
 	console.log(argument);
+});
+
+//Register a new Device Type
+appClient.
+registerDevice('raspi',"new01012220","kjads*()(dsds").then (function onSuccess (argument) {
+	console.log("Success");
+	console.log(argument);
+}, function onError (argument) {
+	console.log("Fail");
+	console.log(argument.data);
 });

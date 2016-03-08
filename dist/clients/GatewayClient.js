@@ -144,7 +144,9 @@
       value: function publishEvent(type, id, eventType, eventFormat, payload, qos) {
         if (!this.isConnected) {
           this.log.error("Client is not connected");
-          throw new Error("Client is not connected");
+          //throw new Error("Client is not connected");
+          //instead of throwing error, will emit 'error' event.
+          this.emit('error', "Client is not connected");
         }
 
         if (!(0, _utilUtilJs.isDefined)(payload)) {
@@ -244,7 +246,9 @@
       value: function subscribe(topic) {
         if (!this.isConnected) {
           this.log.error("Client is not connected");
-          throw new Error("Client is not connected");
+          //throw new Error("Client is not connected");
+          //instead of throwing error, will emit 'error' event.
+          this.emit('error', "Client is not connected. So cannot subscribe to topic :" + topic);
         }
 
         this.log.debug("Subscribe: " + topic);
@@ -262,7 +266,9 @@
       value: function unsubscribe(topic) {
         if (!this.isConnected) {
           this.log.error("Client is not connected");
-          throw new Error("Client is not connected");
+          //throw new Error("Client is not connected");
+          //instead of throwing error, will emit 'error' event.
+          this.emit('error', "Client is not connected");
         }
 
         this.log.debug("Unsubscribe: " + topic);

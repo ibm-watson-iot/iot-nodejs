@@ -119,7 +119,9 @@ export default class GatewayClient extends BaseClient {
   publishEvent(type, id, eventType, eventFormat, payload, qos){
     if (!this.isConnected) {
       this.log.error("Client is not connected");
-      throw new Error("Client is not connected");
+      //throw new Error("Client is not connected");
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
 
     if(!isDefined(payload)){
@@ -213,7 +215,9 @@ export default class GatewayClient extends BaseClient {
   subscribe(topic){
     if (!this.isConnected) {
       this.log.error("Client is not connected");
-      throw new Error("Client is not connected");
+      //throw new Error("Client is not connected");
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected. So cannot subscribe to topic :"+topic);
     }
 
     this.log.debug("Subscribe: "+topic);
@@ -230,7 +234,9 @@ export default class GatewayClient extends BaseClient {
   unsubscribe(topic){
     if (!this.isConnected) {
       this.log.error("Client is not connected");
-      throw new Error("Client is not connected");
+      //throw new Error("Client is not connected");
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
 
     this.log.debug("Unsubscribe: "+topic);
