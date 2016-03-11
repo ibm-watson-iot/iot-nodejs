@@ -598,7 +598,8 @@ appClient.connect();
 
 appClient.on("connect", function () {
 
-    var myData={'name' : 'foo', 'cpu' : 60, 'mem' : 50}
+    var myData={'name' : 'foo', 'cpu' : 60, 'mem' : 50};
+    myData = JSON.stringify(myData);
     appClient.publishDeviceEvent("myDeviceType","device01", "myEvent", "json", myData);
 
 });
@@ -623,7 +624,8 @@ appClient.connect();
 
 appClient.on("connect", function () {
 
-    var myData={'DelaySeconds' : 10}
+    var myData={'DelaySeconds' : 10};
+    myData = JSON.stringify(myData);
     appClient.publishDeviceCommand("myDeviceType","device01", "reboot", "json", myData);
 
 });
