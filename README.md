@@ -119,10 +119,10 @@ Publishing events
 ------------------
 
 Events are the mechanism by which devices publish data to the Internet
-of Things Foundation. The device controls the content of the event and
+of Things Platform. The device controls the content of the event and
 assigns a name for each event it sends.
 
-When an event is received by the IOT Foundation the credentials of the
+When an event is received by the IOT Platform the credentials of the
 connection on which the event was received are used to determine from
 which device the event was sent. With this architecture it is impossible
 for a device to impersonate another device.
@@ -150,7 +150,7 @@ deviceClient.on("connect", function () {
 
     //publishing event using the user-defined quality of service
     var myQosLevel=2
-    deviceClient.publish("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel); 
+    deviceClient.publish("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel);
 });
 
 ....
@@ -190,7 +190,7 @@ deviceClient.on("command", function (commandName,format,payload,topic) {
         console.log("Command not supported.. " + commandName);
     }
 });
-.... 
+....
 ```
 
 Handling errors
@@ -212,7 +212,7 @@ deviceClient.on("connect", function () {
 deviceClient.on("error", function (err) {
     console.log("Error : "+err);
 });
-.... 
+....
 ```
 
 Disconnect Client
@@ -231,7 +231,7 @@ client.on("connect", function () {
 
     //publishing event using the user-defined quality of service
     var myQosLevel=2
-    client.publish("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel); 
+    client.publish("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel);
 
     //disconnect the client
     client.disconnect();
@@ -245,7 +245,7 @@ Application
 ==============
 
 *ApplicationClient* is application client for the Internet of Things
-Foundation service. This section contains information on how
+Platform service. This section contains information on how
 applications interact with devices.
 
 Constructor
@@ -344,7 +344,7 @@ appClient.on("connect", function () {
 appClient.on("error", function (err) {
     console.log("Error : "+err);
 });
-.... 
+....
 ```
 
 Handling errors
@@ -365,17 +365,17 @@ appClient.on("connect", function () {
 appClient.on("error", function (err) {
     console.log("Error : "+err);
 });
-.... 
+....
 ```
 
 Subscribing to device events
 ----------------------------
 
 Events are the mechanism by which devices publish data to the Internet
-of Things Foundation. The device controls the content of the event and
+of Things Platform. The device controls the content of the event and
 assigns a name for each event it sends.
 
-When an event is received by the IOT Foundation the credentials of the
+When an event is received by the IOT Platform the credentials of the
 connection on which the event was received are used to determine from
 which device the event was sent. With this architecture it is impossible
 for a device to impersonate another device.
@@ -653,7 +653,7 @@ appClient.on("connect", function () {
 Gateways
 ===============================
 
-*GatewayClient* is Gateway client for the IBM Watson Internet of Things Platform service. You can use this client to connect to the platform, publish gateway events, publish device events on behalf of the devices, subscribe to both gateway and device commands. 
+*GatewayClient* is Gateway client for the IBM Watson Internet of Things Platform service. You can use this client to connect to the platform, publish gateway events, publish device events on behalf of the devices, subscribe to both gateway and device commands.
 
 Constructor
 -----------
@@ -738,7 +738,7 @@ Events can be published by using
 -   data - Payload of the event
 -   QoS - qos for the publish event. Supported values : 0,1,2
 
-A gateway can publish events from itself and on behalf of any device connected via the gateway. 
+A gateway can publish events from itself and on behalf of any device connected via the gateway.
 
 ##### Publish Gateway Events
 
@@ -757,7 +757,7 @@ gatewayClient.on('connect', function(){
 
     //publishing event using the user-defined quality of service
     var myQosLevel=2
-    gatewayClient.publishGatewayEvent("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel); 
+    gatewayClient.publishGatewayEvent("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel);
 });
 
 ....
@@ -765,7 +765,7 @@ gatewayClient.on('connect', function(){
 
 ##### Publish Device Events
 
-The Gateway can publish the device events on behalf of the device that are connected to the Gateway. Function *publishDeviceEvent* needs device Type and the Device Id to publish the device events. 
+The Gateway can publish the device events on behalf of the device that are connected to the Gateway. Function *publishDeviceEvent* needs device Type and the Device Id to publish the device events.
 
 ``` {.sourceCode .javascript}
 
@@ -782,7 +782,7 @@ gatewayClient.on('connect', function(){
 
     //publishing event using the user-defined quality of service
     var myQosLevel=2
-    gatewayClient.publishDeviceEvent("Raspi","pi01","status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel); 
+    gatewayClient.publishDeviceEvent("Raspi","pi01","status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel);
 });
 
 ....
@@ -814,17 +814,17 @@ gatewayClient.log.setLevel('debug');
 gatewayClient.connect();
 
 gatewayClient.on('connect', function(){
-    
+
     //subscribe to command "blink" for the device with Type 'raspi' and id 'pi2'
     gatewayClient.subscribeToDeviceCommand('raspi','pi2','blink');
-    
+
     //subscribe to all commands for the device with Type 'raspi' and id 'pi3'
     gatewayClient.subscribeToDeviceCommand('raspi','pi3');
-    
+
     //subscribe to command 'blink' for this gateway.
     gatewayClient.subscribeToGatewayCommand('blink');
 
-    //unsubscribe command function 
+    //unsubscribe command function
     gatewayClient.unsubscribeToGatewayCommand('blink');
     gatewayClient.unsubscribeToDeviceCommand('raspi','pi2','blink');
 });
@@ -834,7 +834,7 @@ gatewayClient.on('command', function(type, id, commandName, commandFormat, paylo
     console.log("Type: %s  ID: %s  \nCommand Name : %s Format: %s",type, id, commandName, commandFormat);
     console.log("Payload : %s",payload);
 });
-.... 
+....
 ```
 
 Handling errors
@@ -856,13 +856,13 @@ gatewayClient.on('connect', function(){
 
     //publishing event using the user-defined quality of service
     var myQosLevel=2
-    gatewayClient.publishGatewayEvent("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel); 
+    gatewayClient.publishGatewayEvent("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel);
 });
 
 gatewayClient.on("error", function (err) {
     console.log("Error : "+err);
 });
-.... 
+....
 ```
 
 Disconnect Client
@@ -884,7 +884,7 @@ gatewayClient.on('connect', function(){
 
     //publishing event using the user-defined quality of service
     var myQosLevel=2
-    gatewayClient.publishGatewayEvent("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel); 
+    gatewayClient.publishGatewayEvent("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel);
 
     //disconnect the client
     gatewayClient.disconnect();
