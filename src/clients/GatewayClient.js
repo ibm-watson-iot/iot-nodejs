@@ -142,8 +142,12 @@ export default class GatewayClient extends BaseClient {
   publishHTTPS(eventType, eventFormat, payload){
     this.log.debug("Publishing event of Type: "+ eventType + " with payload : "+payload);
     return new Promise((resolve, reject) => {
-      let uri = format("https://%s.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", this.org, this.type, this.id, eventType);
-
+      let uri;
+      if(this.staging) {
+        uri = format("https://%s.staging.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", this.org, this.type, this.id, eventType);
+      }  else {
+        uri = format("https://%s.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", this.org, this.type, this.id, eventType);
+      }
       let xhrConfig = {
         url: uri,
         method: 'POST',

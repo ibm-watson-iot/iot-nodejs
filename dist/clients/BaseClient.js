@@ -53,6 +53,10 @@
       _get(Object.getPrototypeOf(BaseClient.prototype), 'constructor', this).call(this);
       this.log = _log['default'];
       this.log.setDefaultLevel("warn");
+      this.staging = false;
+      if (process.env.STAGING === '1') {
+        this.staging = true;
+      }
       if (!config) {
         throw new Error('Client instantiated with missing properties');
       }
@@ -81,7 +85,12 @@
           throw new Error('auth-token must be a string');
         }
 
-        this.host = "wss://" + config.org + ".messaging.internetofthings.ibmcloud.com:8883";
+        if (this.staging) {
+          this.host = "wss://" + config.org + ".messaging.staging.internetofthings.ibmcloud.com:8883";
+        } else {
+          this.host = "wss://" + config.org + ".messaging.internetofthings.ibmcloud.com:8883";
+        }
+        // this.host = "wss://" + config.org + ".messaging.internetofthings.ibmcloud.com:8883";
         this.isQuickstart = false;
         this.mqttConfig = {
           password: config['auth-token'],

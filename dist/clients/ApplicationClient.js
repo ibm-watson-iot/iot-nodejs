@@ -49,7 +49,7 @@
   var btoa = btoa || _nodeBtoa['default']; // if browser btoa is available use it otherwise use node module
 
   var QUICKSTART_ORG_ID = "quickstart";
-  var API_HOST = "https://%s.internetofthings.ibmcloud.com/api/v0002";
+
   var DEVICE_EVT_RE = /^iot-2\/type\/(.+)\/id\/(.+)\/evt\/(.+)\/fmt\/(.+)$/;
   var DEVICE_CMD_RE = /^iot-2\/type\/(.+)\/id\/(.+)\/cmd\/(.+)\/fmt\/(.+)$/;
   var DEVICE_MON_RE = /^iot-2\/type\/(.+)\/id\/(.+)\/mon$/;
@@ -314,7 +314,13 @@
         var _this2 = this;
 
         return new _Promise['default'](function (resolve, reject) {
-          var uri = (0, _format2['default'])(API_HOST, _this2.org);
+          // const API_HOST = "https://%s.internetofthings.ibmcloud.com/api/v0002";
+          var uri = "";
+          if (_this2.staging) {
+            uri = (0, _format2['default'])("https://%s.staging.internetofthings.ibmcloud.com/api/v0002", _this2.org);
+          } else {
+            uri = (0, _format2['default'])("https://%s.internetofthings.ibmcloud.com/api/v0002", _this2.org);
+          }
 
           if (Array.isArray(paths)) {
             for (var i = 0, l = paths.length; i < l; i++) {
@@ -664,7 +670,13 @@
 
         this.log.debug("Publishing event of Type: " + eventType + " with payload : " + payload);
         return new _Promise['default'](function (resolve, reject) {
-          var uri = (0, _format2['default'])("https://%s.internetofthings.ibmcloud.com/api/v0002/application/types/%s/devices/%s/events/%s", _this3.org, deviceType, deviceId, eventType);
+
+          var uri = "";
+          if (_this3.staging) {
+            uri = (0, _format2['default'])("https://%s.staging.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", _this3.org, deviceType, deviceId, eventType);
+          } else {
+            uri = (0, _format2['default'])("https://%s.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", _this3.org, deviceType, deviceId, eventType);
+          }
 
           var xhrConfig = {
             url: uri,

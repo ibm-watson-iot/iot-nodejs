@@ -21,7 +21,7 @@ import { isDefined, isString, isNode, isBrowser } from '../util/util.js';
 import { default as BaseClient } from './BaseClient.js';
 
 const QUICKSTART_ORG_ID = "quickstart";
-const API_HOST = "https://%s.internetofthings.ibmcloud.com/api/v0002";
+
 const DEVICE_EVT_RE = /^iot-2\/type\/(.+)\/id\/(.+)\/evt\/(.+)\/fmt\/(.+)$/;
 const DEVICE_CMD_RE = /^iot-2\/type\/(.+)\/id\/(.+)\/cmd\/(.+)\/fmt\/(.+)$/;
 const DEVICE_MON_RE = /^iot-2\/type\/(.+)\/id\/(.+)\/mon$/;
@@ -291,7 +291,13 @@ export default class ApplicationClient extends BaseClient {
 
   callApi(method, expectedHttpCode, expectJsonContent, paths, body, params){
     return new Promise((resolve, reject) => {
-      let uri = format(API_HOST, this.org);
+      // const API_HOST = "https://%s.internetofthings.ibmcloud.com/api/v0002";
+      let uri = "";
+      if(this.staging) {
+        uri = format("https://%s.staging.internetofthings.ibmcloud.com/api/v0002", this.org);
+      } else {
+        uri = format("https://%s.internetofthings.ibmcloud.com/api/v0002", this.org);
+      }
 
       if(Array.isArray(paths)){
         for(var i = 0, l = paths.length; i < l; i++){
@@ -601,7 +607,13 @@ export default class ApplicationClient extends BaseClient {
   publishHTTPS(deviceType, deviceId, eventType, eventFormat, payload){
     this.log.debug("Publishing event of Type: "+ eventType + " with payload : "+payload);
     return new Promise((resolve, reject) => {
-      let uri = format("https://%s.internetofthings.ibmcloud.com/api/v0002/application/types/%s/devices/%s/events/%s", this.org, deviceType, deviceId, eventType);
+
+      let uri = "";
+      if(this.staging) {
+        uri = format("https://%s.staging.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", this.org, deviceType, deviceId, eventType);
+      }  else {
+        uri = format("https://%s.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", this.org, deviceType, deviceId, eventType);
+      }
 
       let xhrConfig = {
         url: uri,
