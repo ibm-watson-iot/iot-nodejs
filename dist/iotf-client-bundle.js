@@ -19055,7 +19055,9 @@ var ApplicationClient = (function (_BaseClient) {
     value: function subscribe(topic) {
       if (!this.isConnected) {
         this.log.error("Client is not connected");
-        throw new Error("Client is not connected");
+        //throw new Error("Client is not connected");
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       this.log.trace("Subscribe: " + topic);
@@ -19073,7 +19075,9 @@ var ApplicationClient = (function (_BaseClient) {
     value: function unsubscribe(topic) {
       if (!this.isConnected) {
         this.log.error("Client is not connected");
-        throw new Error("Client is not connected");
+        // throw new Error("Client is not connected");
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       this.log.debug("Unsubscribe: " + topic);
@@ -19090,7 +19094,9 @@ var ApplicationClient = (function (_BaseClient) {
     value: function publish(topic, msg) {
       if (!this.mqtt) {
         this.log.error("Client is not connected");
-        throw new Error("Client is not connected");
+        // throw new Error("Client is not connected");
+        //instead of throwing error, will emit 'error' event.
+        this.emit('error', "Client is not connected");
       }
 
       this.log.debug("Publish: " + topic + ", " + msg);

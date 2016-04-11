@@ -18,45 +18,45 @@ import events from 'events';
 
 console.info = () => {};
 
-describe('ApplicationClient', () => {
+describe('IotfApplication', () => {
 
   describe('Constructor', () => {
 
     it('should throw an error if instantiated without config', () => {
       expect(() => {
-        let client = new IBMIoTF.ApplicationClient();
+        let client = new IBMIoTF.IotfApplication();
       }).to.throw(/missing properties/);
     });
 
     it('should throw an error if org is not present', () => {
       expect(() => {
-        let client = new IBMIoTF.ApplicationClient({});
+        let client = new IBMIoTF.IotfApplication({});
       }).to.throw(/config must contain org/);
     });
 
     it('should throw an error if org is not a string', () => {
       expect(() => {
-        let client = new IBMIoTF.ApplicationClient({org: false});
+        let client = new IBMIoTF.IotfApplication({org: false});
       }).to.throw(/org must be a string/);
     });
 
     describe('Quickstart mode', () => {
       it('should throw an error if id is not present', () => {
         expect(() => {
-          let client = new IBMIoTF.ApplicationClient({org:'quickstart'});
+          let client = new IBMIoTF.IotfApplication({org:'quickstart'});
         }).to.throw(/config must contain id/);
       });
 
       it('should return an instance if org, id and type are specified', () => {
         let client;
         expect(() => {
-          client = new IBMIoTF.ApplicationClient({org:'quickstart', id:'123', type:'123'});
+          client = new IBMIoTF.IotfApplication({org:'quickstart', id:'123', type:'123'});
         }).not.to.throw();
-        expect(client).to.be.instanceof(IBMIoTF.ApplicationClient);
+        expect(client).to.be.instanceof(IBMIoTF.IotfApplication);
       });
 
       it('should run in quickstart mode if org is set to "quickstart"', () => {
-        let client = new IBMIoTF.ApplicationClient({org: 'quickstart', type: 'mytype', id: '3215'});
+        let client = new IBMIoTF.IotfApplication({org: 'quickstart', type: 'mytype', id: '3215'});
         expect(client.isQuickstart).to.equal(true);
         expect(client.mqttConfig.username).to.be.undefined;
         expect(client.mqttConfig.password).to.be.undefined;
@@ -66,24 +66,24 @@ describe('ApplicationClient', () => {
     describe('Registered mode', () => {
       it('should throw an error if id is not present', () => {
         expect(() => {
-          let client = new IBMIoTF.ApplicationClient({org:'regorg'});
+          let client = new IBMIoTF.IotfApplication({org:'regorg'});
         }).to.throw(/config must contain id/);
       });
 
       it('should throw an error if auth-token is not present', () => {
         expect(() => {
-          let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123'});
+          let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123'});
         }).to.throw(/config must contain auth-token/);
       });
 
       it('should throw an error if auth-key is not present', () => {
         expect(() => {
-          let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123'});
+          let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123'});
         }).to.throw(/config must contain auth-key/);
       });
 
       it('should run in registered mode if org is not set to "quickstart"', () => {
-        let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+        let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
         expect(client.isQuickstart).to.equal(false);
       });
     });
@@ -101,7 +101,7 @@ describe('ApplicationClient', () => {
         on: function(){}
       });
 
-      let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
       client.connect();
     });
 
@@ -111,7 +111,7 @@ describe('ApplicationClient', () => {
         on: on
       });
 
-      let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
       client.connect();
 
       expect(on.calledWith('offline')).to.be.true;
@@ -123,7 +123,7 @@ describe('ApplicationClient', () => {
         on: on
       });
 
-      let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
       client.connect();
 
       expect(on.calledWith('close')).to.be.true;
@@ -135,7 +135,7 @@ describe('ApplicationClient', () => {
         on: on
       });
 
-      let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
       client.connect();
 
       expect(on.calledWith('error')).to.be.true;
@@ -147,7 +147,7 @@ describe('ApplicationClient', () => {
         on: on
       });
 
-      let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
       client.connect();
 
       expect(on.calledWith('connect')).to.be.true;
@@ -159,7 +159,7 @@ describe('ApplicationClient', () => {
         on: on
       });
 
-      let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
       client.connect();
 
       expect(on.calledWith('message')).to.be.true;
@@ -170,7 +170,7 @@ describe('ApplicationClient', () => {
       let fakeMqtt = new events.EventEmitter();
       let mqttConnect = sinon.stub(mqtt, 'connect').returns(fakeMqtt);
 
-      let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
       client.connect();
 
       client.on('deviceEvent', callback);
@@ -180,18 +180,17 @@ describe('ApplicationClient', () => {
 
       fakeMqtt.emit('message', topic, payload);
 
-      let expectation = {
-        type: '123',
-        id: '123',
-        event: 'myevt',
-        format: 'json',
+      let expectation = [
+        '123',
+        '123',
+        'myevt',
+        'json',
         payload,
         topic
-      };
+      ];
 
       let args = callback.getCall(0).args;
-
-      expect(args[0]).to.deep.equal(expectation);
+      expect(args).to.deep.equal(expectation);
     });
 
     it('should setup a "deviceCommand" event for messages arriving on the device-command topic', () => {
@@ -199,7 +198,7 @@ describe('ApplicationClient', () => {
       let fakeMqtt = new events.EventEmitter();
       let mqttConnect = sinon.stub(mqtt, 'connect').returns(fakeMqtt);
 
-      let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
       client.connect();
 
       client.on('deviceCommand', callback);
@@ -209,18 +208,18 @@ describe('ApplicationClient', () => {
 
       fakeMqtt.emit('message', topic, payload);
 
-      let expectation = {
-        type: '123',
-        id: '123',
-        command: 'mycmd',
-        format: 'json',
+      let expectation = [
+        '123',
+        '123',
+        'mycmd',
+        'json',
         payload,
         topic
-      };
+      ];
 
       let args = callback.getCall(0).args;
 
-      expect(args[0]).to.deep.equal(expectation);
+      expect(args).to.deep.equal(expectation);
     });
 
     it('should setup a "deviceStatus" event for messages arriving on the device-monitoring topic', () => {
@@ -228,7 +227,7 @@ describe('ApplicationClient', () => {
       let fakeMqtt = new events.EventEmitter();
       let mqttConnect = sinon.stub(mqtt, 'connect').returns(fakeMqtt);
 
-      let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
       client.connect();
 
       client.on('deviceStatus', callback);
@@ -238,16 +237,16 @@ describe('ApplicationClient', () => {
 
       fakeMqtt.emit('message', topic, payload);
 
-      let expectation = {
-        type: '123',
-        id: '123',
+      let expectation = [
+        '123',
+        '123',
         payload,
         topic
-      };
+      ];
 
       let args = callback.getCall(0).args;
 
-      expect(args[0]).to.deep.equal(expectation);
+      expect(args).to.deep.equal(expectation);
     });
 
     it('should setup an "appStatus" event for messages arriving on the app-monitoring topic', () => {
@@ -255,7 +254,7 @@ describe('ApplicationClient', () => {
       let fakeMqtt = new events.EventEmitter();
       let mqttConnect = sinon.stub(mqtt, 'connect').returns(fakeMqtt);
 
-      let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
       client.connect();
 
       client.on('appStatus', callback);
@@ -265,15 +264,15 @@ describe('ApplicationClient', () => {
 
       fakeMqtt.emit('message', topic, payload);
 
-      let expectation = {
-        app: '123',
+      let expectation = [
+        '123',
         payload,
         topic
-      };
+      ];
 
       let args = callback.getCall(0).args;
 
-      expect(args[0]).to.deep.equal(expectation);
+      expect(args).to.deep.equal(expectation);
     });
   });
 
@@ -285,8 +284,8 @@ describe('ApplicationClient', () => {
     });
 
     it('should throw an error when trying to subscribe without being connected', () => {
-      let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
-
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.log.disableAll();
       expect(() => {
         client.subscribe('mytopic');
       }).to.throw(/Client is not connected/);
@@ -298,7 +297,7 @@ describe('ApplicationClient', () => {
       fakeMqtt.subscribe = subscribe;
       let mqttConnect = sinon.stub(mqtt, 'connect').returns(fakeMqtt);
 
-      let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
       let topic = 'mytopic';
       client.connect();
       fakeMqtt.emit('connect');
@@ -319,8 +318,8 @@ describe('ApplicationClient', () => {
     });
 
     it('should throw an error when trying to subscribe without being connected', () => {
-      let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
-
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.log.disableAll();
       expect(() => {
         client.publish('mytopic', 'mymessage');
       }).to.throw(/Client is not connected/);
@@ -332,7 +331,7 @@ describe('ApplicationClient', () => {
       fakeMqtt.publish = publish;
       let mqttConnect = sinon.stub(mqtt, 'connect').returns(fakeMqtt);
 
-      let client = new IBMIoTF.ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
       let topic = 'mytopic';
       let message = 'mymessage';
       client.connect();

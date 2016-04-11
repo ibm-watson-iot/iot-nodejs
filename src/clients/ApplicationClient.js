@@ -151,7 +151,9 @@ export default class ApplicationClient extends BaseClient {
   subscribe(topic){
     if (!this.isConnected) {
       this.log.error("Client is not connected");
-      throw new Error("Client is not connected");
+      //throw new Error("Client is not connected");
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
 
     this.log.trace("Subscribe: "+topic);
@@ -168,7 +170,9 @@ export default class ApplicationClient extends BaseClient {
   unsubscribe(topic){
     if (!this.isConnected) {
       this.log.error("Client is not connected");
-      throw new Error("Client is not connected");
+      // throw new Error("Client is not connected");
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
 
     this.log.debug("Unsubscribe: "+topic);
@@ -185,7 +189,9 @@ export default class ApplicationClient extends BaseClient {
   publish(topic, msg){
     if (!this.mqtt) {
       this.log.error("Client is not connected");
-      throw new Error("Client is not connected");
+      // throw new Error("Client is not connected");
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Client is not connected");
     }
 
     this.log.debug("Publish: "+topic+", "+msg);
