@@ -103,6 +103,15 @@
           _this.log.info("ApplicationClient Connected");
           _this.isConnected = true;
 
+          if (_this.retryCount === 0) {
+            _this.emit('connect');
+          } else {
+            _this.emit('reconnect');
+          }
+
+          //reset the counter to 0 incase of reconnection
+          _this.retryCount = 0;
+
           try {
             for (var i = 0, l = _this.subscriptions.length; i < l; i++) {
               _this.mqtt.subscribe(_this.subscriptions[i], { qos: 0 });
@@ -110,12 +119,6 @@
           } catch (err) {
             _this.log.error("Error while trying to subscribe : " + err);
           }
-
-          //reset the counter to 0 incase of reconnection
-          _this.retryCount = 0;
-
-          //emit a 'connect' event
-          _this.emit('connect');
         });
 
         this.mqtt.on('message', function (topic, payload) {

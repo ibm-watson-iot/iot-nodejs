@@ -70,9 +70,15 @@ export default class GatewayClient extends BaseClient {
     this.mqtt.on('connect', () => {
       this.isConnected = true;
       this.log.info("GatewayClient Connected");
+
       if(this.retryCount === 0){
         this.emit('connect');
+      } else {
+        this.emit('reconnect');
       }
+
+      //reset the counter to 0 incase of reconnection
+      this.retryCount = 0;
 
       try {
         for(var i = 0, l = this.subscriptions.length; i < l; i++) {

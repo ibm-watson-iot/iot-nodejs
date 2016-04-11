@@ -69,7 +69,12 @@ export default class DeviceClient extends BaseClient {
       this.log.info("DeviceClient Connected");
       if(this.retryCount === 0){
         this.emit('connect');
+      } else {
+        this.emit('reconnect');
       }
+
+      //reset the counter to 0 incase of reconnection
+      this.retryCount = 0;
 
       if(!this.isQuickstart){
         mqtt.subscribe(WILDCARD_TOPIC, { qos: 2 }, function(){});

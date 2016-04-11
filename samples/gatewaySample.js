@@ -20,6 +20,11 @@ gatewayClient.on('connect', function(){
     gatewayClient.subscribeToGatewayCommand('blink1');
 });
 
+gatewayClient.on('reconnect', function(){ 
+
+    console.log("Reconnected!!!");
+});
+
 gatewayClient.on('command', function(type, id, commandName, commandFormat, payload, topic){
     console.log("Command received");
     console.log("Type: %s  ID: %s  \nCommand Name : %s Format: %s",type, id, commandName, commandFormat);

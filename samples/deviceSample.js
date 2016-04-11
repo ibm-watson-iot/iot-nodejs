@@ -17,6 +17,11 @@ deviceClient.on('connect', function(){
     },2000);
 });
 
+deviceClient.on('reconnect', function(){ 
+
+	console.log("Reconnected!!!");
+});
+
 deviceClient.on('disconnect', function(){
   console.log('Disconnected from IoTF');
 });

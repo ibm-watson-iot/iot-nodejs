@@ -96,6 +96,10 @@ After the successful connection to the IoTF service, the device client
 emits *connect* event. So all the device logic can be implemented inside
 this callback function.
 
+The Device Client automatically tries to reconnect when it loses connection. 
+When the reconnection is successful, the client emits *reconnect* event. 
+
+
 Logging
 --------
 
@@ -298,6 +302,9 @@ appClient.on("connect", function () {
 After the successful connection to the IoTF service, the application
 client emits *connect* event. So all the logic can be implemented inside
 this callback function.
+
+The Application Client automatically tries to reconnect when it loses connection. 
+When the reconnection is successful, the client emits *reconnect* event. 
 
 Logging
 --------
@@ -702,6 +709,9 @@ gatewayClient.on('connect', function(){
 
 After the successful connection to the platform, the gateway client
 emits *connect* event. So all the programming logic can be implemented inside this callback function.
+
+The Gateway Client automatically tries to reconnect when it loses connection. 
+When the reconnection is successful, the client emits *reconnect* event. 
 
 Logging
 --------

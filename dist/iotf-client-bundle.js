@@ -18998,6 +18998,15 @@ var ApplicationClient = (function (_BaseClient) {
         _this.log.info("ApplicationClient Connected");
         _this.isConnected = true;
 
+        if (_this.retryCount === 0) {
+          _this.emit('connect');
+        } else {
+          _this.emit('reconnect');
+        }
+
+        //reset the counter to 0 incase of reconnection
+        _this.retryCount = 0;
+
         try {
           for (var i = 0, l = _this.subscriptions.length; i < l; i++) {
             _this.mqtt.subscribe(_this.subscriptions[i], { qos: 0 });
@@ -19005,12 +19014,6 @@ var ApplicationClient = (function (_BaseClient) {
         } catch (err) {
           _this.log.error("Error while trying to subscribe : " + err);
         }
-
-        //reset the counter to 0 incase of reconnection
-        _this.retryCount = 0;
-
-        //emit a 'connect' event
-        _this.emit('connect');
       });
 
       this.mqtt.on('message', function (topic, payload) {
@@ -19888,7 +19891,12 @@ var DeviceClient = (function (_BaseClient) {
         _this.log.info("DeviceClient Connected");
         if (_this.retryCount === 0) {
           _this.emit('connect');
+        } else {
+          _this.emit('reconnect');
         }
+
+        //reset the counter to 0 incase of reconnection
+        _this.retryCount = 0;
 
         if (!_this.isQuickstart) {
           mqtt.subscribe(WILDCARD_TOPIC, { qos: 2 }, function () {});
@@ -20074,9 +20082,15 @@ var GatewayClient = (function (_BaseClient) {
       this.mqtt.on('connect', function () {
         _this.isConnected = true;
         _this.log.info("GatewayClient Connected");
+
         if (_this.retryCount === 0) {
           _this.emit('connect');
+        } else {
+          _this.emit('reconnect');
         }
+
+        //reset the counter to 0 incase of reconnection
+        _this.retryCount = 0;
 
         try {
           for (var i = 0, l = _this.subscriptions.length; i < l; i++) {

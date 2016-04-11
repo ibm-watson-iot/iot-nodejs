@@ -101,7 +101,12 @@
           _this.log.info("DeviceClient Connected");
           if (_this.retryCount === 0) {
             _this.emit('connect');
+          } else {
+            _this.emit('reconnect');
           }
+
+          //reset the counter to 0 incase of reconnection
+          _this.retryCount = 0;
 
           if (!_this.isQuickstart) {
             mqtt.subscribe(WILDCARD_TOPIC, { qos: 2 }, function () {});

@@ -102,9 +102,15 @@
         this.mqtt.on('connect', function () {
           _this.isConnected = true;
           _this.log.info("GatewayClient Connected");
+
           if (_this.retryCount === 0) {
             _this.emit('connect');
+          } else {
+            _this.emit('reconnect');
           }
+
+          //reset the counter to 0 incase of reconnection
+          _this.retryCount = 0;
 
           try {
             for (var i = 0, l = _this.subscriptions.length; i < l; i++) {

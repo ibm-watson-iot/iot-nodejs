@@ -68,6 +68,15 @@ export default class ApplicationClient extends BaseClient {
       this.log.info("ApplicationClient Connected");
       this.isConnected = true;
 
+      if(this.retryCount === 0){
+        this.emit('connect');
+      } else {
+        this.emit('reconnect');
+      }
+
+      //reset the counter to 0 incase of reconnection
+      this.retryCount = 0;
+      
       try	{
         for(var i = 0, l = this.subscriptions.length; i < l; i++) {
           this.mqtt.subscribe(this.subscriptions[i], {qos: 0});
@@ -77,13 +86,6 @@ export default class ApplicationClient extends BaseClient {
       catch (err){
         this.log.error("Error while trying to subscribe : "+err);
       }
-
-      //reset the counter to 0 incase of reconnection
-      this.retryCount = 0;
-
-      //emit a 'connect' event
-      this.emit('connect');
-
     });
 
     this.mqtt.on('message', (topic, payload) => {
