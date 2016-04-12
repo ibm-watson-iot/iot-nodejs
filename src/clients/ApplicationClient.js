@@ -587,7 +587,7 @@ export default class ApplicationClient extends BaseClient {
     let params = {
       start : start,
       end : end,
-      evtType : evtType
+      evt_type : evtType
     };
     return this.callApi('GET', 200, true, [ 'historian'], null, params);
   }
@@ -597,7 +597,7 @@ export default class ApplicationClient extends BaseClient {
     let params = {
       start : start,
       end : end,
-      evtType : evtType
+      evt_type : evtType
     };
     return this.callApi('GET', 200, true, [ 'historian', 'types', typeId], null, params);
   }
@@ -607,7 +607,7 @@ export default class ApplicationClient extends BaseClient {
     let params = {
       start : start,
       end : end,
-      evtType : evtType
+      evt_type : evtType
     };
     return this.callApi('GET', 200, true, [ 'historian', 'types', typeId, 'devices', deviceId], null, params);
   }
