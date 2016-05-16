@@ -95,6 +95,7 @@ describe('IotfManagedDevice', () => {
 
       let client = new IBMIoTF.IotfManagedDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
+      client.log.setLevel('silent');
     });
 
     it('should set up a callback for the "offline" event', () => {
@@ -105,6 +106,7 @@ describe('IotfManagedDevice', () => {
 
       let client = new IBMIoTF.IotfManagedDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
+      client.log.setLevel('silent');
 
       expect(on.calledWith('offline')).to.be.true;
     });
@@ -117,6 +119,7 @@ describe('IotfManagedDevice', () => {
 
       let client = new IBMIoTF.IotfManagedDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
+      client.log.setLevel('silent');
 
       expect(on.calledWith('close')).to.be.true;
     });
@@ -129,6 +132,7 @@ describe('IotfManagedDevice', () => {
 
       let client = new IBMIoTF.IotfManagedDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
+      client.log.setLevel('silent');
 
       expect(on.calledWith('error')).to.be.true;
     });
@@ -141,6 +145,7 @@ describe('IotfManagedDevice', () => {
 
       let client = new IBMIoTF.IotfManagedDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
+      client.log.setLevel('silent');
 
       expect(on.calledWith('connect')).to.be.true;
     });
@@ -153,6 +158,7 @@ describe('IotfManagedDevice', () => {
 
       let client = new IBMIoTF.IotfManagedDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
+      client.log.setLevel('silent');
 
       expect(on.calledWith('message')).to.be.true;
     });
@@ -197,6 +203,35 @@ describe('IotfManagedDevice', () => {
         client.manage(3600, false, "false");
       }).to.throw(/supportFirmwareActions must be a boolean/);
     });
+
+  it('should successfully finish manage request', () => {
+
+      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let pubSpy = sinon.spy(client.mqtt,'publish');
+
+      // /sinon.stub(client.mqtt,'publish').returns({});
+
+      let reqId = client.manage(3600, true, true);
+
+      let payload = {
+        d : {
+          lifetime: 3600,
+          supports : {
+            deviceActions : true,
+            firmwareActions : true
+          }
+        },
+        reqId : reqId
+      };
+
+      expect(pubSpy.calledWith('iotdevice-1/mgmt/manage',JSON.stringify(payload),1)).to.be.true;
+    });
   });
 
   describe('.unmanage()', () => {
@@ -205,6 +240,28 @@ describe('IotfManagedDevice', () => {
         let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.unmanage();
       }).to.throw(/Client is not connected/);
+    });
+
+  it('should successfully finish unmanage request', () => {
+
+      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let pubSpy = sinon.spy(client.mqtt,'publish');
+
+      // /sinon.stub(client.mqtt,'publish').returns({});
+
+      let reqId = client.unmanage(3600, true, true);
+
+      let payload = {
+        reqId : reqId
+      };
+
+      expect(pubSpy.calledWith('iotdevice-1/mgmt/unmanage',JSON.stringify(payload),1)).to.be.true;
     });
   });
 
@@ -240,7 +297,7 @@ describe('IotfManagedDevice', () => {
       }).to.throw(/longitude cannot be less than -180 or greater than 180/);
     });
 
-  it('should throw an error if longitude is greater than 180', () => {
+    it('should throw an error if longitude is greater than 180', () => {
       expect(() => {
         let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
@@ -280,6 +337,36 @@ describe('IotfManagedDevice', () => {
         client.updateLocation(20, 40, 5, "1");
       }).to.throw(/accuracy must be a number/);
     });
+
+    it('should successfully complete', () => {
+      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let pubSpy = sinon.spy(client.mqtt,'publish');
+
+      // /sinon.stub(client.mqtt,'publish').returns({});
+
+      let latitude = 12, longitude = 77, elevation = 5, accuracy = 2;
+
+      let reqId = client.updateLocation(latitude, longitude, elevation, accuracy);
+
+      let payload = {
+        d: {
+          latitude : latitude,
+          longitude : longitude,
+          elevation : elevation,
+          accuracy : accuracy,
+          measuredDateTime : new Date().toISOString()
+        },
+        reqId : reqId
+      };
+      
+      expect(pubSpy.called).to.be.true;
+    });
   });
 
   describe('.addErrorCode()', () => {
@@ -305,6 +392,32 @@ describe('IotfManagedDevice', () => {
         client.addErrorCode("20");
       }).to.throw(/error code must be a number/);
     });
+
+    it('should successfully complete', () => {
+      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let pubSpy = sinon.spy(client.mqtt,'publish');
+
+      // /sinon.stub(client.mqtt,'publish').returns({});
+
+      let errorCode = 1;
+
+      let reqId = client.addErrorCode(errorCode);
+
+      let payload = {
+        d: {
+          errorCode : errorCode
+        },
+        reqId : reqId
+      };
+      
+      expect(pubSpy.calledWith('iotdevice-1/add/diag/errorCodes',JSON.stringify(payload),1)).to.be.true;
+    });
   });
 
   describe('.clearErrorCodes()', () => {
@@ -313,6 +426,29 @@ describe('IotfManagedDevice', () => {
         let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.clearErrorCodes();
       }).to.throw(/Client is not connected/);
+    });
+
+    it('should successfully complete', () => {
+      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let pubSpy = sinon.spy(client.mqtt,'publish');
+
+      // /sinon.stub(client.mqtt,'publish').returns({});
+
+      let errorCode = 1;
+
+      let reqId = client.clearErrorCodes(errorCode);
+
+      let payload = {
+        reqId : reqId
+      };
+      
+      expect(pubSpy.calledWith('iotdevice-1/clear/diag/errorCodes',JSON.stringify(payload),1)).to.be.true;
     });
   });
 
@@ -363,6 +499,25 @@ describe('IotfManagedDevice', () => {
         client.addLog("blah", 0, 0);
       }).to.throw(/data must be a string/);
     });
+
+    it('should successfully complete', () => {
+      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let pubSpy = sinon.spy(client.mqtt,'publish');
+
+      // /sinon.stub(client.mqtt,'publish').returns({});
+
+      let errorCode = 1;
+
+      let reqId = client.addLog("errorCode", 1, "addLog");
+
+      expect(pubSpy.called).to.be.true;
+    });
   });
 
   describe('.clearLogs()', () => {
@@ -372,5 +527,278 @@ describe('IotfManagedDevice', () => {
         client.clearLogs();
       }).to.throw(/Client is not connected/);
     });
+
+    it('should successfully complete', () => {
+      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let pubSpy = sinon.spy(client.mqtt,'publish');
+
+      // /sinon.stub(client.mqtt,'publish').returns({});
+
+      let errorCode = 1;
+
+      let reqId = client.clearLogs();
+
+      let payload = {
+        reqId : reqId
+      };
+
+      expect(pubSpy.calledWith('iotdevice-1/clear/diag/log',JSON.stringify(payload),1)).to.be.true;
+    });
+  });
+
+  describe('.respondDeviceAction()', () => {
+    it('should throw an error if client is not connected', () => {
+      expect(() => {
+        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let request = {};
+        request.reqId = "43";
+        client.respondDeviceAction(request);
+      }).to.throw(/Client is not connected/);
+    });
+
+    it('should throw an error if request and rc not provided', () => {
+      expect(() => {
+        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        client.isConnected = true;
+        client.respondDeviceAction();
+      }).to.throw(/Request and rc/);
+    });
+
+    it('should throw an error if reqId not provided', () => {
+      expect(() => {
+        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        client.isConnected = true;
+        let request = {};
+        client.respondDeviceAction(request,1);
+      }).to.throw(/reqId is required/);
+    });
+
+    it('should throw an error if request id is not a string', () => {
+      expect(() => {
+        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        client.isConnected = true;
+        let request = {};
+        request.reqId = 43;
+        client.respondDeviceAction(request,1);
+      }).to.throw(/reqId must be a string/);
+    });
+
+    it('should throw an error if rc is not a number', () => {
+      expect(() => {
+        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        client.isConnected = true;
+        let request = {};
+        request.reqId = "43";
+        client.respondDeviceAction(request,"4");
+      }).to.throw(/Return code must be a Number/);
+    });
+
+    it('should throw an error if reqId is invalid', () => {
+      expect(() => {
+        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        client.isConnected = true;
+        let request = {};
+        request.reqId = "43";
+        client.respondDeviceAction(request,4);
+      }).to.throw(/unknown request/);
+    });
+
+    it('should successfully complete', () => {
+      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let reqId = "43", rc = 1, msg = "message";
+      client._dmRequests = [];
+      client._dmRequests[reqId] = {
+        reqId : reqId
+      }
+
+      let pubSpy = sinon.spy(client.mqtt,'publish');
+
+      let request = {};
+      request.reqId = reqId;
+
+      client.respondDeviceAction(request, rc, msg);
+
+      let payload = {
+        rc : rc,
+        reqId : reqId,
+        message : msg 
+      };
+
+      expect(pubSpy.calledWith('iotdevice-1/response',JSON.stringify(payload),1)).to.be.true;
+    });
+  });
+
+  describe('.isRebootAction(), isFactoryResetAction()', () => {
+    it('should return false if reboot action is not present in request', () => {
+
+        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+
+        let request = {
+          action : "reboot1"
+        };
+        expect(client.isRebootAction(request)).to.be.false;
+    });
+    it('should return true if reboot action is present in request', () => {
+
+        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+
+        let request = {
+          action : "reboot"
+        };
+        expect(client.isRebootAction(request)).to.be.true;
+    });
+
+    it('should return false if factory_reset action is not present in request', () => {
+
+        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+
+        let request = {
+          action : "somethingelse"
+        };
+        expect(client.isFactoryResetAction(request)).to.be.false;
+    });
+    it('should return true if factory_reset action is present in request', () => {
+
+        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+
+        let request = {
+          action : "factory_reset"
+        };
+        expect(client.isFactoryResetAction(request)).to.be.true;
+    });
+  });
+
+  describe('.changeState() and notify', () => {
+    it('should change state only if its on observe state', () => {
+      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+
+      client.connect();
+      client.log.setLevel('silent');
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+      client.observe = true;
+
+      let pubSpy = sinon.spy(client.mqtt,'publish');
+
+      let field = 'state', newValue = client.FIRMWARESTATE.IDLE;
+      client.changeState(newValue);
+
+      let payload = {};
+      payload.d = {};
+      payload.d.fields = [];
+
+      let data = {};
+      data[field] = newValue;
+      let fieldData = {
+        field : 'mgmt.firmware',
+        value : data
+      }
+      payload.d.fields.push(fieldData);
+
+      expect(pubSpy.calledWith('iotdevice-1/notify', JSON.stringify(payload), 1)).to.be.true;
+    });
+
+    it('should not change state only if its not on observe state', () => {
+      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+      //observe is false
+      client.observe = false;
+
+      let pubSpy = sinon.spy(client.mqtt,'publish');
+
+      let field = 'state', newValue = client.FIRMWARESTATE.IDLE;
+      client.changeState(newValue);
+
+      let payload = {};
+      payload.d = {};
+      payload.d.fields = [];
+
+      let data = {};
+      data[field] = newValue;
+      let fieldData = {
+        field : 'mgmt.firmware',
+        value : data
+      }
+      payload.d.fields.push(fieldData);
+
+      expect(pubSpy.calledWith('iotdevice-1/notify', JSON.stringify(payload), 1)).to.be.false;
+    });
+
+    it('should change updatestate only if its on observe state', () => {
+      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+      client.observe = true;
+
+      let pubSpy = sinon.spy(client.mqtt,'publish');
+
+      let field = 'updateStatus', newValue = client.FIRMWAREUPDATESTATE.SUCCESS;
+      client.changeUpdateState(newValue);
+
+      let payload = {};
+      payload.d = {};
+      payload.d.fields = [];
+
+      let data = {};
+      data[field] = newValue;
+      let fieldData = {
+        field : 'mgmt.firmware',
+        value : data
+      }
+      payload.d.fields.push(fieldData);
+
+      expect(pubSpy.calledWith('iotdevice-1/notify', JSON.stringify(payload), 1)).to.be.true;
+    });
+
+    it('should not change updatestate only if its not on observe state', () => {
+      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+      //observe is false
+      client.observe = false;
+
+      let pubSpy = sinon.spy(client.mqtt,'publish');
+
+      let field = 'updateStatus', newValue = client.FIRMWAREUPDATESTATE.SUCCESS;
+      client.changeUpdateState(newValue);
+
+      let payload = {};
+      payload.d = {};
+      payload.d.fields = [];
+
+      let data = {};
+      data[field] = newValue;
+      let fieldData = {
+        field : 'mgmt.firmware',
+        value : data
+      }
+      payload.d.fields.push(fieldData);
+
+      expect(pubSpy.calledWith('iotdevice-1/notify', JSON.stringify(payload), 1)).to.be.false;
+    });
+
   });
 });

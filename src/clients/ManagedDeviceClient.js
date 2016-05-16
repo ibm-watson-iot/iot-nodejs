@@ -394,7 +394,6 @@ export default class ManagedDeviceClient extends DeviceClient {
   }
 
   respondDeviceAction(request, rc, message){
-    var reqId = request.reqId;
     if(!this.isConnected){
       this.log.error("Client is not connected");
       //throw new Error();
@@ -402,8 +401,13 @@ export default class ManagedDeviceClient extends DeviceClient {
       this.emit('error', "Client is not connected");
     }
 
-    if(!isDefined(reqId) || !isDefined(rc)){
-      throw new Error("reqId and accept are required");
+    if(!isDefined(request) || !isDefined(rc)){
+      throw new Error("Request and rc(return code) are required");
+    }
+    var reqId = request.reqId;
+
+    if(!isDefined(reqId)){
+      throw new Error("reqId is required");
     }
 
     if(!isString(reqId)){
@@ -416,7 +420,7 @@ export default class ManagedDeviceClient extends DeviceClient {
 
     var request = this._dmRequests[reqId];
     if(!isDefined(request)){
-      throw new Error("unknown request : %s", reqId);
+      throw new Error("unknown request : "+ reqId);
     }
 
     var payload = new Object();

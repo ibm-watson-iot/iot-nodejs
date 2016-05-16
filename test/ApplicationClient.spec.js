@@ -291,6 +291,14 @@ describe('IotfApplication', () => {
       }).to.throw(/Client is not connected/);
     });
 
+    it('should throw an error when trying to unsubscribe without being connected', () => {
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.log.disableAll();
+      expect(() => {
+        client.unsubscribe('mytopic');
+      }).to.throw(/Client is not connected/);
+    });
+
     it('should subscribe to the specified topic', () => {
       let subscribe = sinon.spy();
       let fakeMqtt = new events.EventEmitter();
@@ -341,6 +349,356 @@ describe('IotfApplication', () => {
       let args = publish.getCall(0).args;
       expect(args[0]).to.equal(topic);
       expect(args[1]).to.equal(message);
+    });
+  });
+
+  describe('.subscribe to Events, commands, status', () => {
+
+    it('should successfully subscribe to device event', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'subscribe');
+
+      let QOS = 0;
+
+      client.subscribeToDeviceEvents('type','id','test','json');
+
+      subSpy.restore();
+      expect(client.subscriptions[0]).to.equal('iot-2/type/type/id/id/evt/test/fmt/json')
+      expect(subSpy.calledWith('iot-2/type/type/id/id/evt/test/fmt/json',{qos: QOS})).to.be.true;
+    });
+
+    it('should successfully subscribe to device event with wild card', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'subscribe');
+
+      let QOS = 0;
+
+      client.subscribeToDeviceEvents();
+
+      subSpy.restore();
+      expect(client.subscriptions[0]).to.equal('iot-2/type/+/id/+/evt/+/fmt/+')
+      expect(subSpy.calledWith('iot-2/type/+/id/+/evt/+/fmt/+',{qos: QOS})).to.be.true;
+    });
+
+    it('should successfully subscribe to device commands', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'subscribe');
+
+      let QOS = 0;
+
+      client.subscribeToDeviceCommands('type','id','test','json');
+
+      subSpy.restore();
+      expect(client.subscriptions[0]).to.equal('iot-2/type/type/id/id/cmd/test/fmt/json')
+      expect(subSpy.calledWith('iot-2/type/type/id/id/cmd/test/fmt/json',{qos: QOS})).to.be.true;
+    });
+
+    it('should successfully subscribe to device commands with wild card', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'subscribe');
+
+      let QOS = 0;
+
+      client.subscribeToDeviceCommands();
+
+      subSpy.restore();
+      expect(client.subscriptions[0]).to.equal('iot-2/type/+/id/+/cmd/+/fmt/+')
+      expect(subSpy.calledWith('iot-2/type/+/id/+/cmd/+/fmt/+',{qos: QOS})).to.be.true;
+    });
+
+    it('should successfully unsubscribe to device event', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'unsubscribe');
+
+      let QOS = 0;
+
+      client.unsubscribeToDeviceEvents('type','id','test','json');
+
+      subSpy.restore();
+      expect(subSpy.calledWith('iot-2/type/type/id/id/evt/test/fmt/json')).to.be.true;
+    });
+
+    it('should successfully unsubscribe to device event with wild card', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'unsubscribe');
+
+      client.unsubscribeToDeviceEvents();
+
+      subSpy.restore();
+      expect(subSpy.calledWith('iot-2/type/+/id/+/evt/+/fmt/+')).to.be.true;
+    });
+
+    it('should successfully unsubscribe to device commands', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'unsubscribe');
+
+      client.unsubscribeToDeviceCommands('type','id','test','json');
+
+      subSpy.restore();
+      expect(subSpy.calledWith('iot-2/type/type/id/id/cmd/test/fmt/json')).to.be.true;
+    });
+
+    it('should successfully unsubscribe to device commands with wild card', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'unsubscribe');
+
+      client.unsubscribeToDeviceCommands();
+
+      subSpy.restore();
+      expect(subSpy.calledWith('iot-2/type/+/id/+/cmd/+/fmt/+')).to.be.true;
+    });
+
+    it('should successfully subscribe to device status', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'subscribe');
+
+      let QOS = 0;
+
+      client.subscribeToDeviceStatus('type','id');
+
+      subSpy.restore();
+      expect(client.subscriptions[0]).to.equal('iot-2/type/type/id/id/mon')
+      expect(subSpy.calledWith('iot-2/type/type/id/id/mon',{qos: QOS})).to.be.true;
+    });
+
+    it('should successfully subscribe to device status with wild card', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'subscribe');
+
+      let QOS = 0;
+
+      client.subscribeToDeviceStatus();
+
+      subSpy.restore();
+      expect(client.subscriptions[0]).to.equal('iot-2/type/+/id/+/mon')
+      expect(subSpy.calledWith('iot-2/type/+/id/+/mon',{qos: QOS})).to.be.true;
+    });
+
+    it('should successfully subscribe to application status', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'subscribe');
+
+      let QOS = 0;
+
+      client.subscribeToAppStatus('appId');
+
+      subSpy.restore();
+      expect(client.subscriptions[0]).to.equal('iot-2/app/appId/mon')
+      expect(subSpy.calledWith('iot-2/app/appId/mon',{qos: QOS})).to.be.true;
+    });
+
+    it('should successfully subscribe to application status with wild card', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'subscribe');
+
+      let QOS = 0;
+
+      client.subscribeToAppStatus();
+
+      subSpy.restore();
+      expect(client.subscriptions[0]).to.equal('iot-2/app/+/mon')
+      expect(subSpy.calledWith('iot-2/app/+/mon',{qos: QOS})).to.be.true;
+    });
+
+    it('should successfully unsubscribe to device status', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'unsubscribe');
+
+      let QOS = 0;
+
+      client.unsubscribeToDeviceStatus('type','id');
+
+      subSpy.restore();
+      expect(subSpy.calledWith('iot-2/type/type/id/id/mon')).to.be.true;
+    });
+
+    it('should successfully unsubscribe to device status with wild card', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'unsubscribe');
+
+      let QOS = 0;
+
+      client.unsubscribeToDeviceStatus();
+
+      subSpy.restore();
+      expect(subSpy.calledWith('iot-2/type/+/id/+/mon')).to.be.true;
+    });
+
+    it('should successfully unsubscribe to application status', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'unsubscribe');
+
+      let QOS = 0;
+
+      client.unsubscribeToAppStatus('appId');
+
+      subSpy.restore();
+      expect(subSpy.calledWith('iot-2/app/appId/mon')).to.be.true;
+    });
+
+    it('should successfully unsubscribe to application status with wild card', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'unsubscribe');
+
+      let QOS = 0;
+
+      client.unsubscribeToAppStatus();
+
+      subSpy.restore();
+      expect(subSpy.calledWith('iot-2/app/+/mon')).to.be.true;
+    });
+
+    //publish
+    it('should successfully publish device event', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let pubSpy = sinon.spy(client.mqtt,'publish');
+
+      let QOS = 0;
+
+      client.publishDeviceEvent('type','id','stat','json','message');
+
+      pubSpy.restore();
+      expect(pubSpy.calledWith('iot-2/type/type/id/id/evt/stat/fmt/json','message')).to.be.true;
+    });
+
+    it('should throw an error when no params passed to publishDeviceEvent', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.log.disableAll();
+      expect(() => {
+        client.publishDeviceEvent();
+      }).to.throw(/Required params for publishDeviceEvent not present/);
+
+    });
+
+    it('should successfully publish device command', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let pubSpy = sinon.spy(client.mqtt,'publish');
+
+      let QOS = 0;
+
+      client.publishDeviceCommand('type','id','blink','json','message');
+
+      pubSpy.restore();
+      expect(pubSpy.calledWith('iot-2/type/type/id/id/cmd/blink/fmt/json','message')).to.be.true;
+    });
+
+    it('should throw an error when no params passed to publishDeviceCommand', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.log.disableAll();
+      expect(() => {
+        client.publishDeviceCommand();
+      }).to.throw(/Required params for publishDeviceCommand not present/);
+
     });
   });
 });

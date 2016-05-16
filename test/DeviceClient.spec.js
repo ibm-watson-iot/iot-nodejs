@@ -128,6 +128,8 @@ describe('IotfDevice', () => {
 
       let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
+      client.log.setLevel('silent');
+      client.log.setLevel('silent');
     });
 
     it('should set up a callback for the "offline" event', () => {
@@ -138,6 +140,8 @@ describe('IotfDevice', () => {
 
       let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
+      client.log.setLevel('silent');
+      client.log.setLevel('silent');
 
       expect(on.calledWith('offline')).to.be.true;
     });
@@ -150,6 +154,7 @@ describe('IotfDevice', () => {
 
       let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
+      client.log.setLevel('silent');
 
       expect(on.calledWith('close')).to.be.true;
     });
@@ -162,6 +167,7 @@ describe('IotfDevice', () => {
 
       let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
+      client.log.setLevel('silent');
 
       expect(on.calledWith('error')).to.be.true;
     });
@@ -174,6 +180,7 @@ describe('IotfDevice', () => {
 
       let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
+      client.log.setLevel('silent');
 
       expect(on.calledWith('connect')).to.be.true;
     });
@@ -186,8 +193,65 @@ describe('IotfDevice', () => {
 
       let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
+      client.log.setLevel('silent');
 
       expect(on.calledWith('message')).to.be.true;
+    });
+
+  });
+
+  describe('.publish()', () => {
+
+    it('should publish event', () => {
+
+      let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let pubSpy = sinon.spy(client.mqtt,'publish');
+
+      let QOS = 2;
+      client.publish('stat','json','test',QOS);
+
+      expect(pubSpy.calledWith('iot-2/evt/stat/fmt/json','test',{qos: QOS})).to.be.true;
+    });
+
+    it('should throw exception when client is not connected', () => {
+      expect(() => {
+          let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+          client.publish('stat','json','test');
+
+      }).to.throw(/Client is not connected/);
+
+    });
+
+    it('should publish event with default QOS 0 if qos is not provided', () => {
+
+      let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let pubSpy = sinon.spy(client.mqtt,'publish');
+
+      client.publish('stat','json','test');
+
+      let expectedQOS = 0;
+      expect(pubSpy.calledWith('iot-2/evt/stat/fmt/json','test',{qos: expectedQOS})).to.be.true;
+    });
+
+    it('should publish event with default QOS 0 if qos is not provided', () => {
+
+      let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+
+      //let pubSpy = sinon.spy(client.mqtt,'publish');
+
+      client.publishHTTPS('stat','json','test');
+
+      expect(true).to.be.true;
     });
   });
 });

@@ -161,12 +161,9 @@ export default class ApplicationClient extends BaseClient {
     this.log.trace("Subscribe: "+topic);
     this.subscriptions.push(topic);
 
-    if(this.isConnected) {
-      this.mqtt.subscribe(topic, {qos: 0});
-      this.log.debug("Subscribed to: " +	topic);
-    } else {
-      this.log.error("Unable to subscribe as application is not currently connected");
-    }
+    this.mqtt.subscribe(topic, {qos: 0});
+    this.log.debug("Subscribed to: " +	topic);
+
   }
 
   unsubscribe(topic){
@@ -189,7 +186,7 @@ export default class ApplicationClient extends BaseClient {
   }
 
   publish(topic, msg){
-    if (!this.mqtt) {
+    if (!this.isConnected) {
       this.log.error("Client is not connected");
       // throw new Error("Client is not connected");
       //instead of throwing error, will emit 'error' event.
@@ -197,12 +194,8 @@ export default class ApplicationClient extends BaseClient {
     }
 
     this.log.debug("Publish: "+topic+", "+msg);
+    this.mqtt.publish(topic, msg);
 
-    if(this.isConnected) {
-      this.mqtt.publish(topic, msg);
-    } else {
-      this.log.warn("Unable to publish as application is not currently connected");
-    }
   }
 
   subscribeToDeviceEvents(type, id, event, format){
@@ -286,12 +279,26 @@ export default class ApplicationClient extends BaseClient {
   }
 
   publishDeviceEvent(type, id, event, format, data){
+
+    if(!isDefined(type) || !isDefined(id) || !isDefined(event) || !isDefined(format) ) {
+      this.log.error("Required params for publishDeviceEvent not present");
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Required params for publishDeviceEvent not present");
+      return;
+    }
     var topic = "iot-2/type/" + type + "/id/" + id + "/evt/" + event + "/fmt/" + format;
     this.publish(topic, data);
     return this;
   }
 
   publishDeviceCommand(type, id, command, format, data){
+
+    if(!isDefined(type) || !isDefined(id) || !isDefined(command) || !isDefined(format) ) {
+      this.log.error("Required params for publishDeviceCommand not present");
+      //instead of throwing error, will emit 'error' event.
+      this.emit('error', "Required params for publishDeviceCommand not present");
+      return;
+    }
     var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/" + command + "/fmt/" + format;
     this.publish(topic, data);
     return this;
