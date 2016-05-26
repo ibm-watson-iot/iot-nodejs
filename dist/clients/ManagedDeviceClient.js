@@ -433,7 +433,6 @@
     }, {
       key: 'respondDeviceAction',
       value: function respondDeviceAction(request, rc, message) {
-        var reqId = request.reqId;
         if (!this.isConnected) {
           this.log.error("Client is not connected");
           //throw new Error();
@@ -441,8 +440,13 @@
           this.emit('error', "Client is not connected");
         }
 
-        if (!(0, _utilUtilJs.isDefined)(reqId) || !(0, _utilUtilJs.isDefined)(rc)) {
-          throw new Error("reqId and accept are required");
+        if (!(0, _utilUtilJs.isDefined)(request) || !(0, _utilUtilJs.isDefined)(rc)) {
+          throw new Error("Request and rc(return code) are required");
+        }
+        var reqId = request.reqId;
+
+        if (!(0, _utilUtilJs.isDefined)(reqId)) {
+          throw new Error("reqId is required");
         }
 
         if (!(0, _utilUtilJs.isString)(reqId)) {
@@ -455,7 +459,7 @@
 
         var request = this._dmRequests[reqId];
         if (!(0, _utilUtilJs.isDefined)(request)) {
-          throw new Error("unknown request : %s", reqId);
+          throw new Error("unknown request : " + reqId);
         }
 
         var payload = new Object();

@@ -438,7 +438,10 @@
       key: 'clearLogsDevice',
       value: function clearLogsDevice(type, id) {
         if (!this.isConnected) {
-          throw new Error("client must be connected");
+          this.log.error("Client is not connected");
+          //throw new Error("Client is not connected");
+          //instead of throwing error, will emit 'error' event.
+          this.emit('error', "Client is not connected");
         }
 
         var payload = new Object();
@@ -460,7 +463,10 @@
       key: 'respondDeviceAction',
       value: function respondDeviceAction(reqId, accept) {
         if (!this.isConnected) {
-          throw new Error("client must be connected");
+          this.log.error("Client is not connected");
+          //throw new Error("Client is not connected");
+          //instead of throwing error, will emit 'error' event.
+          this.emit('error', "Client is not connected");
         }
 
         if (!(0, _utilUtilJs.isDefined)(reqId) || !(0, _utilUtilJs.isDefined)(accept)) {
