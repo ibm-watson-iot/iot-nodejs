@@ -651,4 +651,49 @@ export default class ApplicationClient extends BaseClient {
       xhr(xhrConfig).then(resolve, reject);
     });
   }
+
+  //event cache
+  getLastEvents(type, id){
+    this.log.debug("getLastEvents() - event cache");
+    return this.callApi('GET', 200, true, ["device", "types", type, "devices", id , "events"], null);
+  }
+
+  getLastEventsByEventType(type, id, eventType){
+    this.log.debug("getLastEventsByEventType() - event cache");
+    return this.callApi('GET', 200, true, ["device", "types", type, "devices", id , "events", eventType], null);
+  }
+
+  //bulk apis
+  getAllDevices(params){
+    this.log.debug("getAllDevices() - BULK");
+    return this.callApi('GET', 200, true, ["bulk", "devices"], null, params);
+  }
+
+  /**
+   * Register multiple new devices, each request can contain a maximum of 512KB.
+   * The response body will contain the generated authentication tokens for all devices.
+   * The caller of the method must make sure to record these tokens when processing
+   * the response. The IBM Watson IoT Platform will not be able to retrieve lost authentication tokens
+   *
+   * @param arryOfDevicesToBeAdded Array of JSON devices to be added. Refer to
+   * <a href="https://docs.internetofthings.ibmcloud.com/swagger/v0002.html#!/Bulk_Operations/post_bulk_devices_add">link</a>
+   * for more information about the schema to be used
+   */
+   registerMultipleDevices(arryOfDevicesToBeAdded) {
+    this.log.debug("arryOfDevicesToBeAdded() - BULK");
+    return this.callApi('POST', 201, true, ["bulk", "devices", "add"], JSON.stringify(arryOfDevicesToBeAdded));
+   }
+
+   /**
+   * Delete multiple devices, each request can contain a maximum of 512Kb
+   *
+   * @param arryOfDevicesToBeDeleted Array of JSON devices to be deleted. Refer to
+   * <a href="https://docs.internetofthings.ibmcloud.com/swagger/v0002.html#!/Bulk_Operations/post_bulk_devices_remove">link</a>
+   * for more information about the schema to be used.
+   */
+   deleteMultipleDevices(arryOfDevicesToBeDeleted) {
+
+    this.log.debug("deleteMultipleDevices() - BULK");
+    return this.callApi('POST', 201, true, ["bulk", "devices", "remove"], JSON.stringify(arryOfDevicesToBeDeleted));
+   }
 }

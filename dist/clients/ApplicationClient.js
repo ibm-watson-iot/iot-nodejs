@@ -171,12 +171,8 @@
         this.log.trace("Subscribe: " + topic);
         this.subscriptions.push(topic);
 
-        if (this.isConnected) {
-          this.mqtt.subscribe(topic, { qos: 0 });
-          this.log.debug("Subscribed to: " + topic);
-        } else {
-          this.log.error("Unable to subscribe as application is not currently connected");
-        }
+        this.mqtt.subscribe(topic, { qos: 0 });
+        this.log.debug("Subscribed to: " + topic);
       }
     }, {
       key: 'unsubscribe',
@@ -200,7 +196,7 @@
     }, {
       key: 'publish',
       value: function publish(topic, msg) {
-        if (!this.mqtt) {
+        if (!this.isConnected) {
           this.log.error("Client is not connected");
           // throw new Error("Client is not connected");
           //instead of throwing error, will emit 'error' event.
@@ -208,12 +204,7 @@
         }
 
         this.log.debug("Publish: " + topic + ", " + msg);
-
-        if (this.isConnected) {
-          this.mqtt.publish(topic, msg);
-        } else {
-          this.log.warn("Unable to publish as application is not currently connected");
-        }
+        this.mqtt.publish(topic, msg);
       }
     }, {
       key: 'subscribeToDeviceEvents',
@@ -306,6 +297,13 @@
     }, {
       key: 'publishDeviceEvent',
       value: function publishDeviceEvent(type, id, event, format, data) {
+
+        if (!(0, _utilUtilJs.isDefined)(type) || !(0, _utilUtilJs.isDefined)(id) || !(0, _utilUtilJs.isDefined)(event) || !(0, _utilUtilJs.isDefined)(format)) {
+          this.log.error("Required params for publishDeviceEvent not present");
+          //instead of throwing error, will emit 'error' event.
+          this.emit('error', "Required params for publishDeviceEvent not present");
+          return;
+        }
         var topic = "iot-2/type/" + type + "/id/" + id + "/evt/" + event + "/fmt/" + format;
         this.publish(topic, data);
         return this;
@@ -313,6 +311,13 @@
     }, {
       key: 'publishDeviceCommand',
       value: function publishDeviceCommand(type, id, command, format, data) {
+
+        if (!(0, _utilUtilJs.isDefined)(type) || !(0, _utilUtilJs.isDefined)(id) || !(0, _utilUtilJs.isDefined)(command) || !(0, _utilUtilJs.isDefined)(format)) {
+          this.log.error("Required params for publishDeviceCommand not present");
+          //instead of throwing error, will emit 'error' event.
+          this.emit('error', "Required params for publishDeviceCommand not present");
+          return;
+        }
         var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/" + command + "/fmt/" + format;
         this.publish(topic, data);
         return this;
@@ -646,7 +651,7 @@
         var params = {
           start: start,
           end: end,
-          evtType: evtType
+          evt_type: evtType
         };
         return this.callApi('GET', 200, true, ['historian'], null, params);
       }
@@ -657,7 +662,7 @@
         var params = {
           start: start,
           end: end,
-          evtType: evtType
+          evt_type: evtType
         };
         return this.callApi('GET', 200, true, ['historian', 'types', typeId], null, params);
       }
@@ -668,7 +673,7 @@
         var params = {
           start: start,
           end: end,
-          evtType: evtType
+          evt_type: evtType
         };
         return this.callApi('GET', 200, true, ['historian', 'types', typeId, 'devices', deviceId], null, params);
       }
@@ -705,6 +710,60 @@
 
           (0, _xhr['default'])(xhrConfig).then(resolve, reject);
         });
+      }
+
+      //event cache
+    }, {
+      key: 'getLastEvents',
+      value: function getLastEvents(type, id) {
+        this.log.debug("getLastEvents() - event cache");
+        return this.callApi('GET', 200, true, ["device", "types", type, "devices", id, "events"], null);
+      }
+    }, {
+      key: 'getLastEventsByEventType',
+      value: function getLastEventsByEventType(type, id, eventType) {
+        this.log.debug("getLastEventsByEventType() - event cache");
+        return this.callApi('GET', 200, true, ["device", "types", type, "devices", id, "events", eventType], null);
+      }
+
+      //bulk apis
+    }, {
+      key: 'getAllDevices',
+      value: function getAllDevices(params) {
+        this.log.debug("getAllDevices() - BULK");
+        return this.callApi('GET', 200, true, ["bulk", "devices"], null, params);
+      }
+
+      /**
+       * Register multiple new devices, each request can contain a maximum of 512KB.
+       * The response body will contain the generated authentication tokens for all devices.
+       * The caller of the method must make sure to record these tokens when processing
+       * the response. The IBM Watson IoT Platform will not be able to retrieve lost authentication tokens
+       *
+       * @param arryOfDevicesToBeAdded Array of JSON devices to be added. Refer to
+       * <a href="https://docs.internetofthings.ibmcloud.com/swagger/v0002.html#!/Bulk_Operations/post_bulk_devices_add">link</a>
+       * for more information about the schema to be used
+       */
+    }, {
+      key: 'registerMultipleDevices',
+      value: function registerMultipleDevices(arryOfDevicesToBeAdded) {
+        this.log.debug("arryOfDevicesToBeAdded() - BULK");
+        return this.callApi('POST', 201, true, ["bulk", "devices", "add"], JSON.stringify(arryOfDevicesToBeAdded));
+      }
+
+      /**
+      * Delete multiple devices, each request can contain a maximum of 512Kb
+      *
+      * @param arryOfDevicesToBeDeleted Array of JSON devices to be deleted. Refer to
+      * <a href="https://docs.internetofthings.ibmcloud.com/swagger/v0002.html#!/Bulk_Operations/post_bulk_devices_remove">link</a>
+      * for more information about the schema to be used.
+      */
+    }, {
+      key: 'deleteMultipleDevices',
+      value: function deleteMultipleDevices(arryOfDevicesToBeDeleted) {
+
+        this.log.debug("deleteMultipleDevices() - BULK");
+        return this.callApi('POST', 201, true, ["bulk", "devices", "remove"], JSON.stringify(arryOfDevicesToBeDeleted));
       }
     }]);
 
