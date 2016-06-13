@@ -101,7 +101,7 @@
           this.mqttConfig.caPaths = [__dirname + '/IoTFoundation.pem'];
         }
       }
-
+      this.mqttConfig.connectTimeout = 90 * 1000;
       this.retryCount = 0;
       this.isConnected = false;
     }
@@ -151,6 +151,11 @@
         var _this2 = this;
 
         if (!this.isConnected) {
+          if (this.mqtt) {
+            // The client is disconnected, but the reconnect thread
+            // is running. Need to stop it.
+            this.mqtt.end(true, function () {});
+          }
           throw new Error("Client is not connected");
         }
 

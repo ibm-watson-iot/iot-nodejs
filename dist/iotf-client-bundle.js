@@ -8825,6 +8825,11 @@ module.exports = function (obj) {
 // shim for using process in browser
 
 var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it don't break things.
+var cachedSetTimeout = setTimeout;
+var cachedClearTimeout = clearTimeout;
+
 var queue = [];
 var draining = false;
 var currentQueue;
@@ -8849,7 +8854,7 @@ function drainQueue() {
     if (draining) {
         return;
     }
-    var timeout = setTimeout(cleanUpNextTick);
+    var timeout = cachedSetTimeout(cleanUpNextTick);
     draining = true;
 
     var len = queue.length;
@@ -8866,7 +8871,7 @@ function drainQueue() {
     }
     currentQueue = null;
     draining = false;
-    clearTimeout(timeout);
+    cachedClearTimeout(timeout);
 }
 
 process.nextTick = function (fun) {
@@ -8878,7 +8883,7 @@ process.nextTick = function (fun) {
     }
     queue.push(new Item(fun, args));
     if (queue.length === 1 && !draining) {
-        setTimeout(drainQueue, 0);
+        cachedSetTimeout(drainQueue, 0);
     }
 };
 
@@ -16430,7 +16435,7 @@ Parser.prototype._parseString = function(maybeBuffer) {
     , result
     , end = length + this._pos
 
-  if(length === -1 || end > this._list.length || end > this.packet.length)
+  if(length === -1 || end > this._list.length || end > this.packet.length)
     return null
 
   result = this._list.toString('utf8', this._pos, end)
@@ -16445,7 +16450,7 @@ Parser.prototype._parseBuffer = function() {
     , result
     , end = length + this._pos
 
-  if(length === -1 || end > this._list.length || end > this.packet.length)
+  if(length === -1 || end > this._list.length || end > this.packet.length)
     return null
 
   result = this._list.slice(this._pos, end)
@@ -21523,7 +21528,7 @@ var BaseClient = (function (_events$EventEmitter) {
         this.mqttConfig.caPaths = [__dirname + '/IoTFoundation.pem'];
       }
     }
-
+    this.mqttConfig.connectTimeout = 90 * 1000;
     this.retryCount = 0;
     this.isConnected = false;
   }
@@ -21573,6 +21578,11 @@ var BaseClient = (function (_events$EventEmitter) {
       var _this2 = this;
 
       if (!this.isConnected) {
+        if (this.mqtt) {
+          // The client is disconnected, but the reconnect thread
+          // is running. Need to stop it.
+          this.mqtt.end(true, function () {});
+        }
         throw new Error("Client is not connected");
       }
 
@@ -21591,7 +21601,7 @@ var BaseClient = (function (_events$EventEmitter) {
 exports['default'] = BaseClient;
 module.exports = exports['default'];
 
-}).call(this,require('_process'),"/src\\clients")
+}).call(this,require('_process'),"/src/clients")
 },{"../util/util.js":116,"_process":25,"events":22,"loglevel":52,"mqtt":54}],111:[function(require,module,exports){
 /**
  *****************************************************************************
@@ -23014,7 +23024,7 @@ var ManagedGatewayClient = (function (_GatewayClient) {
         }
 
         /*let match = DM_REQUEST_RE.exec(topic);
-          
+         
         if(match){
           if(topic == DM_RESPONSE_TOPIC){
             this._onDmResponse(payload);
