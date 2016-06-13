@@ -117,6 +117,11 @@ export default class BaseClient extends events.EventEmitter {
 
   disconnect(){
     if(!this.isConnected){
+      if (this.mqtt) {
+          // The client is disconnected, but the reconnect thread
+          // is running. Need to stop it.
+          this.mqtt.end(true, () => {});
+      }
       throw new Error("Client is not connected");
     }
 
