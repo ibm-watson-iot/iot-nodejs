@@ -74,7 +74,7 @@ export default class BaseClient extends events.EventEmitter {
         this.mqttConfig.caPaths = [__dirname + '/IoTFoundation.pem'];
       }
     }
-
+    this.mqttConfig.connectTimeout = 90*1000;
     this.retryCount = 0;
     this.isConnected = false;
   }
