@@ -73,6 +73,15 @@
         throw new Error('id must be a string');
       }
 
+      this.domainName = "internetofthings.ibmcloud.com";
+      // Parse Domain property
+      if ((0, _utilUtilJs.isDefined)(config.domain)) {
+        if (!(0, _utilUtilJs.isString)(config.domain)) {
+          throw new Error('domain must be a string');
+        }
+        this.domainName = config.domain;
+      }
+
       if (config.org === QUICKSTART_ORG_ID) {
         this.host = "ws://quickstart.messaging.internetofthings.ibmcloud.com:1883";
         this.isQuickstart = true;
@@ -88,9 +97,9 @@
         if (this.staging) {
           this.host = "wss://" + config.org + ".messaging.staging.internetofthings.ibmcloud.com:8883";
         } else {
-          this.host = "wss://" + config.org + ".messaging.internetofthings.ibmcloud.com:8883";
+          this.host = "wss://" + config.org + ".messaging." + this.domainName + ":8883";
         }
-        // this.host = "wss://" + config.org + ".messaging.internetofthings.ibmcloud.com:8883";
+
         this.isQuickstart = false;
         this.mqttConfig = {
           password: config['auth-token'],
@@ -107,6 +116,11 @@
     }
 
     _createClass(BaseClient, [{
+      key: 'setKeepAliveInterval',
+      value: function setKeepAliveInterval(keepAliveInterval) {
+        this.mqttConfig.keepalive = keepAliveInterval;
+      }
+    }, {
       key: 'connect',
       value: function connect() {
         var _this = this;

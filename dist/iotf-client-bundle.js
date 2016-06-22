@@ -8826,10 +8826,30 @@ module.exports = function (obj) {
 
 var process = module.exports = {};
 
-// cached from whatever global is present so that test runners that stub it don't break things.
-var cachedSetTimeout = setTimeout;
-var cachedClearTimeout = clearTimeout;
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
 
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+(function () {
+  try {
+    cachedSetTimeout = setTimeout;
+  } catch (e) {
+    cachedSetTimeout = function () {
+      throw new Error('setTimeout is not defined');
+    }
+  }
+  try {
+    cachedClearTimeout = clearTimeout;
+  } catch (e) {
+    cachedClearTimeout = function () {
+      throw new Error('clearTimeout is not defined');
+    }
+  }
+} ())
 var queue = [];
 var draining = false;
 var currentQueue;
@@ -20984,7 +21004,7 @@ var ApplicationClient = (function (_BaseClient) {
         if (_this2.staging) {
           uri = (0, _format2['default'])("https://%s.staging.internetofthings.ibmcloud.com/api/v0002", _this2.org);
         } else {
-          uri = (0, _format2['default'])("https://%s.internetofthings.ibmcloud.com/api/v0002", _this2.org);
+          uri = (0, _format2['default'])("https://%s.%s/api/v0002", _this2.org, _this2.domainName);
         }
 
         if (Array.isArray(paths)) {
@@ -21340,7 +21360,7 @@ var ApplicationClient = (function (_BaseClient) {
         if (_this3.staging) {
           uri = (0, _format2['default'])("https://%s.staging.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", _this3.org, deviceType, deviceId, eventType);
         } else {
-          uri = (0, _format2['default'])("https://%s.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", _this3.org, deviceType, deviceId, eventType);
+          uri = (0, _format2['default'])("https://%s.%s/api/v0002/device/types/%s/devices/%s/events/%s", _this3.org, _this3.domainName, deviceType, deviceId, eventType);
         }
 
         var xhrConfig = {
@@ -21500,6 +21520,15 @@ var BaseClient = (function (_events$EventEmitter) {
       throw new Error('id must be a string');
     }
 
+    this.domainName = "internetofthings.ibmcloud.com";
+    // Parse Domain property
+    if ((0, _utilUtilJs.isDefined)(config.domain)) {
+      if (!(0, _utilUtilJs.isString)(config.domain)) {
+        throw new Error('domain must be a string');
+      }
+      this.domainName = config.domain;
+    }
+
     if (config.org === QUICKSTART_ORG_ID) {
       this.host = "ws://quickstart.messaging.internetofthings.ibmcloud.com:1883";
       this.isQuickstart = true;
@@ -21515,9 +21544,9 @@ var BaseClient = (function (_events$EventEmitter) {
       if (this.staging) {
         this.host = "wss://" + config.org + ".messaging.staging.internetofthings.ibmcloud.com:8883";
       } else {
-        this.host = "wss://" + config.org + ".messaging.internetofthings.ibmcloud.com:8883";
+        this.host = "wss://" + config.org + ".messaging." + this.domainName + ":8883";
       }
-      // this.host = "wss://" + config.org + ".messaging.internetofthings.ibmcloud.com:8883";
+
       this.isQuickstart = false;
       this.mqttConfig = {
         password: config['auth-token'],
@@ -21534,6 +21563,11 @@ var BaseClient = (function (_events$EventEmitter) {
   }
 
   _createClass(BaseClient, [{
+    key: 'setKeepAliveInterval',
+    value: function setKeepAliveInterval(keepAliveInterval) {
+      this.mqttConfig.keepalive = keepAliveInterval;
+    }
+  }, {
     key: 'connect',
     value: function connect() {
       var _this = this;
@@ -21601,7 +21635,7 @@ var BaseClient = (function (_events$EventEmitter) {
 exports['default'] = BaseClient;
 module.exports = exports['default'];
 
-}).call(this,require('_process'),"/src/clients")
+}).call(this,require('_process'),"/src\\clients")
 },{"../util/util.js":116,"_process":25,"events":22,"loglevel":52,"mqtt":54}],111:[function(require,module,exports){
 /**
  *****************************************************************************
@@ -21763,7 +21797,7 @@ var DeviceClient = (function (_BaseClient) {
         if (_this2.staging) {
           uri = (0, _format2['default'])("https://%s.staging.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.typeId, _this2.deviceId, eventType);
         } else {
-          uri = (0, _format2['default'])("https://%s.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.typeId, _this2.deviceId, eventType);
+          uri = (0, _format2['default'])("https://%s.%s/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.domainName, _this2.typeId, _this2.deviceId, eventType);
         }
         var xhrConfig = {
           url: uri,
@@ -21980,7 +22014,7 @@ var GatewayClient = (function (_BaseClient) {
         if (_this2.staging) {
           uri = (0, _format2['default'])("https://%s.staging.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.type, _this2.id, eventType);
         } else {
-          uri = (0, _format2['default'])("https://%s.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.type, _this2.id, eventType);
+          uri = (0, _format2['default'])("https://%s.%s/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.domainName, _this2.type, _this2.id, eventType);
         }
         var xhrConfig = {
           url: uri,
@@ -23024,7 +23058,7 @@ var ManagedGatewayClient = (function (_GatewayClient) {
         }
 
         /*let match = DM_REQUEST_RE.exec(topic);
-         
+          
         if(match){
           if(topic == DM_RESPONSE_TOPIC){
             this._onDmResponse(payload);

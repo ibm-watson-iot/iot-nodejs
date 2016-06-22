@@ -45,7 +45,7 @@ export default class ApplicationClient extends BaseClient {
         this.mqttConfig.username = config['auth-key'];
       }
     }
-
+	
     this.org = config.org;
     this.apiKey = config['auth-key'];
     this.apiToken = config['auth-token'];
@@ -311,7 +311,7 @@ export default class ApplicationClient extends BaseClient {
       if(this.staging) {
         uri = format("https://%s.staging.internetofthings.ibmcloud.com/api/v0002", this.org);
       } else {
-        uri = format("https://%s.internetofthings.ibmcloud.com/api/v0002", this.org);
+        uri = format("https://%s.%s/api/v0002", this.org, this.domainName);
       }
 
       if(Array.isArray(paths)){
@@ -627,7 +627,7 @@ export default class ApplicationClient extends BaseClient {
       if(this.staging) {
         uri = format("https://%s.staging.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", this.org, deviceType, deviceId, eventType);
       }  else {
-        uri = format("https://%s.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", this.org, deviceType, deviceId, eventType);
+        uri = format("https://%s.%s/api/v0002/device/types/%s/devices/%s/events/%s", this.org, this.domainName, deviceType, deviceId, eventType);
       }
 
       let xhrConfig = {
