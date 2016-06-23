@@ -333,7 +333,7 @@
           if (_this2.staging) {
             uri = (0, _format2['default'])("https://%s.staging.internetofthings.ibmcloud.com/api/v0002", _this2.org);
           } else {
-            uri = (0, _format2['default'])("https://%s.internetofthings.ibmcloud.com/api/v0002", _this2.org);
+            uri = (0, _format2['default'])("https://%s.%s/api/v0002", _this2.org, _this2.domainName);
           }
 
           if (Array.isArray(paths)) {
@@ -689,7 +689,7 @@
           if (_this3.staging) {
             uri = (0, _format2['default'])("https://%s.staging.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", _this3.org, deviceType, deviceId, eventType);
           } else {
-            uri = (0, _format2['default'])("https://%s.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", _this3.org, deviceType, deviceId, eventType);
+            uri = (0, _format2['default'])("https://%s.%s/api/v0002/device/types/%s/devices/%s/events/%s", _this3.org, _this3.domainName, deviceType, deviceId, eventType);
           }
 
           var xhrConfig = {

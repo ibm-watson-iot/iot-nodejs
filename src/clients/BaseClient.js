@@ -44,6 +44,15 @@ export default class BaseClient extends events.EventEmitter {
     else if(!isString(config.id)){
       throw new Error('id must be a string');
     }
+	
+	this.domainName = "internetofthings.ibmcloud.com";
+	// Parse Domain property
+	if(isDefined(config.domain)){
+		if(!isString(config.domain)){
+		  throw new Error('domain must be a string');
+		}
+		this.domainName = config.domain;
+    }
 
     if(config.org === QUICKSTART_ORG_ID){
       this.host = "ws://quickstart.messaging.internetofthings.ibmcloud.com:1883";
@@ -60,10 +69,10 @@ export default class BaseClient extends events.EventEmitter {
 
       if(this.staging){
         this.host = "wss://" + config.org + ".messaging.staging.internetofthings.ibmcloud.com:8883";
-      } else{
-        this.host = "wss://" + config.org + ".messaging.internetofthings.ibmcloud.com:8883";
+      } else {
+        this.host = "wss://" + config.org + ".messaging." + this.domainName + ":8883";
       }
-      // this.host = "wss://" + config.org + ".messaging.internetofthings.ibmcloud.com:8883";
+
       this.isQuickstart = false;
       this.mqttConfig = {
         password: config['auth-token'],
@@ -77,6 +86,10 @@ export default class BaseClient extends events.EventEmitter {
     this.mqttConfig.connectTimeout = 90*1000;
     this.retryCount = 0;
     this.isConnected = false;
+  }
+  
+  setKeepAliveInterval(keepAliveInterval) {
+		this.mqttConfig.keepalive = keepAliveInterval;
   }
 
   connect(){

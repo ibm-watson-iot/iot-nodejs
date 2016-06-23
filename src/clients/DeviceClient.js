@@ -122,7 +122,7 @@ export default class DeviceClient extends BaseClient {
       if(this.staging) {
         uri = format("https://%s.staging.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", this.org, this.typeId, this.deviceId, eventType);
       }  else {
-        uri = format("https://%s.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", this.org, this.typeId, this.deviceId, eventType);
+        uri = format("https://%s.%s/api/v0002/device/types/%s/devices/%s/events/%s", this.org, this.domainName, this.typeId, this.deviceId, eventType);
       }
       let xhrConfig = {
         url: uri,
