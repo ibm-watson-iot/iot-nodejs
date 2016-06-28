@@ -139,7 +139,7 @@ Events can be published by using
 
 -   eventType - Type of event to be published e.g status, gps
 -   eventFormat - Format of the event e.g json
--   data - Payload of the event
+-   data - Payload of the event. Supported formats for data are String, Buffer and JSON
 -   QoS - qos for the publish event. Supported values : 0,1,2
 
 ``` {.sourceCode .javascript}
@@ -598,6 +598,8 @@ function requires
 -   Format
 -   Data
 
+Supported formats for data are String, Buffer and JSON
+
 ``` {.sourceCode .javascript}
 var appClient = new Client.IotfApplication(appClientConfig);
 
@@ -623,6 +625,8 @@ requires
 -   Command Type
 -   Format
 -   Data
+
+Supported formats for data are String, Buffer and JSON
 
 ``` {.sourceCode .javascript}
 var appClient = new Client.IotfApplication(appClientConfig);
@@ -745,7 +749,7 @@ Events can be published by using
 
 -   eventType - Type of event to be published e.g status, gps
 -   eventFormat - Format of the event e.g json
--   data - Payload of the event
+-   data - Payload of the event. Supported formats for data are String, Buffer and JSON
 -   QoS - qos for the publish event. Supported values : 0,1,2
 
 A gateway can publish events from itself and on behalf of any device connected via the gateway.
