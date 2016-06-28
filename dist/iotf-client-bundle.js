@@ -8826,30 +8826,10 @@ module.exports = function (obj) {
 
 var process = module.exports = {};
 
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
+// cached from whatever global is present so that test runners that stub it don't break things.
+var cachedSetTimeout = setTimeout;
+var cachedClearTimeout = clearTimeout;
 
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-(function () {
-  try {
-    cachedSetTimeout = setTimeout;
-  } catch (e) {
-    cachedSetTimeout = function () {
-      throw new Error('setTimeout is not defined');
-    }
-  }
-  try {
-    cachedClearTimeout = clearTimeout;
-  } catch (e) {
-    cachedClearTimeout = function () {
-      throw new Error('clearTimeout is not defined');
-    }
-  }
-} ())
 var queue = [];
 var draining = false;
 var currentQueue;
@@ -20874,6 +20854,11 @@ var ApplicationClient = (function (_BaseClient) {
         this.emit('error', "Client is not connected");
       }
 
+      if (typeof msg === 'object') {
+        // mqtt library does not support sending JSON data. So stringifying it.
+        // All JSON object, array will be encoded.
+        msg = JSON.stringify(msg);
+      }
       this.log.debug("Publish: " + topic + ", " + msg);
       this.mqtt.publish(topic, msg);
     }
@@ -21635,7 +21620,7 @@ var BaseClient = (function (_events$EventEmitter) {
 exports['default'] = BaseClient;
 module.exports = exports['default'];
 
-}).call(this,require('_process'),"/src\\clients")
+}).call(this,require('_process'),"/src/clients")
 },{"../util/util.js":116,"_process":25,"events":22,"loglevel":52,"mqtt":54}],111:[function(require,module,exports){
 /**
  *****************************************************************************
@@ -21779,6 +21764,12 @@ var DeviceClient = (function (_BaseClient) {
 
       var topic = (0, _format2['default'])("iot-2/evt/%s/fmt/%s", eventType, eventFormat);
       var QOS = qos || 0;
+
+      if (typeof payload === 'object') {
+        // mqtt library does not support sending JSON data. So stringifying it.
+        // All JSON object, array will be encoded.
+        payload = JSON.stringify(payload);
+      }
 
       this.log.debug("Publishing to topic : " + topic + " with payload : " + payload);
 
@@ -21996,6 +21987,12 @@ var GatewayClient = (function (_BaseClient) {
 
       var topic = (0, _format2['default'])("iot-2/type/%s/id/%s/evt/%s/fmt/%s", type, id, eventType, eventFormat);
       var QOS = qos || 0;
+
+      if (typeof payload === 'object') {
+        // mqtt library does not support sending JSON data. So stringifying it.
+        // All JSON object, array will be encoded.
+        payload = JSON.stringify(payload);
+      }
 
       this.log.debug("Publishing to topic : " + topic + " with payload : " + payload + " with QoS : " + QOS);
 
@@ -23058,7 +23055,7 @@ var ManagedGatewayClient = (function (_GatewayClient) {
         }
 
         /*let match = DM_REQUEST_RE.exec(topic);
-          
+         
         if(match){
           if(topic == DM_RESPONSE_TOPIC){
             this._onDmResponse(payload);

@@ -193,6 +193,11 @@ export default class ApplicationClient extends BaseClient {
       this.emit('error', "Client is not connected");
     }
 
+    if( typeof msg === 'object') {
+      // mqtt library does not support sending JSON data. So stringifying it.
+      // All JSON object, array will be encoded.
+      msg = JSON.stringify(msg);
+    }
     this.log.debug("Publish: "+topic+", "+msg);
     this.mqtt.publish(topic, msg);
 

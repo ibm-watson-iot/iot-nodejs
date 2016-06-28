@@ -138,6 +138,12 @@ export default class GatewayClient extends BaseClient {
     let topic = format("iot-2/type/%s/id/%s/evt/%s/fmt/%s", type, id, eventType, eventFormat);
     let QOS = qos || 0;
 
+    if( typeof payload === 'object') {
+      // mqtt library does not support sending JSON data. So stringifying it.
+      // All JSON object, array will be encoded.
+      payload = JSON.stringify(payload);
+    }
+
     this.log.debug("Publishing to topic : "+ topic + " with payload : "+payload+" with QoS : "+QOS);
 
     this.mqtt.publish(topic,payload,{qos: QOS});

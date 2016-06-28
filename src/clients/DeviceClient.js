@@ -108,6 +108,12 @@ export default class DeviceClient extends BaseClient {
     let topic = format("iot-2/evt/%s/fmt/%s", eventType, eventFormat);
     let QOS = qos || 0;
 
+    if( typeof payload === 'object') {
+        // mqtt library does not support sending JSON data. So stringifying it.
+        // All JSON object, array will be encoded.
+        payload = JSON.stringify(payload);
+    }
+
     this.log.debug("Publishing to topic : "+ topic + " with payload : "+payload);
 
     this.mqtt.publish(topic,payload,{qos: QOS});
