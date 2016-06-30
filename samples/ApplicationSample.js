@@ -47,7 +47,7 @@ registerDeviceType('newType1',"New Type").then (function onSuccess (argument) {
 
 //Register a new Device Type
 appClient.
-registerDevice('raspi',"new01012220","kjads*()(dsds").then (function onSuccess (argument) {
+registerDevice('raspi',"new01012220","token12345").then (function onSuccess (argument) {
 	console.log("Success");
 	console.log(argument);
 }, function onError (argument) {
