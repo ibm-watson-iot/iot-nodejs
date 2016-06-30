@@ -20985,12 +20985,7 @@ var ApplicationClient = (function (_BaseClient) {
 
       return new _bluebird2['default'](function (resolve, reject) {
         // const API_HOST = "https://%s.internetofthings.ibmcloud.com/api/v0002";
-        var uri = "";
-        if (_this2.staging) {
-          uri = (0, _format2['default'])("https://%s.staging.internetofthings.ibmcloud.com/api/v0002", _this2.org);
-        } else {
-          uri = (0, _format2['default'])("https://%s.%s/api/v0002", _this2.org, _this2.domainName);
-        }
+        var uri = (0, _format2['default'])("https://%s.%s/api/v0002", _this2.org, _this2.domainName);
 
         if (Array.isArray(paths)) {
           for (var i = 0, l = paths.length; i < l; i++) {
@@ -21341,12 +21336,7 @@ var ApplicationClient = (function (_BaseClient) {
       this.log.debug("Publishing event of Type: " + eventType + " with payload : " + payload);
       return new _bluebird2['default'](function (resolve, reject) {
 
-        var uri = "";
-        if (_this3.staging) {
-          uri = (0, _format2['default'])("https://%s.staging.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", _this3.org, deviceType, deviceId, eventType);
-        } else {
-          uri = (0, _format2['default'])("https://%s.%s/api/v0002/device/types/%s/devices/%s/events/%s", _this3.org, _this3.domainName, deviceType, deviceId, eventType);
-        }
+        var uri = (0, _format2['default'])("https://%s.%s/api/v0002/device/types/%s/devices/%s/events/%s", _this3.org, _this3.domainName, deviceType, deviceId, eventType);
 
         var xhrConfig = {
           url: uri,
@@ -21430,7 +21420,7 @@ exports['default'] = ApplicationClient;
 module.exports = exports['default'];
 
 },{"../util/util.js":116,"./BaseClient.js":110,"axios":1,"bluebird":16,"btoa":50,"format":51}],110:[function(require,module,exports){
-(function (process,__dirname){
+(function (__dirname){
 /**
  *****************************************************************************
  Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
@@ -21485,10 +21475,11 @@ var BaseClient = (function (_events$EventEmitter) {
     _get(Object.getPrototypeOf(BaseClient.prototype), 'constructor', this).call(this);
     this.log = _loglevel2['default'];
     this.log.setDefaultLevel("warn");
-    this.staging = false;
-    if (process.env.STAGING === '1') {
-      this.staging = true;
-    }
+    //removed as now we have support of domain name in config.
+    /*    this.staging = false;
+        if(process.env.STAGING === '1') {
+          this.staging = true;
+        }*/
     if (!config) {
       throw new Error('Client instantiated with missing properties');
     }
@@ -21526,11 +21517,7 @@ var BaseClient = (function (_events$EventEmitter) {
         throw new Error('auth-token must be a string');
       }
 
-      if (this.staging) {
-        this.host = "wss://" + config.org + ".messaging.staging.internetofthings.ibmcloud.com:8883";
-      } else {
-        this.host = "wss://" + config.org + ".messaging." + this.domainName + ":8883";
-      }
+      this.host = "wss://" + config.org + ".messaging." + this.domainName + ":8883";
 
       this.isQuickstart = false;
       this.mqttConfig = {
@@ -21620,8 +21607,8 @@ var BaseClient = (function (_events$EventEmitter) {
 exports['default'] = BaseClient;
 module.exports = exports['default'];
 
-}).call(this,require('_process'),"/src/clients")
-},{"../util/util.js":116,"_process":25,"events":22,"loglevel":52,"mqtt":54}],111:[function(require,module,exports){
+}).call(this,"/src/clients")
+},{"../util/util.js":116,"events":22,"loglevel":52,"mqtt":54}],111:[function(require,module,exports){
 /**
  *****************************************************************************
  Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
@@ -21784,12 +21771,8 @@ var DeviceClient = (function (_BaseClient) {
 
       this.log.debug("Publishing event of Type: " + eventType + " with payload : " + payload);
       return new _bluebird2['default'](function (resolve, reject) {
-        var uri = "";
-        if (_this2.staging) {
-          uri = (0, _format2['default'])("https://%s.staging.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.typeId, _this2.deviceId, eventType);
-        } else {
-          uri = (0, _format2['default'])("https://%s.%s/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.domainName, _this2.typeId, _this2.deviceId, eventType);
-        }
+        var uri = (0, _format2['default'])("https://%s.%s/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.domainName, _this2.typeId, _this2.deviceId, eventType);
+
         var xhrConfig = {
           url: uri,
           method: 'POST',
@@ -22007,12 +21990,8 @@ var GatewayClient = (function (_BaseClient) {
 
       this.log.debug("Publishing event of Type: " + eventType + " with payload : " + payload);
       return new _bluebird2['default'](function (resolve, reject) {
-        var uri = undefined;
-        if (_this2.staging) {
-          uri = (0, _format2['default'])("https://%s.staging.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.type, _this2.id, eventType);
-        } else {
-          uri = (0, _format2['default'])("https://%s.%s/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.domainName, _this2.type, _this2.id, eventType);
-        }
+        var uri = (0, _format2['default'])("https://%s.%s/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.domainName, _this2.type, _this2.id, eventType);
+
         var xhrConfig = {
           url: uri,
           method: 'POST',

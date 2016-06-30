@@ -3,6 +3,7 @@ var iotf = require("../");
 var appClientConfig = {
   org: 'xxxxx',
   id: 'myapp',
+  "domain": "internetofthings.ibmcloud.com",
   "auth-key": 'a-xxxxxxx-zenkqyfiea',
   "auth-token": 'xxxxxxxxxx'
 };

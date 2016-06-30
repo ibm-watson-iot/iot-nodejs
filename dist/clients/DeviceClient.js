@@ -155,12 +155,8 @@
 
         this.log.debug("Publishing event of Type: " + eventType + " with payload : " + payload);
         return new _Promise['default'](function (resolve, reject) {
-          var uri = "";
-          if (_this2.staging) {
-            uri = (0, _format2['default'])("https://%s.staging.internetofthings.ibmcloud.com/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.typeId, _this2.deviceId, eventType);
-          } else {
-            uri = (0, _format2['default'])("https://%s.%s/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.domainName, _this2.typeId, _this2.deviceId, eventType);
-          }
+          var uri = (0, _format2['default'])("https://%s.%s/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.domainName, _this2.typeId, _this2.deviceId, eventType);
+
           var xhrConfig = {
             url: uri,
             method: 'POST',

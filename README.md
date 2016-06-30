@@ -55,15 +55,16 @@ configuration json containing the following :
 -   auth-method - Method of authentication (the only value currently
     supported is “token”)
 -   auth-token - API key token (required if auth-method is “token”)
+-   domain - (Optional)The messaging endpoint URL. By default the value is "internetofthings.ibmcloud.com"(Watson IoT Production server). 
 
-If you want to use quickstart, then send only the first three
-properties.
+If you want to use quickstart, then enter only the first three properties.
 
 ``` {.sourceCode .javascript}
 var Client = require("ibmiotf");
 var config = {
     "org" : "organization",
     "id" : "deviceId",
+    "domain": "internetofthings.ibmcloud.com",
     "type" : "deviceType",
     "auth-method" : "token",
     "auth-token" : "authToken"
@@ -263,6 +264,7 @@ configuration json containing the following :
 -   auth-key - API key
 -   auth-token - API key token
 -   type - use 'shared' to enable shared subscription
+-   domain - (Optional)The messaging endpoint URL. By default the value is "internetofthings.ibmcloud.com"(Watson IoT Production server).
 
 If you want to use quickstart, then send only the first two properties.
 
@@ -271,6 +273,7 @@ var Client = require("ibmiotf");
 var appClientConfig = {
     "org" : orgId,
     "id" : appId,
+    "domain": "internetofthings.ibmcloud.com",
     "auth-key" : apiKey,
     "auth-token" : apiToken
 }
@@ -677,6 +680,7 @@ configuration json containing the following :
 -   id - The ID of your gateway
 -   auth-method - Method of authentication (the only value currently supported is “token”)
 -   auth-token - API key token (required if auth-method is “token”)
+-   domain - (Optional)The messaging endpoint URL. By default the value is "internetofthings.ibmcloud.com"(Watson IoT Production server).
 
 
 ``` {.sourceCode .javascript}
@@ -685,6 +689,7 @@ var config = {
     "org" : "organization",
     "type" : "gatewayType",
     "id" : "gatewayId",
+    "domain": "internetofthings.ibmcloud.com",
     "auth-method" : "token",
     "auth-token" : "authToken"
 };
