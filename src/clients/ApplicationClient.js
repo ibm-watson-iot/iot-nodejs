@@ -193,8 +193,8 @@ export default class ApplicationClient extends BaseClient {
       this.emit('error', "Client is not connected");
     }
 
-    if( typeof msg === 'object') {
-      // mqtt library does not support sending JSON data. So stringifying it.
+    if( typeof msg === 'object' || typeof msg === 'boolean' || typeof msg === 'number' ) {
+      // mqtt library does not support sending JSON/Boolean/Number data. So stringifying it.
       // All JSON object, array will be encoded.
       msg = JSON.stringify(msg);
     }

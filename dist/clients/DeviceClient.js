@@ -136,8 +136,8 @@
         var topic = (0, _format2['default'])("iot-2/evt/%s/fmt/%s", eventType, eventFormat);
         var QOS = qos || 0;
 
-        if (typeof payload === 'object') {
-          // mqtt library does not support sending JSON data. So stringifying it.
+        if (typeof payload === 'object' || typeof payload === 'boolean' || typeof payload === 'number') {
+          // mqtt library does not support sending JSON/boolean/number data. So stringifying it.
           // All JSON object, array will be encoded.
           payload = JSON.stringify(payload);
         }
