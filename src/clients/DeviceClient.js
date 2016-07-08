@@ -108,7 +108,7 @@ export default class DeviceClient extends BaseClient {
     let topic = format("iot-2/evt/%s/fmt/%s", eventType, eventFormat);
     let QOS = qos || 0;
 
-    if( typeof payload === 'object' || typeof payload === 'boolean' || typeof payload === 'number') {
+    if( (typeof msg === 'object' || typeof msg === 'boolean' || typeof msg === 'number') && !Buffer.isBuffer(msg) ) {
         // mqtt library does not support sending JSON/boolean/number data. So stringifying it.
         // All JSON object, array will be encoded.
         payload = JSON.stringify(payload);

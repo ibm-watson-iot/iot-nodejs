@@ -20644,6 +20644,7 @@ function extend() {
 }
 
 },{}],109:[function(require,module,exports){
+(function (Buffer){
 /**
  *****************************************************************************
  Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
@@ -20854,7 +20855,7 @@ var ApplicationClient = (function (_BaseClient) {
         this.emit('error', "Client is not connected");
       }
 
-      if (typeof msg === 'object' || typeof msg === 'boolean' || typeof msg === 'number') {
+      if ((typeof msg === 'object' || typeof msg === 'boolean' || typeof msg === 'number') && !Buffer.isBuffer(msg)) {
         // mqtt library does not support sending JSON/Boolean/Number data. So stringifying it.
         // All JSON object, array will be encoded.
         msg = JSON.stringify(msg);
@@ -21419,7 +21420,8 @@ var ApplicationClient = (function (_BaseClient) {
 exports['default'] = ApplicationClient;
 module.exports = exports['default'];
 
-},{"../util/util.js":116,"./BaseClient.js":110,"axios":1,"bluebird":16,"btoa":50,"format":51}],110:[function(require,module,exports){
+}).call(this,{"isBuffer":require("../../node_modules/browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js")})
+},{"../../node_modules/browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js":24,"../util/util.js":116,"./BaseClient.js":110,"axios":1,"bluebird":16,"btoa":50,"format":51}],110:[function(require,module,exports){
 (function (__dirname){
 /**
  *****************************************************************************
@@ -21609,6 +21611,7 @@ module.exports = exports['default'];
 
 }).call(this,"/src/clients")
 },{"../util/util.js":116,"events":22,"loglevel":52,"mqtt":54}],111:[function(require,module,exports){
+(function (Buffer){
 /**
  *****************************************************************************
  Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
@@ -21752,7 +21755,7 @@ var DeviceClient = (function (_BaseClient) {
       var topic = (0, _format2['default'])("iot-2/evt/%s/fmt/%s", eventType, eventFormat);
       var QOS = qos || 0;
 
-      if (typeof payload === 'object' || typeof payload === 'boolean' || typeof payload === 'number') {
+      if ((typeof msg === 'object' || typeof msg === 'boolean' || typeof msg === 'number') && !Buffer.isBuffer(msg)) {
         // mqtt library does not support sending JSON/boolean/number data. So stringifying it.
         // All JSON object, array will be encoded.
         payload = JSON.stringify(payload);
@@ -21800,7 +21803,8 @@ var DeviceClient = (function (_BaseClient) {
 exports['default'] = DeviceClient;
 module.exports = exports['default'];
 
-},{"../util/util.js":116,"./BaseClient.js":110,"axios":1,"bluebird":16,"btoa":50,"format":51}],112:[function(require,module,exports){
+}).call(this,{"isBuffer":require("../../node_modules/browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js")})
+},{"../../node_modules/browserify/node_modules/insert-module-globals/node_modules/is-buffer/index.js":24,"../util/util.js":116,"./BaseClient.js":110,"axios":1,"bluebird":16,"btoa":50,"format":51}],112:[function(require,module,exports){
 /**
  *****************************************************************************
  Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
