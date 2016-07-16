@@ -30,21 +30,21 @@ export default class DeviceClient extends BaseClient {
     super(config);
 
     if(!isDefined(config.type)){
-      throw new Error('config must contain type');
+      throw new Error('[DeviceClient:constructor] config must contain type');
     }
     else if(!isString(config.type)){
-      throw new Error('type must be a string');
+      throw new Error('[DeviceClient:constructor] type must be a string');
     }
 
     if(config.org !== QUICKSTART_ORG_ID){
       if(!isDefined(config['auth-method'])){
-        throw new Error('config must contain auth-method');
+        throw new Error('[DeviceClient:constructor] config must contain auth-method');
       }
       else if(!isString(config['auth-method'])){
-        throw new Error('auth-method must be a string');
+        throw new Error('[DeviceClient:constructor] auth-method must be a string');
       }
       else if(config['auth-method'] !== 'token'){
-        throw new Error('unsupported authentication method' + config['auth-method']);
+        throw new Error('[DeviceClient:constructor] unsupported authentication method' + config['auth-method']);
       }
 
       this.mqttConfig.username = 'use-token-auth';
@@ -56,17 +56,18 @@ export default class DeviceClient extends BaseClient {
     this.deviceToken = config['auth-token'];
     this.mqttConfig.clientId = "d:" + config.org + ":" + config.type + ":" + config.id;
 
-    this.log.info("DeviceClient initialized for organization : " + config.org + " for ID : "+config.id);
+    this.log.debug("[DeviceClient:constructor] DeviceClient initialized for organization : " + config.org + " for ID : "+config.id);
   }
 
-  connect(){
+  connect(QoS){
+    QoS = QoS || 2;
     super.connect();
 
     var mqtt = this.mqtt;
 
     this.mqtt.on('connect', () => {
       this.isConnected = true;
-      this.log.info("DeviceClient Connected");
+      this.log.debug("[DeviceClient:connect] DeviceClient Connected");
       if(this.retryCount === 0){
         this.emit('connect');
       } else {
@@ -77,17 +78,17 @@ export default class DeviceClient extends BaseClient {
       this.retryCount = 0;
 
       if(!this.isQuickstart){
-        mqtt.subscribe(WILDCARD_TOPIC, { qos: 2 }, function(){});
+        mqtt.subscribe(WILDCARD_TOPIC, { qos: parseInt(QoS) }, function(){});
       }
     });
 
     this.mqtt.on('message', (topic, payload) => {
-      this.log.debug("Message received on topic : "+ topic + " with payload : "+ payload);
-      
+      this.log.debug("[DeviceClient:onMessage] Message received on topic : "+ topic + " with payload : "+ payload);
+
       let match = CMD_RE.exec(topic);
 
       if(match){
-        this.emit('command', 
+        this.emit('command',
           match[1],
           match[2],
           payload,
@@ -99,10 +100,10 @@ export default class DeviceClient extends BaseClient {
 
   publish(eventType, eventFormat, payload, qos){
     if (!this.isConnected) {
-      this.log.error("Client is not connected");
+      this.log.error("[DeviceClient:publish] Client is not connected");
       //throw new Error();
       //instead of throwing error, will emit 'error' event.
-      this.emit('error', "Client is not connected");
+      this.emit('error', "[DeviceClient:publish] Client is not connected");
     }
 
     let topic = format("iot-2/evt/%s/fmt/%s", eventType, eventFormat);
@@ -113,16 +114,14 @@ export default class DeviceClient extends BaseClient {
         // All JSON object, array will be encoded.
         payload = JSON.stringify(payload);
     }
-
-    this.log.debug("Publishing to topic : "+ topic + " with payload : "+payload);
-
-    this.mqtt.publish(topic,payload,{qos: QOS});
-
+    this.log.debug("[DeviceClient:publish] Publishing to topic "+topic+" with payload "+payload+" with QoS "+QOS);
+    this.mqtt.publish(topic,payload,{qos: parseInt(QOS)});
+    this.log.debug("[DeviceClient:publish] Published to topic "+topic+" with payload "+payload+" with QoS "+QOS);
     return this;
   }
 
   publishHTTPS(eventType, eventFormat, payload){
-    this.log.debug("Publishing event of Type: "+ eventType + " with payload : "+payload);
+    this.log.debug("[DeviceClient:publishHTTPS] Publishing event of Type: "+ eventType + " with payload : "+payload);
     return new Promise((resolve, reject) => {
       let uri = format("https://%s.%s/api/v0002/device/types/%s/devices/%s/events/%s", this.org, this.domainName, this.typeId, this.deviceId, eventType);
 
@@ -142,7 +141,7 @@ export default class DeviceClient extends BaseClient {
       if(this.org !== QUICKSTART_ORG_ID) {
         xhrConfig.headers['Authorization'] = 'Basic ' + btoa('use-token-auth' + ':' + this.deviceToken);
       }
-      this.log.debug(xhrConfig);
+      this.log.debug("[DeviceClient:publishHTTPS] "+ xhrConfig);
 
       xhr(xhrConfig).then(resolve, reject);
     });
