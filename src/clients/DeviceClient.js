@@ -56,7 +56,7 @@ export default class DeviceClient extends BaseClient {
     this.deviceToken = config['auth-token'];
     this.mqttConfig.clientId = "d:" + config.org + ":" + config.type + ":" + config.id;
 
-    this.log.debug("[DeviceClient:constructor] DeviceClient initialized for organization : " + config.org + " for ID : "+config.id);
+    this.log.info("[DeviceClient:constructor] DeviceClient initialized for organization : " + config.org + " for ID : "+config.id);
   }
 
   connect(QoS){
@@ -67,7 +67,7 @@ export default class DeviceClient extends BaseClient {
 
     this.mqtt.on('connect', () => {
       this.isConnected = true;
-      this.log.debug("[DeviceClient:connect] DeviceClient Connected");
+      this.log.info("[DeviceClient:connect] DeviceClient Connected");
       if(this.retryCount === 0){
         this.emit('connect');
       } else {

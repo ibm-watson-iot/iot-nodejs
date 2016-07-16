@@ -58,7 +58,7 @@ export default class ApplicationClient extends BaseClient {
     }
     this.subscriptions = [];
 
-    this.log.debug("[ApplicationClient:constructor] ApplicationClient initialized for organization : " + config.org);
+    this.log.info("[ApplicationClient:constructor] ApplicationClient initialized for organization : " + config.org);
   }
 
   connect(QoS){
@@ -66,7 +66,7 @@ export default class ApplicationClient extends BaseClient {
     super.connect();
 
     this.mqtt.on('connect', () => {
-      this.log.debug("[ApplicationClient:connnect] ApplicationClient Connected");
+      this.log.info("[ApplicationClient:connnect] ApplicationClient Connected");
       this.isConnected = true;
 
       if(this.retryCount === 0){
@@ -147,7 +147,7 @@ export default class ApplicationClient extends BaseClient {
       }
 
       // catch all which logs the receipt of an unexpected message
-      this.log.debug("[ApplicationClient:onMessage] Message received on unexpected topic"+", "+topic+", "+payload);
+      this.log.warn("[ApplicationClient:onMessage] Message received on unexpected topic"+", "+topic+", "+payload);
     });
   }
 

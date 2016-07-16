@@ -59,7 +59,7 @@ export default class GatewayClient extends BaseClient {
 
     this.subscriptions = [];
 
-    this.log.debug("[GatewayClient:constructor] GatewayClient initialized for organization : " + config.org + " for ID : "+config.id);
+    this.log.info("[GatewayClient:constructor] GatewayClient initialized for organization : " + config.org + " for ID : "+config.id);
   }
 
   connect(QoS){
@@ -70,7 +70,7 @@ export default class GatewayClient extends BaseClient {
 
     this.mqtt.on('connect', () => {
       this.isConnected = true;
-      this.log.debug("[GatewayClient:connect] GatewayClient Connected");
+      this.log.info("[GatewayClient:connect] GatewayClient Connected");
 
       if(this.retryCount === 0){
         this.emit('connect');

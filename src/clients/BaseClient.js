@@ -92,7 +92,7 @@ export default class BaseClient extends events.EventEmitter {
   }
 
   connect(){
-    this.log.debug("[BaseClient:connect] Connecting to IoTF with host : "+this.host);
+    this.log.info("[BaseClient:connect] Connecting to IoTF with host : "+this.host);
 
     this.mqtt = mqtt.connect(this.host, this.mqttConfig);
 
@@ -115,7 +115,7 @@ export default class BaseClient extends events.EventEmitter {
     });
 
     this.mqtt.on('close', () => {
-      this.log.debug("[BaseClient:onClose] Connection was closed.");
+      this.log.info("[BaseClient:onClose] Connection was closed.");
       this.isConnected = false;
       this.emit('disconnect');
     });
@@ -139,7 +139,7 @@ export default class BaseClient extends events.EventEmitter {
 
     this.isConnected = false;
     this.mqtt.end(false, () => {
-      this.log.debug("[BaseClient:disconnect] Disconnected from the client.");
+      this.log.info("[BaseClient:disconnect] Disconnected from the client.");
     });
 
     delete this.mqtt;
