@@ -36,6 +36,9 @@ Load the library in browser
 load `iotf-client-bundle.js` or `iotf-client-bundle-min.js` from the `dist` directory
 
 
+**Note:** Library used in Node.js will use tcp/ssl and websockets when the library is used in browser. But if user wants to use websockets in Node.js, the user must add a new property `enforce-ws` in the configuration.
+
+
 Devices
 ===============================
 
@@ -55,7 +58,8 @@ configuration json containing the following :
 -   auth-method - Method of authentication (the only value currently
     supported is “token”)
 -   auth-token - API key token (required if auth-method is “token”)
--   domain - (Optional)The messaging endpoint URL. By default the value is "internetofthings.ibmcloud.com"(Watson IoT Production server). 
+-   domain - (Optional)The messaging endpoint URL. By default the value is "internetofthings.ibmcloud.com"(Watson IoT Production server).
+-   enforce-ws - (Optional)Enforce Websocket when using the library in Node.js
 
 If you want to use quickstart, then enter only the first three properties.
 
@@ -265,7 +269,7 @@ configuration json containing the following :
 -   auth-token - API key token
 -   type - use 'shared' to enable shared subscription
 -   domain - (Optional)The messaging endpoint URL. By default the value is "internetofthings.ibmcloud.com"(Watson IoT Production server).
-
+-   enforce-ws - (Optional)Enforce Websocket when using the library in Node.js
 If you want to use quickstart, then send only the first two properties.
 
 ``` {.sourceCode .javascript}
@@ -681,7 +685,7 @@ configuration json containing the following :
 -   auth-method - Method of authentication (the only value currently supported is “token”)
 -   auth-token - API key token (required if auth-method is “token”)
 -   domain - (Optional)The messaging endpoint URL. By default the value is "internetofthings.ibmcloud.com"(Watson IoT Production server).
-
+-   enforce-ws - (Optional)Enforce Websocket when using the library in Node.js
 
 ``` {.sourceCode .javascript}
 var Client = require("ibmiotf");

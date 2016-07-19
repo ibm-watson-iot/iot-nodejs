@@ -14,7 +14,7 @@
 import events from 'events';
 import mqtt from 'mqtt';
 import log from 'loglevel';
-import { isDefined, isString, isNode } from '../util/util.js';
+import { isDefined, isString, isNode, isBoolean } from '../util/util.js';
 
 const QUICKSTART_ORG_ID = "quickstart";
 
@@ -47,6 +47,7 @@ export default class BaseClient extends events.EventEmitter {
     }
 
 	this.domainName = "internetofthings.ibmcloud.com";
+    this.enforceWs = false;
 	// Parse Domain property
 	if(isDefined(config.domain)){
 		if(!isString(config.domain)){
@@ -55,8 +56,22 @@ export default class BaseClient extends events.EventEmitter {
 		this.domainName = config.domain;
     }
 
+    //property to enforce Websockets even in Node 
+    // CAUTION : This is deprecated and may be removed in future 
+    // Parse enforce-ws property 
+    if(isDefined(config['enforce-ws'])) { 
+      if(!isBoolean(config['enforce-ws'])){ 
+        throw new Error('enforce-ws must be a boolean'); 
+      } 
+      this.enforceWs = config['enforce-ws']; 
+    }
+
     if(config.org === QUICKSTART_ORG_ID){
-      this.host = "ws://quickstart.messaging.internetofthings.ibmcloud.com:1883";
+      if(isNode() && !this.enforceWs) { 
+        this.host = "tcp://quickstart.messaging.internetofthings.ibmcloud.com:1883"; 
+      } else { 
+        this.host = "ws://quickstart.messaging.internetofthings.ibmcloud.com:1883"; 
+      }
       this.isQuickstart = true;
       this.mqttConfig = {};
     } else {
@@ -68,13 +83,16 @@ export default class BaseClient extends events.EventEmitter {
         throw new Error('[BaseClient:constructor] auth-token must be a string');
       }
 
-      this.host = "wss://" + config.org + ".messaging." + this.domainName + ":8883";
-
+      if(isNode() && !this.enforceWs) { 
+        this.host = "ssl://" + config.org + ".messaging." + this.domainName + ":8883"; 
+      } else {
+        this.host = "wss://" + config.org + ".messaging." + this.domainName + ":8883";
+      }
 
       this.isQuickstart = false;
       this.mqttConfig = {
         password: config['auth-token'],
-        rejectUnauthorized : true,
+        rejectUnauthorized : true
       };
 
       if(isNode()){
