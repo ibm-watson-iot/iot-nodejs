@@ -116,7 +116,7 @@ export default class DeviceClient extends BaseClient {
     }
     this.log.debug("[DeviceClient:publish] Publishing to topic "+topic+" with payload "+payload+" with QoS "+QOS);
     this.mqtt.publish(topic,payload,{qos: parseInt(QOS)});
-    this.log.debug("[DeviceClient:publish] Published to topic "+topic+" with payload "+payload+" with QoS "+QOS);
+
     return this;
   }
 
