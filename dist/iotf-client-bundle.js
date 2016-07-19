@@ -21633,6 +21633,7 @@ module.exports = exports['default'];
 
 }).call(this,{"isBuffer":require("../../node_modules/is-buffer/index.js")})
 },{"../../node_modules/is-buffer/index.js":37,"../util/util.js":100,"./BaseClient.js":94,"axios":1,"bluebird":17,"btoa":20,"format":34}],96:[function(require,module,exports){
+(function (Buffer){
 /**
  *****************************************************************************
  Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
@@ -21804,7 +21805,7 @@ var GatewayClient = (function (_BaseClient) {
       var topic = (0, _format2['default'])("iot-2/type/%s/id/%s/evt/%s/fmt/%s", type, id, eventType, eventFormat);
       var QoS = qos || 0;
 
-      if (typeof payload === 'object') {
+      if ((typeof payload === 'object' || typeof payload === 'boolean' || typeof payload === 'number') && !Buffer.isBuffer(payload)) {
         // mqtt library does not support sending JSON data. So stringifying it.
         // All JSON object, array will be encoded.
         payload = JSON.stringify(payload);
@@ -21944,7 +21945,8 @@ var GatewayClient = (function (_BaseClient) {
 exports['default'] = GatewayClient;
 module.exports = exports['default'];
 
-},{"../util/util.js":100,"./BaseClient.js":94,"axios":1,"bluebird":17,"btoa":20,"format":34}],97:[function(require,module,exports){
+}).call(this,{"isBuffer":require("../../node_modules/is-buffer/index.js")})
+},{"../../node_modules/is-buffer/index.js":37,"../util/util.js":100,"./BaseClient.js":94,"axios":1,"bluebird":17,"btoa":20,"format":34}],97:[function(require,module,exports){
 /**
  *****************************************************************************
  Copyright (c) 2014, 2015 IBM Corporation and other Contributors.

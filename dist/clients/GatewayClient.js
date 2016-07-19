@@ -164,7 +164,7 @@
         var topic = (0, _format2['default'])("iot-2/type/%s/id/%s/evt/%s/fmt/%s", type, id, eventType, eventFormat);
         var QoS = qos || 0;
 
-        if (typeof payload === 'object') {
+        if ((typeof payload === 'object' || typeof payload === 'boolean' || typeof payload === 'number') && !Buffer.isBuffer(payload)) {
           // mqtt library does not support sending JSON data. So stringifying it.
           // All JSON object, array will be encoded.
           payload = JSON.stringify(payload);
