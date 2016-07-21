@@ -105,8 +105,17 @@ export default class BaseClient extends events.EventEmitter {
   }
 
   setKeepAliveInterval(keepAliveInterval) {
-		this.mqttConfig.keepalive = keepAliveInterval;
+    this.mqttConfig.keepalive = keepAliveInterval||60;
     this.log.debug("[BaseClient:setKeepAliveInterval] Connection Keep Alive Interval value set to "+this.mqttConfig.keepalive+" Seconds");
+  }
+
+  setCleanSession(cleanSession){
+    if(!isBoolean(cleanSession) && cleanSession !== 'true' && cleanSession !== 'false'){ 
+      this.log.debug("[BaseClient:setCleanSession] Value given for cleanSession is "+cleanSession+" , is not a Boolean, setting to true");
+      cleanSession = true;
+    }
+    this.mqttConfig.clean = cleanSession;
+    this.log.debug("[BaseClient:setCleanSession] Connection Clean Session value set to "+this.mqttConfig.clean);
   }
 
   connect(){
