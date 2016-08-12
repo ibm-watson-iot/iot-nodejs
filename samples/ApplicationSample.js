@@ -34,7 +34,7 @@ listAllDevicesOfType('drone').then (function onSuccess (argument) {
 	console.log(argument);
 });
 
-//Register a new Device
+//Register a new Device Type
 appClient.
 registerDeviceType('newType1',"New Type").then (function onSuccess (argument) {
 	console.log("Success");
@@ -45,7 +45,7 @@ registerDeviceType('newType1',"New Type").then (function onSuccess (argument) {
 	console.log(argument);
 });
 
-//Register a new Device Type
+//Register a new Device
 appClient.
 registerDevice('raspi',"new01012220","token12345").then (function onSuccess (argument) {
 	console.log("Success");
