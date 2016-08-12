@@ -34,7 +34,7 @@ listAllDevicesOfType('drone').then (function onSuccess (argument) {
 	console.log(argument);
 });
 
-//Register a new Device Type
+//Register a new Device
 appClient.
 registerDeviceType('newType1',"New Type").then (function onSuccess (argument) {
 	console.log("Success");
