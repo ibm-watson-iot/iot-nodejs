@@ -409,9 +409,11 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('PUT', 200, true, ['device', 'types' , type], JSON.stringify(body));
   }
 
-  registerDeviceType(typeId, description, deviceInfo, metadata){
-    this.log.debug("[ApplicationClient] registerDeviceType("+typeId+", "+description+", "+deviceInfo+", "+metadata+")");
+
+  registerDeviceType(typeId, description, deviceInfo, metadata, classId){
+    this.log.debug("[ApplicationClient] registerDeviceType(" + typeId + ", " + description + ", " + deviceInfo + ", " + metadata + ", " + classId + ")");
     // TODO: field validation
+    classId = classId || "Device";
     let body = {
       id: typeId,
       classId: "Device",

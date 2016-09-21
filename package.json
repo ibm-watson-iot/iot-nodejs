@@ -1,6 +1,6 @@
 {
   "name": "ibmiotf",
-  "version": "0.2.22",
+  "version": "0.2.23",
   "description": "A library for developing device and application clients for IBM Internet of Things Foundation",
   "main": "dist/iotf-client.js",
   "dependencies": {
@@ -43,7 +43,7 @@
     },
     {
       "name": "Amit M Mangalvedkar",
-      "email": "amitmangalvedkar@gmail.com"
+      "email": "amitmangalvedkar@in.ibm.com"
     }
   ],
   "repository": {

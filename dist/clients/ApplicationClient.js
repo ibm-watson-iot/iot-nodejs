@@ -437,9 +437,11 @@
       }
     }, {
       key: 'registerDeviceType',
-      value: function registerDeviceType(typeId, description, deviceInfo, metadata) {
-        this.log.debug("[ApplicationClient] registerDeviceType(" + typeId + ", " + description + ", " + deviceInfo + ", " + metadata + ")");
+      value: function registerDeviceType(typeId, description, deviceInfo, metadata, classId) {
+        this.log.debug("[ApplicationClient] registerDeviceType(" + typeId + ", " + description + ", " + deviceInfo + ", " + metadata + ", " + classId + ")");
         // TODO: field validation
+        classId = classId || "Device";
+        
         var body = {
           id: typeId,
           classId: "Device",
