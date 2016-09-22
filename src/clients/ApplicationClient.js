@@ -416,7 +416,7 @@ export default class ApplicationClient extends BaseClient {
     classId = classId || "Device";
     let body = {
       id: typeId,
-      classId: "Device",
+      classId: classId,
       deviceInfo : deviceInfo,
       description : description,
       metadata: metadata

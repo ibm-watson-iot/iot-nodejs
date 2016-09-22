@@ -443,7 +443,7 @@
         classId = classId || "Device";
         var body = {
           id: typeId,
-          classId: "Device",
+          classId: classId,
           deviceInfo: deviceInfo,
           description: description,
           metadata: metadata
