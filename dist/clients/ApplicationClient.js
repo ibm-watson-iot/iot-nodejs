@@ -197,7 +197,7 @@
       }
     }, {
       key: 'publish',
-      value: function publish(topic, msg, QoS) {
+      value: function publish(topic, msg, QoS, callback) {
         QoS = QoS || 0;
         if (!this.isConnected) {
           this.log.error("[ApplicationClient:publish] Client is not connected");
@@ -212,7 +212,7 @@
           msg = JSON.stringify(msg);
         }
         this.log.debug("[ApplicationClient:publish] Publish: " + topic + ", " + msg + ", QoS : " + QoS);
-        this.mqtt.publish(topic, msg, { qos: parseInt(QoS) });
+        this.mqtt.publish(topic, msg, { qos: parseInt(QoS) }, callback);
       }
     }, {
       key: 'subscribeToDeviceEvents',
@@ -311,7 +311,7 @@
       }
     }, {
       key: 'publishDeviceEvent',
-      value: function publishDeviceEvent(type, id, event, format, data, qos) {
+      value: function publishDeviceEvent(type, id, event, format, data, qos, callback) {
         qos = qos || 0;
         if (!(0, _utilUtilJs.isDefined)(type) || !(0, _utilUtilJs.isDefined)(id) || !(0, _utilUtilJs.isDefined)(event) || !(0, _utilUtilJs.isDefined)(format)) {
           this.log.error("[ApplicationClient:publishDeviceEvent] Required params for publishDeviceEvent not present");
@@ -320,12 +320,12 @@
           return;
         }
         var topic = "iot-2/type/" + type + "/id/" + id + "/evt/" + event + "/fmt/" + format;
-        this.publish(topic, data, qos);
+        this.publish(topic, data, qos, callback);
         return this;
       }
     }, {
       key: 'publishDeviceCommand',
-      value: function publishDeviceCommand(type, id, command, format, data, qos) {
+      value: function publishDeviceCommand(type, id, command, format, data, qos, callback) {
         qos = qos || 0;
         if (!(0, _utilUtilJs.isDefined)(type) || !(0, _utilUtilJs.isDefined)(id) || !(0, _utilUtilJs.isDefined)(command) || !(0, _utilUtilJs.isDefined)(format)) {
           this.log.error("[ApplicationClient:publishToDeviceCommand] Required params for publishDeviceCommand not present");
@@ -334,7 +334,7 @@
           return;
         }
         var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/" + command + "/fmt/" + format;
-        this.publish(topic, data, qos);
+        this.publish(topic, data, qos, callback);
         return this;
       }
     }, {

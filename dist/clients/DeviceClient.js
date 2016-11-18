@@ -126,7 +126,7 @@
       }
     }, {
       key: 'publish',
-      value: function publish(eventType, eventFormat, payload, qos) {
+      value: function publish(eventType, eventFormat, payload, qos, callback) {
         if (!this.isConnected) {
           this.log.error("[DeviceClient:publish] Client is not connected");
           //throw new Error();
@@ -143,7 +143,7 @@
           payload = JSON.stringify(payload);
         }
         this.log.debug("[DeviceClient:publish] Publishing to topic " + topic + " with payload " + payload + " with QoS " + QOS);
-        this.mqtt.publish(topic, payload, { qos: parseInt(QOS) });
+        this.mqtt.publish(topic, payload, { qos: parseInt(QOS) }, callback);
 
         return this;
       }

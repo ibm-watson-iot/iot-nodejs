@@ -8345,7 +8345,8 @@ Duplexify.prototype._forward = function() {
 
   var data
 
-  while ((data = shift(this._readable2)) !== null) {
+  while (this._drained && (data = shift(this._readable2)) !== null) {
+    if (this.destroyed) continue
     this._drained = this.push(data)
   }
 
@@ -8604,6 +8605,10 @@ var processNextTick = require('process-nextick-args');
 var isArray = require('isarray');
 /*</replacement>*/
 
+/*<replacement>*/
+var Duplex;
+/*</replacement>*/
+
 Readable.ReadableState = ReadableState;
 
 /*<replacement>*/
@@ -8651,6 +8656,8 @@ var StringDecoder;
 util.inherits(Readable, Stream);
 
 function prependListener(emitter, event, fn) {
+  // Sadly this is not cacheable as some libraries bundle their own
+  // event emitter implementation with them.
   if (typeof emitter.prependListener === 'function') {
     return emitter.prependListener(event, fn);
   } else {
@@ -8662,7 +8669,6 @@ function prependListener(emitter, event, fn) {
   }
 }
 
-var Duplex;
 function ReadableState(options, stream) {
   Duplex = Duplex || require('./_stream_duplex');
 
@@ -8732,7 +8738,6 @@ function ReadableState(options, stream) {
   }
 }
 
-var Duplex;
 function Readable(options) {
   Duplex = Duplex || require('./_stream_duplex');
 
@@ -9055,7 +9060,7 @@ function maybeReadMore_(stream, state) {
 // for virtual (non-string, non-buffer) streams, "length" is somewhat
 // arbitrary, and perhaps not very meaningful.
 Readable.prototype._read = function (n) {
-  this.emit('error', new Error('not implemented'));
+  this.emit('error', new Error('_read() is not implemented'));
 };
 
 Readable.prototype.pipe = function (dest, pipeOpts) {
@@ -9233,16 +9238,16 @@ Readable.prototype.unpipe = function (dest) {
     state.pipesCount = 0;
     state.flowing = false;
 
-    for (var _i = 0; _i < len; _i++) {
-      dests[_i].emit('unpipe', this);
+    for (var i = 0; i < len; i++) {
+      dests[i].emit('unpipe', this);
     }return this;
   }
 
   // try to find the right one.
-  var i = indexOf(state.pipes, dest);
-  if (i === -1) return this;
+  var index = indexOf(state.pipes, dest);
+  if (index === -1) return this;
 
-  state.pipes.splice(i, 1);
+  state.pipes.splice(index, 1);
   state.pipesCount -= 1;
   if (state.pipesCount === 1) state.pipes = state.pipes[0];
 
@@ -9627,7 +9632,6 @@ function Transform(options) {
 
   this._transformState = new TransformState(this);
 
-  // when the writable side finishes, then flush out anything remaining.
   var stream = this;
 
   // start out asking for a readable event once data is transformed.
@@ -9644,9 +9648,10 @@ function Transform(options) {
     if (typeof options.flush === 'function') this._flush = options.flush;
   }
 
+  // When the writable side finishes, then flush out anything remaining.
   this.once('prefinish', function () {
-    if (typeof this._flush === 'function') this._flush(function (er) {
-      done(stream, er);
+    if (typeof this._flush === 'function') this._flush(function (er, data) {
+      done(stream, er, data);
     });else done(stream);
   });
 }
@@ -9667,7 +9672,7 @@ Transform.prototype.push = function (chunk, encoding) {
 // an error, then that'll put the hurt on the whole operation.  If you
 // never call cb(), then you'll never get another chunk.
 Transform.prototype._transform = function (chunk, encoding, cb) {
-  throw new Error('Not implemented');
+  throw new Error('_transform() is not implemented');
 };
 
 Transform.prototype._write = function (chunk, encoding, cb) {
@@ -9697,8 +9702,10 @@ Transform.prototype._read = function (n) {
   }
 };
 
-function done(stream, er) {
+function done(stream, er, data) {
   if (er) return stream.emit('error', er);
+
+  if (data !== null && data !== undefined) stream.push(data);
 
   // if there's nothing in the write buffer, then that means
   // that nothing more will ever be provided
@@ -9727,6 +9734,10 @@ var processNextTick = require('process-nextick-args');
 
 /*<replacement>*/
 var asyncWrite = !process.browser && ['v0.10', 'v0.9.'].indexOf(process.version.slice(0, 5)) > -1 ? setImmediate : processNextTick;
+/*</replacement>*/
+
+/*<replacement>*/
+var Duplex;
 /*</replacement>*/
 
 Writable.WritableState = WritableState;
@@ -9769,7 +9780,6 @@ function WriteReq(chunk, encoding, cb) {
   this.next = null;
 }
 
-var Duplex;
 function WritableState(options, stream) {
   Duplex = Duplex || require('./_stream_duplex');
 
@@ -9791,6 +9801,7 @@ function WritableState(options, stream) {
   // cast to ints.
   this.highWaterMark = ~ ~this.highWaterMark;
 
+  // drain event flag.
   this.needDrain = false;
   // at the start of calling end()
   this.ending = false;
@@ -9865,7 +9876,7 @@ function WritableState(options, stream) {
   this.corkedRequestsFree = new CorkedRequest(this);
 }
 
-WritableState.prototype.getBuffer = function writableStateGetBuffer() {
+WritableState.prototype.getBuffer = function getBuffer() {
   var current = this.bufferedRequest;
   var out = [];
   while (current) {
@@ -9885,13 +9896,37 @@ WritableState.prototype.getBuffer = function writableStateGetBuffer() {
   } catch (_) {}
 })();
 
-var Duplex;
+// Test _writableState for inheritance to account for Duplex streams,
+// whose prototype chain only points to Readable.
+var realHasInstance;
+if (typeof Symbol === 'function' && Symbol.hasInstance && typeof Function.prototype[Symbol.hasInstance] === 'function') {
+  realHasInstance = Function.prototype[Symbol.hasInstance];
+  Object.defineProperty(Writable, Symbol.hasInstance, {
+    value: function (object) {
+      if (realHasInstance.call(this, object)) return true;
+
+      return object && object._writableState instanceof WritableState;
+    }
+  });
+} else {
+  realHasInstance = function (object) {
+    return object instanceof this;
+  };
+}
+
 function Writable(options) {
   Duplex = Duplex || require('./_stream_duplex');
 
-  // Writable ctor is applied to Duplexes, though they're not
-  // instanceof Writable, they're instanceof Readable.
-  if (!(this instanceof Writable) && !(this instanceof Duplex)) return new Writable(options);
+  // Writable ctor is applied to Duplexes, too.
+  // `realHasInstance` is necessary because using plain `instanceof`
+  // would return false, as no `_writableState` property is attached.
+
+  // Trying to use the custom `instanceof` for Writable here will also break the
+  // Node.js LazyTransform implementation, which has a non-trivial getter for
+  // `_writableState` that would lead to infinite recursion.
+  if (!realHasInstance.call(Writable, this) && !(this instanceof Duplex)) {
+    return new Writable(options);
+  }
 
   this._writableState = new WritableState(options, this);
 
@@ -10151,7 +10186,7 @@ function clearBuffer(stream, state) {
 }
 
 Writable.prototype._write = function (chunk, encoding, cb) {
-  cb(new Error('not implemented'));
+  cb(new Error('_write() is not implemented'));
 };
 
 Writable.prototype._writev = null;
@@ -20822,7 +20857,7 @@ var ApplicationClient = (function (_BaseClient) {
     }
   }, {
     key: 'publish',
-    value: function publish(topic, msg, QoS) {
+    value: function publish(topic, msg, QoS, callback) {
       QoS = QoS || 0;
       if (!this.isConnected) {
         this.log.error("[ApplicationClient:publish] Client is not connected");
@@ -20837,7 +20872,7 @@ var ApplicationClient = (function (_BaseClient) {
         msg = JSON.stringify(msg);
       }
       this.log.debug("[ApplicationClient:publish] Publish: " + topic + ", " + msg + ", QoS : " + QoS);
-      this.mqtt.publish(topic, msg, { qos: parseInt(QoS) });
+      this.mqtt.publish(topic, msg, { qos: parseInt(QoS) }, callback);
     }
   }, {
     key: 'subscribeToDeviceEvents',
@@ -20936,7 +20971,7 @@ var ApplicationClient = (function (_BaseClient) {
     }
   }, {
     key: 'publishDeviceEvent',
-    value: function publishDeviceEvent(type, id, event, format, data, qos) {
+    value: function publishDeviceEvent(type, id, event, format, data, qos, callback) {
       qos = qos || 0;
       if (!(0, _utilUtilJs.isDefined)(type) || !(0, _utilUtilJs.isDefined)(id) || !(0, _utilUtilJs.isDefined)(event) || !(0, _utilUtilJs.isDefined)(format)) {
         this.log.error("[ApplicationClient:publishDeviceEvent] Required params for publishDeviceEvent not present");
@@ -20945,12 +20980,12 @@ var ApplicationClient = (function (_BaseClient) {
         return;
       }
       var topic = "iot-2/type/" + type + "/id/" + id + "/evt/" + event + "/fmt/" + format;
-      this.publish(topic, data, qos);
+      this.publish(topic, data, qos, callback);
       return this;
     }
   }, {
     key: 'publishDeviceCommand',
-    value: function publishDeviceCommand(type, id, command, format, data, qos) {
+    value: function publishDeviceCommand(type, id, command, format, data, qos, callback) {
       qos = qos || 0;
       if (!(0, _utilUtilJs.isDefined)(type) || !(0, _utilUtilJs.isDefined)(id) || !(0, _utilUtilJs.isDefined)(command) || !(0, _utilUtilJs.isDefined)(format)) {
         this.log.error("[ApplicationClient:publishToDeviceCommand] Required params for publishDeviceCommand not present");
@@ -20959,7 +20994,7 @@ var ApplicationClient = (function (_BaseClient) {
         return;
       }
       var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/" + command + "/fmt/" + format;
-      this.publish(topic, data, qos);
+      this.publish(topic, data, qos, callback);
       return this;
     }
   }, {
@@ -21768,7 +21803,7 @@ var DeviceClient = (function (_BaseClient) {
     }
   }, {
     key: 'publish',
-    value: function publish(eventType, eventFormat, payload, qos) {
+    value: function publish(eventType, eventFormat, payload, qos, callback) {
       if (!this.isConnected) {
         this.log.error("[DeviceClient:publish] Client is not connected");
         //throw new Error();
@@ -21785,7 +21820,7 @@ var DeviceClient = (function (_BaseClient) {
         payload = JSON.stringify(payload);
       }
       this.log.debug("[DeviceClient:publish] Publishing to topic " + topic + " with payload " + payload + " with QoS " + QOS);
-      this.mqtt.publish(topic, payload, { qos: parseInt(QOS) });
+      this.mqtt.publish(topic, payload, { qos: parseInt(QOS) }, callback);
 
       return this;
     }
@@ -21973,17 +22008,17 @@ var GatewayClient = (function (_BaseClient) {
     }
   }, {
     key: 'publishGatewayEvent',
-    value: function publishGatewayEvent(eventType, eventFormat, payload, qos) {
-      return this.publishEvent(this.type, this.id, eventType, eventFormat, payload, qos);
+    value: function publishGatewayEvent(eventType, eventFormat, payload, qos, callback) {
+      return this.publishEvent(this.type, this.id, eventType, eventFormat, payload, qos, callback);
     }
   }, {
     key: 'publishDeviceEvent',
-    value: function publishDeviceEvent(deviceType, deviceId, eventType, eventFormat, payload, qos) {
-      return this.publishEvent(deviceType, deviceId, eventType, eventFormat, payload, qos);
+    value: function publishDeviceEvent(deviceType, deviceId, eventType, eventFormat, payload, qos, callback) {
+      return this.publishEvent(deviceType, deviceId, eventType, eventFormat, payload, qos, callback);
     }
   }, {
     key: 'publishEvent',
-    value: function publishEvent(type, id, eventType, eventFormat, payload, qos) {
+    value: function publishEvent(type, id, eventType, eventFormat, payload, qos, callback) {
       if (!this.isConnected) {
         this.log.error("[GatewayClient:publishEvent] Client is not connected");
         //throw new Error("Client is not connected");
@@ -22006,7 +22041,7 @@ var GatewayClient = (function (_BaseClient) {
       }
 
       this.log.debug("[GatewayClient:publishEvent] Publishing to topic : " + topic + " with payload : " + payload + " with QoS : " + QoS);
-      this.mqtt.publish(topic, payload, { qos: parseInt(QoS) });
+      this.mqtt.publish(topic, payload, { qos: parseInt(QoS) }, callback);
 
       return this;
     }
