@@ -115,15 +115,15 @@ export default class GatewayClient extends BaseClient {
     });
   }
 
-  publishGatewayEvent(eventType, eventFormat, payload, qos){
-    return this.publishEvent(this.type, this.id, eventType, eventFormat, payload, qos);
+  publishGatewayEvent(eventType, eventFormat, payload, qos, callback){
+    return this.publishEvent(this.type, this.id, eventType, eventFormat, payload, qos, callback);
   }
 
-  publishDeviceEvent(deviceType, deviceId, eventType, eventFormat, payload, qos){
-    return this.publishEvent(deviceType, deviceId, eventType, eventFormat, payload, qos);
+  publishDeviceEvent(deviceType, deviceId, eventType, eventFormat, payload, qos, callback){
+    return this.publishEvent(deviceType, deviceId, eventType, eventFormat, payload, qos, callback);
   }
 
-  publishEvent(type, id, eventType, eventFormat, payload, qos){
+  publishEvent(type, id, eventType, eventFormat, payload, qos, callback){
     if (!this.isConnected) {
       this.log.error("[GatewayClient:publishEvent] Client is not connected");
       //throw new Error("Client is not connected");
@@ -146,7 +146,7 @@ export default class GatewayClient extends BaseClient {
     }
 
     this.log.debug("[GatewayClient:publishEvent] Publishing to topic : "+ topic + " with payload : "+payload+" with QoS : "+QoS);
-    this.mqtt.publish(topic,payload,{qos: parseInt(QoS)});
+    this.mqtt.publish(topic,payload,{qos: parseInt(QoS)}, callback);
 
     return this;
   }

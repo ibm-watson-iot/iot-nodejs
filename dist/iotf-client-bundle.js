@@ -19282,7 +19282,7 @@ var ApplicationClient = (function (_BaseClient) {
     }
   }, {
     key: 'publish',
-    value: function publish(topic, msg, QoS) {
+    value: function publish(topic, msg, QoS, callback) {
       QoS = QoS || 0;
       if (!this.isConnected) {
         this.log.error("[ApplicationClient:publish] Client is not connected");
@@ -19297,7 +19297,7 @@ var ApplicationClient = (function (_BaseClient) {
         msg = JSON.stringify(msg);
       }
       this.log.debug("[ApplicationClient:publish] Publish: " + topic + ", " + msg + ", QoS : " + QoS);
-      this.mqtt.publish(topic, msg, { qos: parseInt(QoS) });
+      this.mqtt.publish(topic, msg, { qos: parseInt(QoS) }, callback);
     }
   }, {
     key: 'subscribeToDeviceEvents',
@@ -19396,7 +19396,7 @@ var ApplicationClient = (function (_BaseClient) {
     }
   }, {
     key: 'publishDeviceEvent',
-    value: function publishDeviceEvent(type, id, event, format, data, qos) {
+    value: function publishDeviceEvent(type, id, event, format, data, qos, callback) {
       qos = qos || 0;
       if (!(0, _utilUtilJs.isDefined)(type) || !(0, _utilUtilJs.isDefined)(id) || !(0, _utilUtilJs.isDefined)(event) || !(0, _utilUtilJs.isDefined)(format)) {
         this.log.error("[ApplicationClient:publishDeviceEvent] Required params for publishDeviceEvent not present");
@@ -19405,12 +19405,12 @@ var ApplicationClient = (function (_BaseClient) {
         return;
       }
       var topic = "iot-2/type/" + type + "/id/" + id + "/evt/" + event + "/fmt/" + format;
-      this.publish(topic, data, qos);
+      this.publish(topic, data, qos, callback);
       return this;
     }
   }, {
     key: 'publishDeviceCommand',
-    value: function publishDeviceCommand(type, id, command, format, data, qos) {
+    value: function publishDeviceCommand(type, id, command, format, data, qos, callback) {
       qos = qos || 0;
       if (!(0, _utilUtilJs.isDefined)(type) || !(0, _utilUtilJs.isDefined)(id) || !(0, _utilUtilJs.isDefined)(command) || !(0, _utilUtilJs.isDefined)(format)) {
         this.log.error("[ApplicationClient:publishToDeviceCommand] Required params for publishDeviceCommand not present");
@@ -19419,7 +19419,7 @@ var ApplicationClient = (function (_BaseClient) {
         return;
       }
       var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/" + command + "/fmt/" + format;
-      this.publish(topic, data, qos);
+      this.publish(topic, data, qos, callback);
       return this;
     }
   }, {
@@ -20230,7 +20230,7 @@ var DeviceClient = (function (_BaseClient) {
     }
   }, {
     key: 'publish',
-    value: function publish(eventType, eventFormat, payload, qos) {
+    value: function publish(eventType, eventFormat, payload, qos, callback) {
       if (!this.isConnected) {
         this.log.error("[DeviceClient:publish] Client is not connected");
         //throw new Error();
@@ -20247,7 +20247,7 @@ var DeviceClient = (function (_BaseClient) {
         payload = JSON.stringify(payload);
       }
       this.log.debug("[DeviceClient:publish] Publishing to topic " + topic + " with payload " + payload + " with QoS " + QOS);
-      this.mqtt.publish(topic, payload, { qos: parseInt(QOS) });
+      this.mqtt.publish(topic, payload, { qos: parseInt(QOS) }, callback);
 
       return this;
     }
@@ -20437,17 +20437,17 @@ var GatewayClient = (function (_BaseClient) {
     }
   }, {
     key: 'publishGatewayEvent',
-    value: function publishGatewayEvent(eventType, eventFormat, payload, qos) {
-      return this.publishEvent(this.type, this.id, eventType, eventFormat, payload, qos);
+    value: function publishGatewayEvent(eventType, eventFormat, payload, qos, callback) {
+      return this.publishEvent(this.type, this.id, eventType, eventFormat, payload, qos, callback);
     }
   }, {
     key: 'publishDeviceEvent',
-    value: function publishDeviceEvent(deviceType, deviceId, eventType, eventFormat, payload, qos) {
-      return this.publishEvent(deviceType, deviceId, eventType, eventFormat, payload, qos);
+    value: function publishDeviceEvent(deviceType, deviceId, eventType, eventFormat, payload, qos, callback) {
+      return this.publishEvent(deviceType, deviceId, eventType, eventFormat, payload, qos, callback);
     }
   }, {
     key: 'publishEvent',
-    value: function publishEvent(type, id, eventType, eventFormat, payload, qos) {
+    value: function publishEvent(type, id, eventType, eventFormat, payload, qos, callback) {
       if (!this.isConnected) {
         this.log.error("[GatewayClient:publishEvent] Client is not connected");
         //throw new Error("Client is not connected");
@@ -20470,7 +20470,7 @@ var GatewayClient = (function (_BaseClient) {
       }
 
       this.log.debug("[GatewayClient:publishEvent] Publishing to topic : " + topic + " with payload : " + payload + " with QoS : " + QoS);
-      this.mqtt.publish(topic, payload, { qos: parseInt(QoS) });
+      this.mqtt.publish(topic, payload, { qos: parseInt(QoS) }, callback);
 
       return this;
     }
