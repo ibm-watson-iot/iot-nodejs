@@ -138,17 +138,17 @@
       }
     }, {
       key: 'publishGatewayEvent',
-      value: function publishGatewayEvent(eventType, eventFormat, payload, qos) {
-        return this.publishEvent(this.type, this.id, eventType, eventFormat, payload, qos);
+      value: function publishGatewayEvent(eventType, eventFormat, payload, qos, callback) {
+        return this.publishEvent(this.type, this.id, eventType, eventFormat, payload, qos, callback);
       }
     }, {
       key: 'publishDeviceEvent',
-      value: function publishDeviceEvent(deviceType, deviceId, eventType, eventFormat, payload, qos) {
-        return this.publishEvent(deviceType, deviceId, eventType, eventFormat, payload, qos);
+      value: function publishDeviceEvent(deviceType, deviceId, eventType, eventFormat, payload, qos, callback) {
+        return this.publishEvent(deviceType, deviceId, eventType, eventFormat, payload, qos, callback);
       }
     }, {
       key: 'publishEvent',
-      value: function publishEvent(type, id, eventType, eventFormat, payload, qos) {
+      value: function publishEvent(type, id, eventType, eventFormat, payload, qos, callback) {
         if (!this.isConnected) {
           this.log.error("[GatewayClient:publishEvent] Client is not connected");
           //throw new Error("Client is not connected");
@@ -171,7 +171,7 @@
         }
 
         this.log.debug("[GatewayClient:publishEvent] Publishing to topic : " + topic + " with payload : " + payload + " with QoS : " + QoS);
-        this.mqtt.publish(topic, payload, { qos: parseInt(QoS) });
+        this.mqtt.publish(topic, payload, { qos: parseInt(QoS) }, callback);
 
         return this;
       }

@@ -187,7 +187,7 @@ export default class ApplicationClient extends BaseClient {
 
   }
 
-  publish(topic, msg, QoS){
+  publish(topic, msg, QoS, callback){
     QoS = QoS || 0;
     if (!this.isConnected) {
       this.log.error("[ApplicationClient:publish] Client is not connected");
@@ -202,7 +202,7 @@ export default class ApplicationClient extends BaseClient {
       msg = JSON.stringify(msg);
     }
     this.log.debug("[ApplicationClient:publish] Publish: "+topic+", "+msg+", QoS : "+QoS);
-    this.mqtt.publish(topic, msg, {qos:parseInt(QoS)});
+    this.mqtt.publish(topic, msg, {qos:parseInt(QoS)}, callback);
 
   }
 
@@ -293,7 +293,7 @@ export default class ApplicationClient extends BaseClient {
     return this;
   }
 
-  publishDeviceEvent(type, id, event, format, data, qos){
+  publishDeviceEvent(type, id, event, format, data, qos, callback){
     qos = qos || 0;
     if(!isDefined(type) || !isDefined(id) || !isDefined(event) || !isDefined(format) ) {
       this.log.error("[ApplicationClient:publishDeviceEvent] Required params for publishDeviceEvent not present");
@@ -302,11 +302,11 @@ export default class ApplicationClient extends BaseClient {
       return;
     }
     var topic = "iot-2/type/" + type + "/id/" + id + "/evt/" + event + "/fmt/" + format;
-    this.publish(topic, data, qos);
+    this.publish(topic, data, qos, callback);
     return this;
   }
 
-  publishDeviceCommand(type, id, command, format, data, qos){
+  publishDeviceCommand(type, id, command, format, data, qos, callback){
     qos = qos || 0;
     if(!isDefined(type) || !isDefined(id) || !isDefined(command) || !isDefined(format) ) {
       this.log.error("[ApplicationClient:publishToDeviceCommand] Required params for publishDeviceCommand not present");
@@ -315,7 +315,7 @@ export default class ApplicationClient extends BaseClient {
       return;
     }
     var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/" + command + "/fmt/" + format;
-    this.publish(topic, data, qos);
+    this.publish(topic, data, qos, callback);
     return this;
   }
 
