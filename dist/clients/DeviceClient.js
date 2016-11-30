@@ -154,7 +154,7 @@
 
         this.log.debug("[DeviceClient:publishHTTPS] Publishing event of Type: " + eventType + " with payload : " + payload);
         return new _Promise['default'](function (resolve, reject) {
-          var uri = (0, _format2['default'])("https://%s.%s/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.domainName, _this2.typeId, _this2.deviceId, eventType);
+          var uri = (0, _format2['default'])("https://%s.messaging.%s/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.domainName, _this2.typeId, _this2.deviceId, eventType);
 
           var xhrConfig = {
             url: uri,
@@ -165,6 +165,8 @@
 
           if (eventFormat === 'json') {
             xhrConfig.headers['Content-Type'] = 'application/json';
+          } else if (eventFormat === 'xml') {
+            xhrConfig.headers['Content-Type'] = 'application/xml';
           }
 
           if (_this2.org !== QUICKSTART_ORG_ID) {

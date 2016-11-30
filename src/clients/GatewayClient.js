@@ -154,7 +154,7 @@ export default class GatewayClient extends BaseClient {
   publishHTTPS(eventType, eventFormat, payload){
     this.log.debug("Publishing event of Type: "+ eventType + " with payload : "+payload);
     return new Promise((resolve, reject) => {
-      let uri = format("https://%s.%s/api/v0002/device/types/%s/devices/%s/events/%s", this.org, this.domainName, this.type, this.id, eventType);
+      let uri = format("https://%s.messaging.%s/api/v0002/device/types/%s/devices/%s/events/%s", this.org, this.domainName, this.type, this.id, eventType);
 
       let xhrConfig = {
         url: uri,
@@ -167,6 +167,8 @@ export default class GatewayClient extends BaseClient {
 
       if(eventFormat === 'json') {
         xhrConfig.headers['Content-Type'] = 'application/json';
+      } else if(eventFormat === 'xml') {
+        xhrConfig.headers['Content-Type'] = 'application/xml';
       }
 
       if(this.org !== QUICKSTART_ORG_ID) {

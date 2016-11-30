@@ -648,6 +648,8 @@ export default class ApplicationClient extends BaseClient {
 
       if(eventFormat === 'json') {
         xhrConfig.headers['Content-Type'] = 'application/json';
+      } else if(eventFormat === 'xml') {
+        xhrConfig.headers['Content-Type'] = 'application/xml';
       }
 
       if(this.org !== QUICKSTART_ORG_ID) {

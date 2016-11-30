@@ -101,8 +101,8 @@ After the successful connection to the IoTF service, the device client
 emits *connect* event. So all the device logic can be implemented inside
 this callback function.
 
-The Device Client automatically tries to reconnect when it loses connection. 
-When the reconnection is successful, the client emits *reconnect* event. 
+The Device Client automatically tries to reconnect when it loses connection.
+When the reconnection is successful, the client emits *reconnect* event.
 
 
 Logging
@@ -162,6 +162,26 @@ deviceClient.on("connect", function () {
     deviceClient.publish("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel);
 });
 
+....
+```
+
+The device events can also be sent using HTTP instead of JSON.
+
+``` {.sourceCode .javascript}
+
+var deviceClient = new Client.IotfDevice(config);
+
+//setting the log level to trace. By default its 'warn'
+deviceClient.log.setLevel('debug');
+
+deviceClient.publishHTTPS('myevt', 'json', '{"value": 23 }').then(function onSuccess (argument) {
+	console.log("Success");
+	console.log(argument);
+}, function onError (argument) {
+
+	console.log("Fail");
+	console.log(argument);
+});
 ....
 ```
 
@@ -310,8 +330,8 @@ After the successful connection to the IoTF service, the application
 client emits *connect* event. So all the logic can be implemented inside
 this callback function.
 
-The Application Client automatically tries to reconnect when it loses connection. 
-When the reconnection is successful, the client emits *reconnect* event. 
+The Application Client automatically tries to reconnect when it loses connection.
+When the reconnection is successful, the client emits *reconnect* event.
 
 Logging
 --------
@@ -621,6 +641,33 @@ appClient.on("connect", function () {
 });
 ```
 
+Publishing events from devices(via HTTP)
+-----------------------------------------
+
+Applications can publish events as if they originated from a Device. This method uses HTTP instead of MQTT to send messages
+
+-   DeviceType
+-   Device ID
+-   Event Type
+-   Format
+-   Data
+
+Supported formats for data are text, JSON and XML. The 'Content-Type' will be set as application/json or application/xml
+
+``` {.sourceCode .javascript}
+var appClient = new Client.IotfApplication(appClientConfig);
+
+    appClient.publishHTTPS("raspi", "pi01", "eventType", "json", { d : { 'temp' : 32}}). then (function onSuccess (argument) {
+    	console.log("Success");
+    	console.log(argument);
+    }, function onError (argument) {
+
+    	console.log("Fail");
+    	console.log(argument);
+    });
+
+```
+
 Publishing commands to devices
 ------------------------------
 
@@ -723,8 +770,8 @@ gatewayClient.on('connect', function(){
 After the successful connection to the platform, the gateway client
 emits *connect* event. So all the programming logic can be implemented inside this callback function.
 
-The Gateway Client automatically tries to reconnect when it loses connection. 
-When the reconnection is successful, the client emits *reconnect* event. 
+The Gateway Client automatically tries to reconnect when it loses connection.
+When the reconnection is successful, the client emits *reconnect* event.
 
 Logging
 --------
