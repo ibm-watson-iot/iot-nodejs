@@ -635,8 +635,7 @@ export default class ApplicationClient extends BaseClient {
     this.log.debug("[ApplicationClient:publishHTTPS] Publishing event of Type: "+ eventType + " with payload : "+payload);
     return new Promise((resolve, reject) => {
 
-      let uri = format("https://%s.%s/api/v0002/application/types/%s/devices/%s/events/%s", this.org, this.domainName, deviceType, deviceId, eventType);
-
+      let uri = format("https://%s.messaging.%s/api/v0002/application/types/%s/devices/%s/events/%s", this.org, this.domainName, deviceType, deviceId, eventType);
 
       let xhrConfig = {
         url: uri,
