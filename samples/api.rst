@@ -596,8 +596,8 @@ The function initiateDeviceManagementRequest() can be used to initiate a device 
 
 .. code:: javascript
 
-	var action = "firmware/download";
-	var parameters = [{"version": "0.2.3","name": "NewVersion" }];
+	var action = "firmware/download";// "firmware/update" or "device/reboot" or "device/factoryReset"
+	var parameters = [{"value": "0.2.3","name": "NewVersion" }];
 	var devices = [{ "typeId": deviceTypeId, "deviceId": deviceId }];
     appClient.initiateDeviceManagementRequest(action, parameters, devices).then (function onSuccess (response) {
 		console.log("Success");
@@ -723,7 +723,7 @@ The function getDeviceManagementRequestStatusByDevice() can be used to get an in
 .. code:: javascript
 
     // Pass the Request ID of a device management request
-    appClient.getDeviceManagementRequestStatus(requestId, "iotsample-raspberrypi", "raspi01").then (function onSuccess (response) {
+    appClient.getDeviceManagementRequestStatusByDevice(requestId, "iotsample-raspberrypi", "raspi01").then (function onSuccess (response) {
 		console.log("Success");
 		console.log(response);
 	}, function onError (error) {
