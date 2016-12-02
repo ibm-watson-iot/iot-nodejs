@@ -499,7 +499,7 @@ export default class ApplicationClient extends BaseClient {
 
   deleteDiagnosticLog(type, deviceId, logId){
     this.log.debug("[ApplicationClient] deleteDiagnosticLog("+type+", "+deviceId+", "+logId+")");
-    return this.callApi('DELETE', 204, true, ['device', 'types' , type, 'devices', deviceId, 'diag','logs',logId], null);
+    return this.callApi('DELETE', 204, false, ['device', 'types' , type, 'devices', deviceId, 'diag','logs',logId], null);
   }
 
   getDeviceErrorCodes(type, deviceId){
