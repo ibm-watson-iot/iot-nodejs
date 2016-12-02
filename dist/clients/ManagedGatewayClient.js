@@ -118,7 +118,7 @@
           }
 
           /*let match = DM_REQUEST_RE.exec(topic);
-           
+            
           if(match){
             if(topic == DM_RESPONSE_TOPIC){
               this._onDmResponse(payload);
