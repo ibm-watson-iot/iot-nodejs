@@ -1,8 +1,7 @@
 Standalone Web Application Sample
 =================================
  A standalone web application to create a client side Watson IoT application using the <code>iotf-client-bundle-min.js </code>
- 
- Jump into code
+ Checkout the client Javascript [code](https://github.com/ibm-watson-iot/iot-nodejs/blob/master/samples/WebApplicationSample/public/javascripts/app.js) here. 
  
  
 Dependency
