@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WatsonIoT App</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+
+  </head>
+  <body ng-app="IoTApp">
+    <h1>Angular WatsonIoT App</h1>
+    <div ng-controller="main">
+      <h5><i>(Please enter the below details and click connect)</i></h5>
+      <form ng-submit="main.connect()">
+        <label for="OrgId">OrgId : </label>
+        <input id="OrgId" type="text" ng-model="main.OrgId" required> <br/><br/>
+        <label for="APIKey">APIKey : </label>
+        <input id="APIKey" type="text" ng-model="main.APIKey" required><br/><br/>
+        <label for="AuthToken">AuthToken : </label>
+        <input id="AuthToken" type="password" ng-model="main.AuthToken" required><br/><br/>
+        <input type="submit" value="Connect" >
+      </form>
+      <h4  ng-show="main.EventLog" >Device Event Log </h4>
+      <pre ng-show="main.EventLog" style="height:200px;overflow-y:auto">{{main.EventLog}}</pre>
+    </div>
+    <script src="/angular.js"></script>
+    <script src="/iotf-client-bundle.min.js"></script>
+    <script src="/javascripts/app.js"></script>
+  </body>
+</html>
