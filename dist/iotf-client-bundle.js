@@ -20094,7 +20094,7 @@ var BaseClient = (function (_events$EventEmitter) {
 exports['default'] = BaseClient;
 module.exports = exports['default'];
 
-}).call(this,"/src\\clients")
+}).call(this,"/src/clients")
 },{"../util/util.js":104,"events":19,"loglevel":40,"mqtt":47}],99:[function(require,module,exports){
 (function (Buffer){
 /**
@@ -21532,7 +21532,7 @@ var ManagedGatewayClient = (function (_GatewayClient) {
         }
 
         /*let match = DM_REQUEST_RE.exec(topic);
-          
+         
         if(match){
           if(topic == DM_RESPONSE_TOPIC){
             this._onDmResponse(payload);
