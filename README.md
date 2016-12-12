@@ -23,20 +23,21 @@ All code is written in [JavaScript 6](https://babeljs.io/docs/learn-es2015/) and
 
 Usage
 =======
-Load the library in node.js / browserify
+Load the library in node.js
 -------------------------------------------
 
 ```JavaScript
 var Client = require('ibmiotf');
 ```
 
+
+**Note:** When this client library is used in the Node.js environment, it will use tcp/tls. But if user wants to use websockets in Node.js, the user must add a new property `enforce-ws` in the configuration.
+
+
 Load the library in browser
 ------------------------------
 
-load `iotf-client-bundle.js` or `iotf-client-bundle-min.js` from the `dist` directory
-
-
-**Note:** Library used in Node.js will use tcp/ssl and websockets when the library is used in browser. But if user wants to use websockets in Node.js, the user must add a new property `enforce-ws` in the configuration.
+load `iotf-client-bundle.js` or `iotf-client-bundle-min.js` from the `dist` directory. Check out the [sample](https://github.com/ibm-watson-iot/iot-nodejs/tree/master/samples/WebApplicationSample) here. 
 
 
 Devices
