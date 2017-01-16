@@ -1,1 +1,0 @@
-Monitor Device Status
