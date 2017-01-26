@@ -1,7 +1,7 @@
 Node.js Client Library
 ========================
 
-The node.js client is used for simplifying the interacting with the IBM Watson Internet of Things Platform. The following libraries contain instructions and guidance on using the nodejs ibmiotf node to interact with devices and applications within your organizations.
+The node.js client is used for simplifying the interaction with the IBM Watson Internet of Things Platform. The following libraries contain instructions and guidance on using the nodejs ibmiotf node to interact with devices and applications within your organizations.
 
 This client library is divided into three parts, Device, ManagedDevice and Application. The Devices section contains information on how devices publish events and handle commands using the nodejs ibmiotf module, ManagedDevice section contains information on how you can manage the device. More information on device management can be found [here.](https://docs.internetofthings.ibmcloud.com/reference/device_mgmt.html). The Applications section contains information on how applications can use the nodejs ibmiotf module to interact with devices.
 
