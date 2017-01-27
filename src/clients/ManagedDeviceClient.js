@@ -44,6 +44,7 @@ const DM_FIRMWARE_UPDATE_TOPIC = 'iotdm-1/mgmt/initiate/firmware/update';
 // Regex topic
 const DM_REQUEST_RE = /^iotdm-1\/*/;
 const DM_ACTION_RE = /^iotdm-1\/mgmt\/initiate\/(.+)\/(.+)$/;
+const DM_CUSTOM_ACTION_RE = /^iotdm-1\/mgmt\/custom\/(.+)\/(.+)$/;
 
 export default class ManagedDeviceClient extends DeviceClient {
 
@@ -672,6 +673,12 @@ export default class ManagedDeviceClient extends DeviceClient {
       } else {
         this.emit('dmAction', data);
       }
+    } else {
+   	  match = DM_CUSTOM_ACTION_RE.exec(topic);
+   	  if (match) {
+   	    var action = match[2];
+        this.emit('dmAction', { reqId: reqId, action: action});
+   	  }
     }
 
     return this;
