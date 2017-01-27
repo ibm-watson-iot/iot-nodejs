@@ -119,7 +119,7 @@ export default class ManagedDeviceClient extends DeviceClient {
     });
   }
 
-  manage(lifetime, supportDeviceActions, supportFirmwareActions){
+  manage(lifetime, supportDeviceActions, supportFirmwareActions, extensions){
     if(!this.isConnected){
       this.log.error("Client is not connected");
       //throw new Error();
@@ -141,7 +141,7 @@ export default class ManagedDeviceClient extends DeviceClient {
       d.lifetime = lifetime;
     }
 
-    if(isDefined(supportDeviceActions) || isDefined(supportFirmwareActions)){      
+    if(isDefined(supportDeviceActions) || isDefined(supportFirmwareActions) || isDefined(extensions)){      
       d.supports = new Object();
       
       if(isDefined(supportDeviceActions)){
@@ -159,6 +159,16 @@ export default class ManagedDeviceClient extends DeviceClient {
 
         this.supportFirmwareActions = supportFirmwareActions
         d.supports.firmwareActions = supportFirmwareActions;
+      }
+      
+      if (isDefined(extensions)) {
+        if (!Array.isArray(extensions)) {
+          throw new Error("extensions must be an array");
+      	 }
+      	 var i;
+      	 for (i=0; i<extensions.length; i++) {
+      		  d.supports[extensions[i]] = true;
+      	 }  
       }
     }
 
