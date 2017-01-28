@@ -44,6 +44,7 @@ const DM_FIRMWARE_UPDATE_TOPIC = 'iotdm-1/mgmt/initiate/firmware/update';
 // Regex topic
 const DM_REQUEST_RE = /^iotdm-1\/*/;
 const DM_ACTION_RE = /^iotdm-1\/mgmt\/initiate\/(.+)\/(.+)$/;
+const DM_CUSTOM_ACTION_RE = /^iotdm-1\/mgmt\/custom\/(.+)\/(.+)$/;
 
 export default class ManagedDeviceClient extends DeviceClient {
 
@@ -119,7 +120,7 @@ export default class ManagedDeviceClient extends DeviceClient {
     });
   }
 
-  manage(lifetime, supportDeviceActions, supportFirmwareActions){
+  manage(lifetime, supportDeviceActions, supportFirmwareActions, extensions){
     if(!this.isConnected){
       this.log.error("Client is not connected");
       //throw new Error();
@@ -141,7 +142,7 @@ export default class ManagedDeviceClient extends DeviceClient {
       d.lifetime = lifetime;
     }
 
-    if(isDefined(supportDeviceActions) || isDefined(supportFirmwareActions)){      
+    if(isDefined(supportDeviceActions) || isDefined(supportFirmwareActions) || isDefined(extensions)){      
       d.supports = new Object();
       
       if(isDefined(supportDeviceActions)){
@@ -159,6 +160,16 @@ export default class ManagedDeviceClient extends DeviceClient {
 
         this.supportFirmwareActions = supportFirmwareActions
         d.supports.firmwareActions = supportFirmwareActions;
+      }
+      
+      if (isDefined(extensions)) {
+        if (!Array.isArray(extensions)) {
+          throw new Error("extensions must be an array");
+      	 }
+      	 var i;
+      	 for (i=0; i<extensions.length; i++) {
+      		  d.supports[extensions[i]] = true;
+      	 }  
       }
     }
 
@@ -662,6 +673,12 @@ export default class ManagedDeviceClient extends DeviceClient {
       } else {
         this.emit('dmAction', data);
       }
+    } else {
+   	  match = DM_CUSTOM_ACTION_RE.exec(topic);
+   	  if (match) {
+   	    var action = match[2];
+        this.emit('dmAction', { reqId: reqId, action: action});
+   	  }
     }
 
     return this;
