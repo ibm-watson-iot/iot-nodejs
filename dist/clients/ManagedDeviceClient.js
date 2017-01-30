@@ -68,6 +68,7 @@
   // Regex topic
   var DM_REQUEST_RE = /^iotdm-1\/*/;
   var DM_ACTION_RE = /^iotdm-1\/mgmt\/initiate\/(.+)\/(.+)$/;
+  var DM_CUSTOM_ACTION_RE = /^iotdm-1\/mgmt\/custom\/(.+)\/(.+)$/;
 
   var ManagedDeviceClient = (function (_DeviceClient) {
     _inherits(ManagedDeviceClient, _DeviceClient);
@@ -151,7 +152,7 @@
       }
     }, {
       key: 'manage',
-      value: function manage(lifetime, supportDeviceActions, supportFirmwareActions) {
+      value: function manage(lifetime, supportDeviceActions, supportFirmwareActions, extensions) {
         if (!this.isConnected) {
           this.log.error("Client is not connected");
           //throw new Error();
@@ -173,7 +174,7 @@
           d.lifetime = lifetime;
         }
 
-        if ((0, _utilUtilJs.isDefined)(supportDeviceActions) || (0, _utilUtilJs.isDefined)(supportFirmwareActions)) {
+        if ((0, _utilUtilJs.isDefined)(supportDeviceActions) || (0, _utilUtilJs.isDefined)(supportFirmwareActions) || (0, _utilUtilJs.isDefined)(extensions)) {
           d.supports = new Object();
 
           if ((0, _utilUtilJs.isDefined)(supportDeviceActions)) {
@@ -191,6 +192,16 @@
 
             this.supportFirmwareActions = supportFirmwareActions;
             d.supports.firmwareActions = supportFirmwareActions;
+          }
+
+          if ((0, _utilUtilJs.isDefined)(extensions)) {
+            if (!Array.isArray(extensions)) {
+              throw new Error("extensions must be an array");
+            }
+            var i;
+            for (i = 0; i < extensions.length; i++) {
+              d.supports[extensions[i]] = true;
+            }
           }
         }
 
@@ -707,6 +718,12 @@
             }
           } else {
             this.emit('dmAction', data);
+          }
+        } else {
+          match = DM_CUSTOM_ACTION_RE.exec(topic);
+          if (match) {
+            var action = match[2];
+            this.emit('dmAction', { reqId: reqId, action: action });
           }
         }
 
