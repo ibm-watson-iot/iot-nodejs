@@ -1,8 +1,13 @@
 {
-  "org": "xxxxx",
-  "domain": "internetofthings.ibmcloud.com",
-  "type": "raspi",
-  "id": "pi1",
-  "auth-method" : "token",
-  "auth-token" : "xxxxxxxxxxxxxxxx"
+        "org": "xxxxx",
+        "domain": "internetofthings.ibmcloud.com",
+        "type": "raspi",
+        "id": "pi1",
+        "auth-method": "token",
+        "auth-token": "xxxxxxxxxxxxxxxx",
+        "use-client-certs": [true / false],
+        "server-ca": "path to custom server certificate",
+        "client-ca": "path to client ca certificate",
+        "client-cert": "path to client certificate",
+        "client-key": "path to client key"
 }

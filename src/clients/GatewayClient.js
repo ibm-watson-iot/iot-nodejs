@@ -8,6 +8,7 @@
  Contributors:
  Tim-Daniel Jacobi - Initial Contribution
  Jeffrey Dare
+ Lokesh Haralakatta - Added Client Side Certificates Support
  *****************************************************************************
  *
  */
@@ -70,8 +71,12 @@ export default class GatewayClient extends BaseClient {
 
     this.mqtt.on('connect', () => {
       this.isConnected = true;
-      this.log.info("[GatewayClient:connect] GatewayClient Connected");
-
+      if(isDefined(this.mqttConfig.servername)){
+        this.log.info("[GatewayClient:connect] GatewayClient Connected using Client Side Certificates");
+      }
+      else {
+        this.log.info("[GatewayClient:connect] GatewayClient Connected");
+      }
       if(this.retryCount === 0){
         this.emit('connect');
       } else {
