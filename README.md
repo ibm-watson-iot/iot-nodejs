@@ -61,6 +61,11 @@ configuration json containing the following :
 -   auth-token - API key token (required if auth-method is “token”)
 -   domain - (Optional)The messaging endpoint URL. By default the value is "internetofthings.ibmcloud.com"(Watson IoT Production server).
 -   enforce-ws - (Optional)Enforce Websocket when using the library in Node.js
+-   use-client-certs - (Optional) Enforces use of client side certificates when specified as true
+-   server-ca - (Optional) Specifies the custom server certificate signed using device key
+-   client-ca - (Mandatory when use-client-certs:true) Specifies the path to device-client CA certificate
+-   client-cert - (Mandatory when use-client-certs:true) Specifies the path to device-client certificate
+-   client-key - (Mandatory when use-client-certs:true) Specifies the path to device-client key
 
 If you want to use quickstart, then enter only the first three properties.
 
@@ -80,6 +85,28 @@ var deviceClient = new Client.IotfDevice(config);
 ....
 ```
 
+If you want to use registered mode with Client Side Certificates, you need to have use-client-certs defined to true and client-ca, client-cert and client-key referring to appropriate paths as shown below:
+
+``` {.sourceCode .javascript}
+var Client = require("ibmiotf");
+var config = {
+    "org" : "organization",
+    "id" : "deviceId",
+    "domain": "internetofthings.ibmcloud.com",
+    "type" : "deviceType",
+    "auth-method" : "token",
+    "auth-token" : "authToken",
+    "use-client-certs": [true / false],
+    "server-ca": "path to custom server certificate", # Optional, if there is custom server certificate, then can be used
+    "client-ca": "path to device-client ca certificate",
+    "client-cert": "path to device-client certificate",
+    "client-key": "path to device-client key"
+};
+
+var deviceClient = new Client.IotfDevice(config);
+
+....
+```
 Connect
 -------
 
@@ -734,6 +761,11 @@ configuration json containing the following :
 -   auth-token - API key token (required if auth-method is “token”)
 -   domain - (Optional)The messaging endpoint URL. By default the value is "internetofthings.ibmcloud.com"(Watson IoT Production server).
 -   enforce-ws - (Optional)Enforce Websocket when using the library in Node.js
+-   use-client-certs - (Optional) Enforces use of client side certificates when specified as true
+-   server-ca - (Optional) Specifies the custom server certificate signed using gateway key
+-   client-ca - (Mandatory when use-client-certs:true) Specifies the path to gateway-client CA certificate
+-   client-cert - (Mandatory when use-client-certs:true) Specifies the path to gateway-client certificate
+-   client-key - (Mandatory when use-client-certs:true) Specifies the path to gateway-client key
 
 ``` {.sourceCode .javascript}
 var Client = require("ibmiotf");
@@ -743,7 +775,12 @@ var config = {
     "id" : "gatewayId",
     "domain": "internetofthings.ibmcloud.com",
     "auth-method" : "token",
-    "auth-token" : "authToken"
+    "auth-token" : "authToken",
+    "use-client-certs": [true / false],
+    "server-ca": "path to custom server certificate", # Optional, if there is custom server certificate, then can be used
+    "client-ca": "path to gateway-client ca certificate",
+    "client-cert": "path to gateway-client certificate",
+    "client-key": "path to gateway-client key"
 };
 
 var gatewayClient = new iotf.IotfGateway(config);
