@@ -30,7 +30,6 @@ Load the library in node.js
 var Client = require('ibmiotf');
 ```
 
-
 **Note:** When this client library is used in the Node.js environment, it will use tcp/tls. But if user wants to use websockets in Node.js, the user must add a new property `enforce-ws` in the configuration.
 
 
@@ -39,6 +38,24 @@ Load the library in browser
 
 load `iotf-client-bundle.js` or `iotf-client-bundle-min.js` from the `dist` directory. Check out the [sample](https://github.com/ibm-watson-iot/iot-nodejs/tree/master/samples/WebApplicationSample) here. 
 
+Supported Features
+------------------
+
+| Feature   |      Supported?      |
+|----------|:-------------:|
+| Device connectivity |  &#10004; |
+| Gateway connectivity |    &#10004;   |
+| Application connectivity | &#10004; |
+| Watson IoT API | &#10004; |
+| SSL/TLS | &#10004; |
+| Client side Certificate based authentication | &#10008; |
+| Device Management | &#10004; |
+| Device Management Extension(DME) | &#10008; |
+| Scalable Application | &#10004; |
+| Auto reconnect | &#10004; |
+| Websocket | &#10004; |
+| Event/Command publish using MQTT| &#10004; |
+| Event/Command publish using HTTP| &#10004; |
 
 Devices
 ===============================
