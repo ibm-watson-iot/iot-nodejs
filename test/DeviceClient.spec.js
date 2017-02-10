@@ -163,6 +163,19 @@ describe('IotfDevice', () => {
       client.log.setLevel('silent');
     });
 
+    it('should connect to the broker with client-key passphrase', () => {
+      let mqttConnect = sinon.stub(mqtt, 'connect').returns({
+        on: function(){}
+      });
+
+      let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123',
+      'auth-method': 'token', 'use-client-certs':true, 'client-ca':'./IoTFoundation.pem',
+      'client-cert':'./IoTFoundation.pem', 'client-key':'./IoTFoundation.pem', 'client-key-passphrase':'password'});
+      client.connect();
+      client.log.setLevel('silent');
+      client.log.setLevel('silent');
+    });
+
     it('should set up a callback for the "offline" event', () => {
       let on = sinon.spy();
       let mqttConnect = sinon.stub(mqtt, 'connect').returns({

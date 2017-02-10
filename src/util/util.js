@@ -68,6 +68,9 @@ export function initializeMqttConfig(config){
     else {
       throw new Error('[initializeMqttConfig] config must specify path to client key');
     }
+    if(isDefined(config['client-key-passphrase'])){
+      mqttConfig.passphrase = config['client-key-passphrase'];
+    }
     mqttConfig.servername = config.org + ".messaging.internetofthings.ibmcloud.com";
     mqttConfig.protocol = "mqtt";
   }
