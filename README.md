@@ -66,6 +66,7 @@ configuration json containing the following :
 -   client-ca - (Mandatory when use-client-certs:true) Specifies the path to device-client CA certificate
 -   client-cert - (Mandatory when use-client-certs:true) Specifies the path to device-client certificate
 -   client-key - (Mandatory when use-client-certs:true) Specifies the path to device-client key
+-   client-key-passphrase - (Optional) Specifies the passphrase for the device-client key if exists
 
 If you want to use quickstart, then enter only the first three properties.
 
@@ -766,6 +767,7 @@ configuration json containing the following :
 -   client-ca - (Mandatory when use-client-certs:true) Specifies the path to gateway-client CA certificate
 -   client-cert - (Mandatory when use-client-certs:true) Specifies the path to gateway-client certificate
 -   client-key - (Mandatory when use-client-certs:true) Specifies the path to gateway-client key
+-   client-key-passphrase - (Optional) Specifies the passphrase for the gateway-client key if exists
 
 ``` {.sourceCode .javascript}
 var Client = require("ibmiotf");
