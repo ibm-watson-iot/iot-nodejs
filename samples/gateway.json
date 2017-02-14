@@ -9,5 +9,6 @@
         "server-ca": "path to custom server certificate",
         "client-ca": "path to gateway-client ca certificate",
         "client-cert": "path to gateway-client certificate",
-        "client-key": "path to gateway-client key"
+        "client-key": "path to gateway-client key",
+        "client-key-passphrase": "client-key-password"
 }

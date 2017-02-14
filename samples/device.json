@@ -7,7 +7,8 @@
         "auth-token": "xxxxxxxxxxxxxxxx",
         "use-client-certs": [true / false],
         "server-ca": "path to custom server certificate",
-        "client-ca": "path to client ca certificate",
-        "client-cert": "path to client certificate",
-        "client-key": "path to client key"
+        "client-ca": "path to device-client ca certificate",
+        "client-cert": "path to device-client certificate",
+        "client-key": "path to device-client key",
+        "client-key-passphrase": "client-key-password"
 }
