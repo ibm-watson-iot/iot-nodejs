@@ -71,7 +71,7 @@ export function initializeMqttConfig(config){
     if(isDefined(config['client-key-passphrase'])){
       mqttConfig.passphrase = config['client-key-passphrase'];
     }
-    mqttConfig.servername = config.org + ".messaging.internetofthings.ibmcloud.com";
+    mqttConfig.servername = config.org + ".messaging." + config.domain;
     mqttConfig.protocol = "mqtt";
   }
   return mqttConfig;
