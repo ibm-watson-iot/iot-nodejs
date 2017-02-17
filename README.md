@@ -48,7 +48,7 @@ Supported Features
 | Application connectivity | &#10004; |
 | Watson IoT API | &#10004; |
 | SSL/TLS | &#10004; |
-| Client side Certificate based authentication | &#10008; |
+| Client side Certificate based authentication | &#10004; |
 | Device Management | &#10004; |
 | Device Management Extension(DME) | &#10008; |
 | Scalable Application | &#10004; |
