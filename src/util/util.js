@@ -7,9 +7,12 @@
  http://www.eclipse.org/legal/epl-v10.html
  Contributors:
  Tim-Daniel Jacobi - Initial Contribution
+ Lokesh Haralakatta - Added method initializeMqttConfig
  *****************************************************************************
  *
  */
+import fs from 'fs';
+
 export function isString(value){
   return typeof value === 'string';
 }
@@ -35,4 +38,41 @@ export function generateUUID() {
     var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
     return v.toString(16);
   });
+}
+
+export function initializeMqttConfig(config){
+  var mqttConfig = {
+     password: config['auth-token'],
+     rejectUnauthorized : true
+  };
+  if(config['use-client-certs'] == true || config['use-client-certs'] == "true"){
+    var serverCA = fs.readFileSync(__dirname + '/IoTFoundation.pem');
+    if(isDefined(config['server-ca'])){
+      serverCA = fs.readFileSync(config['server-ca']);
+    }
+    if(isDefined(config['client-ca'])){
+      mqttConfig.ca = [fs.readFileSync(config['client-ca']),serverCA];
+    }
+    else {
+      throw new Error('[initializeMqttConfig] config must specify path to self-signed CA certificate');
+    }
+    if(isDefined(config['client-cert'])){
+      mqttConfig.cert = fs.readFileSync(config['client-cert']);
+    }
+    else {
+      throw new Error('[initializeMqttConfig] config must specify path to self-signed client certificate');
+    }
+    if(isDefined(config['client-key'])){
+      mqttConfig.key = fs.readFileSync(config['client-key']);
+    }
+    else {
+      throw new Error('[initializeMqttConfig] config must specify path to client key');
+    }
+    if(isDefined(config['client-key-passphrase'])){
+      mqttConfig.passphrase = config['client-key-passphrase'];
+    }
+    mqttConfig.servername = config.org + ".messaging." + config.domain;
+    mqttConfig.protocol = "mqtt";
+  }
+  return mqttConfig;
 }

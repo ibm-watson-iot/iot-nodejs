@@ -111,6 +111,24 @@ describe('IotfDevice', () => {
         let client = new IBMIoTF.IotfDevice({org: 'qs', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         expect(client.isQuickstart).to.equal(false);
       });
+      it('should throw an error if path to ca-cert is not provided', () => {
+        expect(() => {
+          let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123',
+                                         'auth-method': 'abc', 'use-client-certs':true,});
+        }).to.throw(/config must specify path to self-signed CA certificate/);
+      });
+      it('should throw an error if path to client-cert is not provided', () => {
+        expect(() => {
+          let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123',
+                                'auth-method': 'abc', 'use-client-certs':true,'client-ca': './IoTFoundation.pem'});
+        }).to.throw(/config must specify path to self-signed client certificate/);
+      });
+      it('should throw an error if path to client-key is not provided', () => {
+        expect(() => {
+          let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123',
+           'auth-method': 'abc', 'use-client-certs':true,'client-ca': './IoTFoundation.pem', 'client-cert':'./IoTFoundation.pem'});
+        }).to.throw(/config must specify path to client key/);
+      });
     });
   });
 
@@ -127,6 +145,32 @@ describe('IotfDevice', () => {
       });
 
       let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      client.connect();
+      client.log.setLevel('silent');
+      client.log.setLevel('silent');
+    });
+
+    it('should connect to the broker with client certificates', () => {
+      let mqttConnect = sinon.stub(mqtt, 'connect').returns({
+        on: function(){}
+      });
+
+      let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123',
+      'auth-method': 'token', 'use-client-certs':true, 'client-ca':'./IoTFoundation.pem',
+      'client-cert':'./IoTFoundation.pem', 'client-key':'./IoTFoundation.pem'});
+      client.connect();
+      client.log.setLevel('silent');
+      client.log.setLevel('silent');
+    });
+
+    it('should connect to the broker with client-key passphrase', () => {
+      let mqttConnect = sinon.stub(mqtt, 'connect').returns({
+        on: function(){}
+      });
+
+      let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123',
+      'auth-method': 'token', 'use-client-certs':true, 'client-ca':'./IoTFoundation.pem',
+      'client-cert':'./IoTFoundation.pem', 'client-key':'./IoTFoundation.pem', 'client-key-passphrase':'password'});
       client.connect();
       client.log.setLevel('silent');
       client.log.setLevel('silent');

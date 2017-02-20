@@ -8,6 +8,7 @@
  Contributors:
  Tim-Daniel Jacobi - Initial Contribution
  Jeffrey Dare
+ Lokesh Haralakatta - Added Client Side Certificates Support
  *****************************************************************************
  *
  */
@@ -67,7 +68,12 @@ export default class DeviceClient extends BaseClient {
 
     this.mqtt.on('connect', () => {
       this.isConnected = true;
-      this.log.info("[DeviceClient:connect] DeviceClient Connected");
+      if(isDefined(this.mqttConfig.servername)){
+        this.log.info("[DeviceClient:connect] DeviceClient Connected using Client Side Certificates");
+      }
+      else {
+        this.log.info("[DeviceClient:connect] DeviceClient Connected");
+      }
       if(this.retryCount === 0){
         this.emit('connect');
       } else {

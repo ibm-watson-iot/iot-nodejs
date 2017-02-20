@@ -8,13 +8,14 @@
  Contributors:
  Tim-Daniel Jacobi - Initial Contribution
  Jeffrey Dare
+ Lokesh Haralakatta - Added Client Side Certificates Support
  *****************************************************************************
  *
  */
 import events from 'events';
 import mqtt from 'mqtt';
 import log from 'loglevel';
-import { isDefined, isString, isNode, isBoolean } from '../util/util.js';
+import { isDefined, isString, isNode, isBoolean, initializeMqttConfig } from '../util/util.js';
 
 const QUICKSTART_ORG_ID = "quickstart";
 
@@ -90,10 +91,7 @@ export default class BaseClient extends events.EventEmitter {
       }
 
       this.isQuickstart = false;
-      this.mqttConfig = {
-        password: config['auth-token'],
-        rejectUnauthorized : true
-      };
+      this.mqttConfig = initializeMqttConfig(config)
 
       if(isNode()){
         this.mqttConfig.caPaths = [__dirname + '/IoTFoundation.pem'];
@@ -110,7 +108,7 @@ export default class BaseClient extends events.EventEmitter {
   }
 
   setCleanSession(cleanSession){
-    if(!isBoolean(cleanSession) && cleanSession !== 'true' && cleanSession !== 'false'){ 
+    if(!isBoolean(cleanSession) && cleanSession !== 'true' && cleanSession !== 'false'){
       this.log.debug("[BaseClient:setCleanSession] Value given for cleanSession is "+cleanSession+" , is not a Boolean, setting to true");
       cleanSession = true;
     }
