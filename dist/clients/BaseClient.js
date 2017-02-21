@@ -21,6 +21,7 @@
    Contributors:
    Tim-Daniel Jacobi - Initial Contribution
    Jeffrey Dare
+   Lokesh Haralakatta - Added Client Side Certificates Support
    *****************************************************************************
    *
    */
@@ -75,13 +76,22 @@
       }
 
       this.domainName = "internetofthings.ibmcloud.com";
+      this.mqttHost = "";
       this.enforceWs = false;
-      // Parse Domain property
-      if ((0, _utilUtilJs.isDefined)(config.domain)) {
+      // Parse mqtt-host & domain property. mqtt-host takes precedence over domain
+      if ((0, _utilUtilJs.isDefined)(config['mqtt-host'])) {
+        if (!(0, _utilUtilJs.isString)(config['mqtt-host'])) {
+          throw new Error('[BaseClient:constructor] mqtt-host must be a string');
+        }
+        this.mqttHost = config['mqtt-host'];
+      } else if ((0, _utilUtilJs.isDefined)(config.domain)) {
         if (!(0, _utilUtilJs.isString)(config.domain)) {
           throw new Error('[BaseClient:constructor] domain must be a string');
         }
+        this.mqttHost = config.org + ".messaging." + config.domain;
         this.domainName = config.domain;
+      } else {
+        this.mqttHost = config.org + ".messaging.internetofthings.ibmcloud.com";
       }
 
       //property to enforce Websockets even in Node
@@ -120,16 +130,13 @@
 
         if ((0, _utilUtilJs.isNode)() && !this.enforceWs) {
 
-          this.host = "ssl://" + config.org + ".messaging." + this.domainName + ":8883";
+          this.host = "ssl://" + this.mqttHost + ":8883";
         } else {
-          this.host = "wss://" + config.org + ".messaging." + this.domainName + ":8883";
+          this.host = "wss://" + this.mqttHost + ":8883";
         }
 
         this.isQuickstart = false;
-        this.mqttConfig = {
-          password: config['auth-token'],
-          rejectUnauthorized: true
-        };
+        this.mqttConfig = (0, _utilUtilJs.initializeMqttConfig)(config);
 
         if ((0, _utilUtilJs.isNode)()) {
           this.mqttConfig.caPaths = [__dirname + '/IoTFoundation.pem'];

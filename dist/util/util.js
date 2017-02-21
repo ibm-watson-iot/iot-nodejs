@@ -1,16 +1,16 @@
 (function (global, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['exports'], factory);
+    define(['exports', 'fs'], factory);
   } else if (typeof exports !== 'undefined') {
-    factory(exports);
+    factory(exports, require('fs'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod.exports);
+    factory(mod.exports, global.fs);
     global.util = mod.exports;
   }
-})(this, function (exports) {
+})(this, function (exports, _fs) {
   /**
    *****************************************************************************
    Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
@@ -20,6 +20,7 @@
    http://www.eclipse.org/legal/epl-v10.html
    Contributors:
    Tim-Daniel Jacobi - Initial Contribution
+   Lokesh Haralakatta - Added method initializeMqttConfig
    *****************************************************************************
    *
    */
@@ -33,6 +34,11 @@
   exports.isBoolean = isBoolean;
   exports.isDefined = isDefined;
   exports.generateUUID = generateUUID;
+  exports.initializeMqttConfig = initializeMqttConfig;
+
+  function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+  var _fs2 = _interopRequireDefault(_fs);
 
   function isString(value) {
     return typeof value === 'string';
@@ -63,5 +69,39 @@
           v = c == 'x' ? r : r & 0x3 | 0x8;
       return v.toString(16);
     });
+  }
+
+  function initializeMqttConfig(config) {
+    var mqttConfig = {
+      password: config['auth-token'],
+      rejectUnauthorized: true
+    };
+    if (config['use-client-certs'] == true || config['use-client-certs'] == "true") {
+      var serverCA = _fs2['default'].readFileSync(__dirname + '/IoTFoundation.pem');
+      if (isDefined(config['server-ca'])) {
+        serverCA = _fs2['default'].readFileSync(config['server-ca']);
+      }
+      if (isDefined(config['client-ca'])) {
+        mqttConfig.ca = [_fs2['default'].readFileSync(config['client-ca']), serverCA];
+      } else {
+        throw new Error('[initializeMqttConfig] config must specify path to self-signed CA certificate');
+      }
+      if (isDefined(config['client-cert'])) {
+        mqttConfig.cert = _fs2['default'].readFileSync(config['client-cert']);
+      } else {
+        throw new Error('[initializeMqttConfig] config must specify path to self-signed client certificate');
+      }
+      if (isDefined(config['client-key'])) {
+        mqttConfig.key = _fs2['default'].readFileSync(config['client-key']);
+      } else {
+        throw new Error('[initializeMqttConfig] config must specify path to client key');
+      }
+      if (isDefined(config['client-key-passphrase'])) {
+        mqttConfig.passphrase = config['client-key-passphrase'];
+      }
+      mqttConfig.servername = config.org + ".messaging." + config.domain;
+      mqttConfig.protocol = "mqtt";
+    }
+    return mqttConfig;
   }
 });
