@@ -76,22 +76,22 @@
       }
 
       this.domainName = "internetofthings.ibmcloud.com";
-      this.mqttHost = "";
+      this.mqttServer = "";
       this.enforceWs = false;
-      // Parse mqtt-host & domain property. mqtt-host takes precedence over domain
-      if ((0, _utilUtilJs.isDefined)(config['mqtt-host'])) {
-        if (!(0, _utilUtilJs.isString)(config['mqtt-host'])) {
-          throw new Error('[BaseClient:constructor] mqtt-host must be a string');
+      // Parse mqtt-server & domain property. mqtt-server takes precedence over domain
+      if ((0, _utilUtilJs.isDefined)(config['mqtt-server'])) {
+        if (!(0, _utilUtilJs.isString)(config['mqtt-server'])) {
+          throw new Error('[BaseClient:constructor] mqtt-server must be a string');
         }
-        this.mqttHost = config['mqtt-host'];
+        this.mqttServer = config['mqtt-server'];
       } else if ((0, _utilUtilJs.isDefined)(config.domain)) {
         if (!(0, _utilUtilJs.isString)(config.domain)) {
           throw new Error('[BaseClient:constructor] domain must be a string');
         }
-        this.mqttHost = config.org + ".messaging." + config.domain;
+        this.mqttServer = config.org + ".messaging." + config.domain;
         this.domainName = config.domain;
       } else {
-        this.mqttHost = config.org + ".messaging.internetofthings.ibmcloud.com";
+        this.mqttServer = config.org + ".messaging.internetofthings.ibmcloud.com";
       }
 
       //property to enforce Websockets even in Node
@@ -130,9 +130,9 @@
 
         if ((0, _utilUtilJs.isNode)() && !this.enforceWs) {
 
-          this.host = "ssl://" + this.mqttHost + ":8883";
+          this.host = "ssl://" + this.mqttServer + ":8883";
         } else {
-          this.host = "wss://" + this.mqttHost + ":8883";
+          this.host = "wss://" + this.mqttServer + ":8883";
         }
 
         this.isQuickstart = false;

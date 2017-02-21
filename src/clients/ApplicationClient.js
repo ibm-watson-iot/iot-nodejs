@@ -58,22 +58,22 @@ export default class ApplicationClient extends BaseClient {
     }
     this.subscriptions = [];
 
-    this.httpHost = "";
-    // Parse http-host & domain property. http-host takes precedence over domain
-    if(isDefined(config['http-host'])) {
-        if(!isString(config['http-host'])){
-            throw new Error('[BaseClient:constructor] http-host must be a string, ' +
+    this.httpServer = "";
+    // Parse http-server & domain property. http-server takes precedence over domain
+    if(isDefined(config['http-server'])) {
+        if(!isString(config['http-server'])){
+            throw new Error('[BaseClient:constructor] http-server must be a string, ' +
                 'see Bluemix Watson IoT service credentials for more information');
         }
-        this.httpHost = config['http-host'];
+        this.httpServer = config['http-server'];
     } else if(isDefined(config.domain)){
         if(!isString(config.domain)){
             throw new Error('[BaseClient:constructor] domain must be a string');
         }
-        this.httpHost = config.org + "." + config.domain;
+        this.httpServer = config.org + "." + config.domain;
         this.domainName = config.domain;
     } else {
-        this.httpHost = config.org + ".internetofthings.ibmcloud.com";
+        this.httpServer = config.org + ".internetofthings.ibmcloud.com";
     }
 	
     this.log.info("[ApplicationClient:constructor] ApplicationClient initialized for organization : " + config.org);
@@ -340,7 +340,7 @@ export default class ApplicationClient extends BaseClient {
   callApi(method, expectedHttpCode, expectJsonContent, paths, body, params){
     return new Promise((resolve, reject) => {
       // const API_HOST = "https://%s.internetofthings.ibmcloud.com/api/v0002";
-      let uri = format("https://%s/api/v0002", this.httpHost);
+      let uri = format("https://%s/api/v0002", this.httpServer);
 
       if(Array.isArray(paths)){
         for(var i = 0, l = paths.length; i < l; i++){
@@ -653,7 +653,7 @@ export default class ApplicationClient extends BaseClient {
     this.log.debug("[ApplicationClient:publishHTTPS] Publishing event of Type: "+ eventType + " with payload : "+payload);
     return new Promise((resolve, reject) => {
 
-      let uri = format("https://%s/api/v0002/application/types/%s/devices/%s/events/%s", this.mqttHost, deviceType, deviceId, eventType);
+      let uri = format("https://%s/api/v0002/application/types/%s/devices/%s/events/%s", this.mqttServer, deviceType, deviceId, eventType);
 
       let xhrConfig = {
         url: uri,

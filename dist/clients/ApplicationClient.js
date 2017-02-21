@@ -89,21 +89,21 @@
       }
       this.subscriptions = [];
 
-      this.httpHost = "";
-      // Parse http-host & domain property. http-host takes precedence over domain
-      if ((0, _utilUtilJs.isDefined)(config['http-host'])) {
-        if (!(0, _utilUtilJs.isString)(config['http-host'])) {
-          throw new Error('[BaseClient:constructor] http-host must be a string, ' + 'see Bluemix Watson IoT service credentials for more information');
+      this.httpServer = "";
+      // Parse http-server & domain property. http-server takes precedence over domain
+      if ((0, _utilUtilJs.isDefined)(config['http-server'])) {
+        if (!(0, _utilUtilJs.isString)(config['http-server'])) {
+          throw new Error('[BaseClient:constructor] http-server must be a string, ' + 'see Bluemix Watson IoT service credentials for more information');
         }
-        this.httpHost = config['http-host'];
+        this.httpServer = config['http-server'];
       } else if ((0, _utilUtilJs.isDefined)(config.domain)) {
         if (!(0, _utilUtilJs.isString)(config.domain)) {
           throw new Error('[BaseClient:constructor] domain must be a string');
         }
-        this.httpHost = config.org + "." + config.domain;
+        this.httpServer = config.org + "." + config.domain;
         this.domainName = config.domain;
       } else {
-        this.httpHost = config.org + ".internetofthings.ibmcloud.com";
+        this.httpServer = config.org + ".internetofthings.ibmcloud.com";
       }
 
       this.log.info("[ApplicationClient:constructor] ApplicationClient initialized for organization : " + config.org);
@@ -361,7 +361,7 @@
 
         return new _Promise['default'](function (resolve, reject) {
           // const API_HOST = "https://%s.internetofthings.ibmcloud.com/api/v0002";
-          var uri = (0, _format2['default'])("https://%s/api/v0002", _this2.httpHost);
+          var uri = (0, _format2['default'])("https://%s/api/v0002", _this2.httpServer);
 
           if (Array.isArray(paths)) {
             for (var i = 0, l = paths.length; i < l; i++) {
@@ -713,7 +713,7 @@
         this.log.debug("[ApplicationClient:publishHTTPS] Publishing event of Type: " + eventType + " with payload : " + payload);
         return new _Promise['default'](function (resolve, reject) {
 
-          var uri = (0, _format2['default'])("https://%s/api/v0002/application/types/%s/devices/%s/events/%s", _this3.mqttHost, deviceType, deviceId, eventType);
+          var uri = (0, _format2['default'])("https://%s/api/v0002/application/types/%s/devices/%s/events/%s", _this3.mqttServer, deviceType, deviceId, eventType);
 
           var xhrConfig = {
             url: uri,
