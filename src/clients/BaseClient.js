@@ -50,21 +50,21 @@ export default class BaseClient extends events.EventEmitter {
 	this.domainName = "internetofthings.ibmcloud.com";
 	this.mqttHost = "";
     this.enforceWs = false;
-	// Parse mqtt-host & domain property. mqtt-host takes precedence over domain
-	if(isDefined(config['mqtt-host'])) {
-		if(!isString(config['mqtt-host'])){
-			throw new Error('[BaseClient:constructor] mqtt-host must be a string');
-		}
-		this.mqttHost = config['mqtt-host'];
-	} else if(isDefined(config.domain)){
-		if(!isString(config.domain)){
-		  throw new Error('[BaseClient:constructor] domain must be a string');
-		}
-		this.mqttHost = config.org + ".messaging." + config.domain;
-		this.domainName = config.domain;
+    // Parse mqtt-host & domain property. mqtt-host takes precedence over domain
+    if(isDefined(config['mqtt-host'])) {
+        if(!isString(config['mqtt-host'])){
+            throw new Error('[BaseClient:constructor] mqtt-host must be a string');
+        }
+        this.mqttHost = config['mqtt-host'];
+    } else if(isDefined(config.domain)){
+        if(!isString(config.domain)){
+            throw new Error('[BaseClient:constructor] domain must be a string');
+        }
+        this.mqttHost = config.org + ".messaging." + config.domain;
+        this.domainName = config.domain;
     } else {
-		this.mqttHost = config.org + ".messaging.internetofthings.ibmcloud.com";
-	}
+        this.mqttHost = config.org + ".messaging.internetofthings.ibmcloud.com";
+    }
 	
     //property to enforce Websockets even in Node 
     // CAUTION : This is deprecated and may be removed in future 

@@ -58,23 +58,23 @@ export default class ApplicationClient extends BaseClient {
     }
     this.subscriptions = [];
 
-	this.httpHost = "";
-	// Parse http-host & domain property. http-host takes precedence over domain
-	if(isDefined(config['http-host'])) {
-		if(!isString(config['http-host'])){
-			throw new Error('[BaseClient:constructor] http-host must be a string, ' +
-			        'see Bluemix Watson IoT service credentials for more information');
-		}
-		this.httpHost = config['http-host'];
-	} else if(isDefined(config.domain)){
-		if(!isString(config.domain)){
-		  throw new Error('[BaseClient:constructor] domain must be a string');
-		}
-		this.httpHost = config.org + "." + config.domain;
-		this.domainName = config.domain;
+    this.httpHost = "";
+    // Parse http-host & domain property. http-host takes precedence over domain
+    if(isDefined(config['http-host'])) {
+        if(!isString(config['http-host'])){
+            throw new Error('[BaseClient:constructor] http-host must be a string, ' +
+                'see Bluemix Watson IoT service credentials for more information');
+        }
+        this.httpHost = config['http-host'];
+    } else if(isDefined(config.domain)){
+        if(!isString(config.domain)){
+            throw new Error('[BaseClient:constructor] domain must be a string');
+        }
+        this.httpHost = config.org + "." + config.domain;
+        this.domainName = config.domain;
     } else {
-		this.httpHost = config.org + ".internetofthings.ibmcloud.com";
-	}
+        this.httpHost = config.org + ".internetofthings.ibmcloud.com";
+    }
 	
     this.log.info("[ApplicationClient:constructor] ApplicationClient initialized for organization : " + config.org);
   }
