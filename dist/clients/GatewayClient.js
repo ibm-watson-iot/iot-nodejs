@@ -21,6 +21,7 @@
    Contributors:
    Tim-Daniel Jacobi - Initial Contribution
    Jeffrey Dare
+   Lokesh Haralakatta - Added Client Side Certificates Support
    *****************************************************************************
    *
    */
@@ -102,8 +103,11 @@
 
         this.mqtt.on('connect', function () {
           _this.isConnected = true;
-          _this.log.info("[GatewayClient:connect] GatewayClient Connected");
-
+          if ((0, _utilUtilJs.isDefined)(_this.mqttConfig.servername)) {
+            _this.log.info("[GatewayClient:connect] GatewayClient Connected using Client Side Certificates");
+          } else {
+            _this.log.info("[GatewayClient:connect] GatewayClient Connected");
+          }
           if (_this.retryCount === 0) {
             _this.emit('connect');
           } else {

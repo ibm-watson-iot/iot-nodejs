@@ -21,6 +21,7 @@
    Contributors:
    Tim-Daniel Jacobi - Initial Contribution
    Jeffrey Dare
+   Lokesh Haralakatta - Added Client Side Certificates Support
    *****************************************************************************
    *
    */
@@ -99,7 +100,11 @@
 
         this.mqtt.on('connect', function () {
           _this.isConnected = true;
-          _this.log.info("[DeviceClient:connect] DeviceClient Connected");
+          if ((0, _utilUtilJs.isDefined)(_this.mqttConfig.servername)) {
+            _this.log.info("[DeviceClient:connect] DeviceClient Connected using Client Side Certificates");
+          } else {
+            _this.log.info("[DeviceClient:connect] DeviceClient Connected");
+          }
           if (_this.retryCount === 0) {
             _this.emit('connect');
           } else {
@@ -154,7 +159,7 @@
 
         this.log.debug("[DeviceClient:publishHTTPS] Publishing event of Type: " + eventType + " with payload : " + payload);
         return new _Promise['default'](function (resolve, reject) {
-          var uri = (0, _format2['default'])("https://%s.messaging.%s/api/v0002/device/types/%s/devices/%s/events/%s", _this2.org, _this2.domainName, _this2.typeId, _this2.deviceId, eventType);
+          var uri = (0, _format2['default'])("https://%s/api/v0002/device/types/%s/devices/%s/events/%s", _this2.mqttServer, _this2.typeId, _this2.deviceId, eventType);
 
           var xhrConfig = {
             url: uri,

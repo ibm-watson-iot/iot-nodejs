@@ -129,7 +129,7 @@ export default class DeviceClient extends BaseClient {
   publishHTTPS(eventType, eventFormat, payload){
     this.log.debug("[DeviceClient:publishHTTPS] Publishing event of Type: "+ eventType + " with payload : "+payload);
     return new Promise((resolve, reject) => {
-      let uri = format("https://%s.messaging.%s/api/v0002/device/types/%s/devices/%s/events/%s", this.org, this.domainName, this.typeId, this.deviceId, eventType);
+      let uri = format("https://%s/api/v0002/device/types/%s/devices/%s/events/%s", this.mqttServer, this.typeId, this.deviceId, eventType);
 
       let xhrConfig = {
         url: uri,
