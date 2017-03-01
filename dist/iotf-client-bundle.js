@@ -22166,7 +22166,7 @@ module.exports = exports['default'];
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
-  value: true
+   value: true
 });
 exports.isString = isString;
 exports.isNumber = isNumber;
@@ -22182,19 +22182,19 @@ var _fs = require('fs');
 var _fs2 = _interopRequireDefault(_fs);
 
 function isString(value) {
-  return typeof value === 'string';
+   return typeof value === 'string';
 }
 
 function isNumber(value) {
-  return typeof value === 'number';
+   return typeof value === 'number';
 }
 
 function isBoolean(value) {
-  return typeof value === 'boolean';
+   return typeof value === 'boolean';
 }
 
 function isDefined(value) {
-  return value !== undefined && value !== null;
+   return value !== undefined && value !== null;
 }
 
 var isBrowser = new Function("try {return this===window;}catch(e){ return false;}");
@@ -22205,45 +22205,51 @@ var isNode = new Function("try {return this===global;}catch(e){return false;}");
 exports.isNode = isNode;
 
 function generateUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    var r = Math.random() * 16 | 0,
-        v = c == 'x' ? r : r & 0x3 | 0x8;
-    return v.toString(16);
-  });
+   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0,
+          v = c == 'x' ? r : r & 0x3 | 0x8;
+      return v.toString(16);
+   });
 }
 
 function initializeMqttConfig(config) {
-  var mqttConfig = {
-    password: config['auth-token'],
-    rejectUnauthorized: true
-  };
-  if (config['use-client-certs'] == true || config['use-client-certs'] == "true") {
-    var serverCA = _fs2['default'].readFileSync(__dirname + '/IoTFoundation.pem');
-    if (isDefined(config['server-ca'])) {
-      serverCA = _fs2['default'].readFileSync(config['server-ca']);
-    }
-    if (isDefined(config['client-ca'])) {
-      mqttConfig.ca = [_fs2['default'].readFileSync(config['client-ca']), serverCA];
-    } else {
-      throw new Error('[initializeMqttConfig] config must specify path to self-signed CA certificate');
-    }
-    if (isDefined(config['client-cert'])) {
-      mqttConfig.cert = _fs2['default'].readFileSync(config['client-cert']);
-    } else {
-      throw new Error('[initializeMqttConfig] config must specify path to self-signed client certificate');
-    }
-    if (isDefined(config['client-key'])) {
-      mqttConfig.key = _fs2['default'].readFileSync(config['client-key']);
-    } else {
-      throw new Error('[initializeMqttConfig] config must specify path to client key');
-    }
-    if (isDefined(config['client-key-passphrase'])) {
-      mqttConfig.passphrase = config['client-key-passphrase'];
-    }
-    mqttConfig.servername = config.org + ".messaging." + config.domain;
-    mqttConfig.protocol = "mqtt";
-  }
-  return mqttConfig;
+   var mqttConfig = {
+      password: config['auth-token'],
+      rejectUnauthorized: true
+   };
+   if (config['use-client-certs'] == true || config['use-client-certs'] == "true") {
+      var serverCA = _fs2['default'].readFileSync(__dirname + '/IoTFoundation.pem');
+      if (config['read-certs'] == true) {
+         mqttConfig.ca = [config['client-ca'], serverCA];
+         mqttConfig.cert = config['client-cert'];
+         mqttConfig.key = config['client-key'];
+      } else {
+         if (isDefined(config['server-ca'])) {
+            serverCA = _fs2['default'].readFileSync(config['server-ca']);
+         }
+         if (isDefined(config['client-ca'])) {
+            mqttConfig.ca = [_fs2['default'].readFileSync(config['client-ca']), serverCA];
+         } else {
+            throw new Error('[initializeMqttConfig] config must specify path to self-signed CA certificate');
+         }
+         if (isDefined(config['client-cert'])) {
+            mqttConfig.cert = _fs2['default'].readFileSync(config['client-cert']);
+         } else {
+            throw new Error('[initializeMqttConfig] config must specify path to self-signed client certificate');
+         }
+         if (isDefined(config['client-key'])) {
+            mqttConfig.key = _fs2['default'].readFileSync(config['client-key']);
+         } else {
+            throw new Error('[initializeMqttConfig] config must specify path to client key');
+         }
+         if (isDefined(config['client-key-passphrase'])) {
+            mqttConfig.passphrase = config['client-key-passphrase'];
+         }
+      }
+      mqttConfig.servername = config.org + ".messaging." + config.domain;
+      mqttConfig.protocol = "mqtt";
+   }
+   return mqttConfig;
 }
 
 }).call(this,"/src/util")
