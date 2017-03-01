@@ -47,29 +47,36 @@ export function initializeMqttConfig(config){
   };
   if(config['use-client-certs'] == true || config['use-client-certs'] == "true"){
     var serverCA = fs.readFileSync(__dirname + '/IoTFoundation.pem');
-    if(isDefined(config['server-ca'])){
-      serverCA = fs.readFileSync(config['server-ca']);
-    }
-    if(isDefined(config['client-ca'])){
-      mqttConfig.ca = [fs.readFileSync(config['client-ca']),serverCA];
-    }
-    else {
-      throw new Error('[initializeMqttConfig] config must specify path to self-signed CA certificate');
-    }
-    if(isDefined(config['client-cert'])){
-      mqttConfig.cert = fs.readFileSync(config['client-cert']);
+    if(config['read-certs'] == true){
+        mqttConfig.ca = [config['client-ca'],serverCA];
+        mqttConfig.cert = config['client-cert'];
+        mqttConfig.key = config['client-key']; 
     }
     else {
-      throw new Error('[initializeMqttConfig] config must specify path to self-signed client certificate');
-    }
-    if(isDefined(config['client-key'])){
-      mqttConfig.key = fs.readFileSync(config['client-key']);
-    }
-    else {
-      throw new Error('[initializeMqttConfig] config must specify path to client key');
-    }
-    if(isDefined(config['client-key-passphrase'])){
-      mqttConfig.passphrase = config['client-key-passphrase'];
+       if(isDefined(config['server-ca'])){
+          serverCA = fs.readFileSync(config['server-ca']);
+       }
+       if(isDefined(config['client-ca'])){
+          mqttConfig.ca = [fs.readFileSync(config['client-ca']),serverCA];
+       }
+       else {
+          throw new Error('[initializeMqttConfig] config must specify path to self-signed CA certificate');
+       }
+       if(isDefined(config['client-cert'])){
+          mqttConfig.cert = fs.readFileSync(config['client-cert']);
+       }
+       else {
+          throw new Error('[initializeMqttConfig] config must specify path to self-signed client certificate');
+       }
+       if(isDefined(config['client-key'])){
+          mqttConfig.key = fs.readFileSync(config['client-key']);
+       }
+       else {
+          throw new Error('[initializeMqttConfig] config must specify path to client key');
+       }
+       if(isDefined(config['client-key-passphrase'])){
+          mqttConfig.passphrase = config['client-key-passphrase'];
+       }
     }
     mqttConfig.servername = config.org + ".messaging." + config.domain;
     mqttConfig.protocol = "mqtt";
