@@ -47,8 +47,8 @@ export default class BaseClient extends events.EventEmitter {
       throw new Error('[BaseClient:constructor] id must be a string');
     }
 
-	this.domainName = "internetofthings.ibmcloud.com";
-	this.mqttServer = "";
+    this.domainName = "internetofthings.ibmcloud.com";
+    this.mqttServer = "";
     this.enforceWs = false;
     // Parse mqtt-server & domain property. mqtt-server takes precedence over domain
     if(isDefined(config['mqtt-server'])) {
@@ -56,16 +56,17 @@ export default class BaseClient extends events.EventEmitter {
             throw new Error('[BaseClient:constructor] mqtt-server must be a string');
         }
         this.mqttServer = config['mqtt-server'];
-    } else if(isDefined(config.domain)){
-        if(!isString(config.domain)){
+    }
+    else if(isDefined(config['domain'])){
+        if(!isString(config['domain'])){
             throw new Error('[BaseClient:constructor] domain must be a string');
         }
         this.mqttServer = config.org + ".messaging." + config.domain;
         this.domainName = config.domain;
     } else {
         this.mqttServer = config.org + ".messaging.internetofthings.ibmcloud.com";
-    }
-	
+   }
+
     //property to enforce Websockets even in Node 
     // CAUTION : This is deprecated and may be removed in future 
     // Parse enforce-ws property 
