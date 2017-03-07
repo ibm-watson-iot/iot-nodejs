@@ -50,7 +50,7 @@ export function initializeMqttConfig(config){
     if(config['read-certs'] == true){
         mqttConfig.ca = [config['client-ca'],serverCA];
         mqttConfig.cert = config['client-cert'];
-        mqttConfig.key = config['client-key']; 
+        mqttConfig.key = config['client-key'];
     }
     else {
        if(isDefined(config['server-ca'])){
@@ -78,7 +78,7 @@ export function initializeMqttConfig(config){
           mqttConfig.passphrase = config['client-key-passphrase'];
        }
     }
-    mqttConfig.servername = config.org + ".messaging." + config.domain;
+    mqttConfig.servername = config['mqtt-server'];
     mqttConfig.protocol = "mqtt";
   }
   return mqttConfig;

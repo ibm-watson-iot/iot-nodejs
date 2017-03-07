@@ -105,7 +105,7 @@
                mqttConfig.passphrase = config['client-key-passphrase'];
             }
          }
-         mqttConfig.servername = config.org + ".messaging." + config.domain;
+         mqttConfig.servername = config['mqtt-server'];
          mqttConfig.protocol = "mqtt";
       }
       return mqttConfig;
