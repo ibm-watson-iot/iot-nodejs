@@ -90,8 +90,10 @@
         }
         this.mqttServer = config.org + ".messaging." + config.domain;
         this.domainName = config.domain;
+        config['mqtt-server'] = this.mqttServer;
       } else {
         this.mqttServer = config.org + ".messaging.internetofthings.ibmcloud.com";
+        config['mqtt-server'] = this.mqttServer;
       }
 
       //property to enforce Websockets even in Node
