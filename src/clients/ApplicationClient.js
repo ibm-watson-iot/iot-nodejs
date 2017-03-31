@@ -75,6 +75,11 @@ export default class ApplicationClient extends BaseClient {
     } else {
         this.httpServer = config.org + ".internetofthings.ibmcloud.com";
     }
+
+    this.withProxy = false;
+    if(isDefined(config['with-proxy'])) {
+      this.withProxy = config['with-proxy'];
+    }
 	
     this.log.info("[ApplicationClient:constructor] ApplicationClient initialized for organization : " + config.org);
   }
@@ -340,7 +345,9 @@ export default class ApplicationClient extends BaseClient {
   callApi(method, expectedHttpCode, expectJsonContent, paths, body, params){
     return new Promise((resolve, reject) => {
       // const API_HOST = "https://%s.internetofthings.ibmcloud.com/api/v0002";
-      let uri = format("https://%s/api/v0002", this.httpServer);
+      let uri = this.withProxy
+        ? "/api/v0002"
+        : format("https://%s/api/v0002", this.httpServer);
 
       if(Array.isArray(paths)){
         for(var i = 0, l = paths.length; i < l; i++){
