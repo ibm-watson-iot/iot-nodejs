@@ -3,3 +3,5 @@ node_modules
 coverage
 .idea
 .DS_Store
+dist/iotf-client-bundle.js
+dist/iotf-client-bundle.min.js
