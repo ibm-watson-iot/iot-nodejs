@@ -30,7 +30,7 @@ Load the library in node.js
 var Client = require('ibmiotf');
 ```
 
-**Note:** When this client library is used in the Node.js environment, it will use tcp/tls. But if user wants to use websockets in Node.js, the user must add a new property `enforce-ws` in the configuration.
+**Note:** When this client library is used in the Node.js environment, it will use tcp/tls. But if a user wants to use websockets in Node.js, the user must add a new property `enforce-ws` in the configuration.
 
 
 Load the library in browser
@@ -67,8 +67,8 @@ events from the device and subscribe to commands.
 Constructor
 -----------
 
-The constructor builds the device client instance. It accepts an
-configuration json containing the following :
+The constructor builds the device client instance. It accepts a
+configuration JSON containing the following:
 
 -   org - Your organization ID
 -   type - The type of your device
@@ -76,7 +76,7 @@ configuration json containing the following :
 -   auth-method - Method of authentication (the only value currently
     supported is “token”)
 -   auth-token - API key token (required if auth-method is “token”)
--   domain - (Optional)The messaging endpoint URL. By default the value is "internetofthings.ibmcloud.com"(Watson IoT Production server).
+-   domain - (Optional)The messaging endpoint URL. By default, the value is "internetofthings.ibmcloud.com"(Watson IoT Production server).
 -   enforce-ws - (Optional)Enforce Websocket when using the library in Node.js
 -   use-client-certs - (Optional) Enforces use of client side certificates when specified as true
 -   server-ca - (Optional) Specifies the custom server certificate signed using device key
@@ -221,12 +221,12 @@ var deviceClient = new Client.IotfDevice(config);
 deviceClient.log.setLevel('debug');
 
 deviceClient.publishHTTPS('myevt', 'json', '{"value": 23 }').then(function onSuccess (argument) {
-	console.log("Success");
-	console.log(argument);
+    console.log("Success");
+    console.log(argument);
 }, function onError (argument) {
 
-	console.log("Fail");
-	console.log(argument);
+    console.log("Fail");
+    console.log(argument);
 });
 ....
 ```
@@ -704,12 +704,12 @@ Supported formats for data are text, JSON and XML. The 'Content-Type' will be se
 var appClient = new Client.IotfApplication(appClientConfig);
 
     appClient.publishHTTPS("raspi", "pi01", "eventType", "json", { d : { 'temp' : 32}}). then (function onSuccess (argument) {
-    	console.log("Success");
-    	console.log(argument);
+        console.log("Success");
+        console.log(argument);
     }, function onError (argument) {
 
-    	console.log("Fail");
-    	console.log(argument);
+        console.log("Fail");
+        console.log(argument);
     });
 
 ```
@@ -892,7 +892,7 @@ gatewayClient.on('connect', function(){
 
 ##### Publish Device Events
 
-The Gateway can publish the device events on behalf of the device that are connected to the Gateway. Function *publishDeviceEvent* needs device Type and the Device Id to publish the device events.
+The Gateway can publish the device events on behalf of the device that is connected to the Gateway. Function *publishDeviceEvent* needs device Type and the Device Id to publish the device events.
 
 ``` {.sourceCode .javascript}
 

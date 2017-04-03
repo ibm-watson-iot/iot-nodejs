@@ -84,14 +84,16 @@
           throw new Error('[BaseClient:constructor] mqtt-server must be a string');
         }
         this.mqttServer = config['mqtt-server'];
-      } else if ((0, _utilUtilJs.isDefined)(config.domain)) {
-        if (!(0, _utilUtilJs.isString)(config.domain)) {
+      } else if ((0, _utilUtilJs.isDefined)(config['domain'])) {
+        if (!(0, _utilUtilJs.isString)(config['domain'])) {
           throw new Error('[BaseClient:constructor] domain must be a string');
         }
         this.mqttServer = config.org + ".messaging." + config.domain;
         this.domainName = config.domain;
+        config['mqtt-server'] = this.mqttServer;
       } else {
         this.mqttServer = config.org + ".messaging.internetofthings.ibmcloud.com";
+        config['mqtt-server'] = this.mqttServer;
       }
 
       //property to enforce Websockets even in Node
