@@ -35,8 +35,13 @@ var Client = require('ibmiotf');
 
 Load the library in browser
 ------------------------------
+**Note**: From version 0.2.34, the user must build the library using the below command to get the necessary javascript files to use the library in browser.
 
-load `iotf-client-bundle.js` or `iotf-client-bundle-min.js` from the `dist` directory. Check out the [sample](https://github.com/ibm-watson-iot/iot-nodejs/tree/master/samples/WebApplicationSample) here. 
+```JavaScript
+npm run build
+```
+
+Load the generated javascript file - `iotf-client-bundle.js` or `iotf-client-bundle-min.js` from the `dist` directory to your web application. Check out the [sample](https://github.com/ibm-watson-iot/iot-nodejs/tree/master/samples/WebApplicationSample) on how to use the generated library in your web application. 
 
 Supported Features
 ------------------
