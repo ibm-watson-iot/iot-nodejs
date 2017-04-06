@@ -80,7 +80,6 @@ export default class ApplicationClient extends BaseClient {
     if(isDefined(config['with-proxy'])) {
       this.withProxy = config['with-proxy'];
     }
-	
     this.log.info("[ApplicationClient:constructor] ApplicationClient initialized for organization : " + config.org);
   }
 
@@ -732,4 +731,123 @@ export default class ApplicationClient extends BaseClient {
     this.log.debug("[ApplicationClient] deleteMultipleDevices() - BULK");
     return this.callApi('POST', 201, true, ["bulk", "devices", "remove"], JSON.stringify(arryOfDevicesToBeDeleted));
    }
+
+   // IM Device state API
+
+   createSchema(schemaContents, name, description, type) {
+    var body = {
+	  	'schemaFile': schemaContents,
+			'schemaType': 'json-schema', 
+			'name': name,
+		} 
+    if(description) {
+      body.description = description
+    } 
+     return this.callFormDataApi('POST', 201, true, ["schemas"], body, null);
+   }
+
+   deleteSchema(schemaId) {
+     return this.callApi('DELETE', 204, false, ["schemas", schemaId], null);
+   }
+
+  callFormDataApi(method, expectedHttpCode, expectJsonContent, paths, body, params){
+    return new Promise((resolve, reject) => {
+      // const API_HOST = "https://%s.internetofthings.ibmcloud.com/api/v0002";
+      let uri = this.withProxy
+        ? "/api/v0002"
+        : format("https://%s/api/v0002", this.httpServer);
+
+      console.log(uri);
+
+      if(Array.isArray(paths)){
+        for(var i = 0, l = paths.length; i < l; i++){
+          uri += '/'+paths[i];
+        }
+      }
+
+      let xhrConfig = {
+        url: uri,
+        method: method,
+        headers : {
+          'Content-Type' : 'multipart/form-data'
+        }
+      };
+
+      if(this.useLtpa){
+        xhrConfig.withCredentials = true;
+      }
+      else {
+        xhrConfig.headers['Authorization'] = 'Basic ' + btoa(this.apiKey + ':' + this.apiToken);
+      }
+
+      if(body) {
+        xhrConfig.data = body;
+
+        xhrConfig.transformRequest = [function(data) {
+          var formData = new FormData()
+          var blob = new Blob([data.schemaFile], { type: "application/json"});
+          formData.append('schemaFile', blob)
+          formData.append('name' , data.name)
+          formData.append('schemaType', 'json-schema')
+          if(data.description) {
+            formData.append('description', data.description)
+          }
+          /*for (var value of formData.values()) {
+            console.log(value); 
+          }*/
+          return formData;
+        }]
+      }
+              
+
+      if(params) {
+        xhrConfig.params = params;
+      }
+
+      function transformResponse(response){
+        if(response.status === expectedHttpCode){
+          if(expectJsonContent && !(typeof response.data === 'object')){
+            try {
+              resolve(JSON.parse(response.data));
+            } catch (e) {
+              reject(e);
+            }
+          } else {
+            resolve(response.data);
+          }
+        } else {
+          reject(new Error(method + " " + uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.status + ". Error Body: " + data));
+        }
+      }
+      this.log.debug("[ApplicationClient:transformResponse] "+xhrConfig);
+      xhr(xhrConfig).then(transformResponse, reject);
+    });
+  }
+
+  createEventType(name, description, schemaId) {
+    var body = {
+	  	'name': name,
+			'description': description, 
+			'schemaId': schemaId,
+		} 
+
+     return this.callApi('POST', 201, true, ["event", "types"], JSON.stringify(body));
+  }
+
+  getEventType(eventTypeId) {
+     return this.callApi('GET', 200, true, ["event", "types", eventTypeId]);
+  }
+
+  deleteEventType(eventTypeId) {
+     return this.callApi('DELETE', 204, false, ["event", "types", eventTypeId]);
+  }
+
+  updateEventType(eventTypeId, body) {
+     return this.callApi('PUT', 200, true, ["event", "types", eventTypeId], body);
+  }
+
+  getEventTypes() {
+     return this.callApi('GET', 200, true, ["event", "types"]);
+  }
+
 }
