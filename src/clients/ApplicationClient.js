@@ -746,6 +746,34 @@ export default class ApplicationClient extends BaseClient {
      return this.callFormDataApi('POST', 201, true, ["schemas"], body, null);
    }
 
+   getSchema(schemaId) {
+     return this.callApi('GET', 200, true, ["schemas", schemaId]);
+   }
+
+   getSchemas() {
+     return this.callApi('GET', 200, true, ["schemas"]);
+   }
+
+   deleteSchema(schemaId) {
+     return this.callApi('DELETE', 204, false, ["schemas", schemaId]);
+   }
+
+   updateSchema(schemaId, body) {
+     return this.callApi('PUT', 200, true, ["schemas", schemaId], body);
+   }
+
+   updateSchemaContent(schemaId, schemaContents) {
+     var body = {
+	    'schemaFile': schemaContents
+		 } 
+
+     return this.callFormDataApi('PUT', 204, false, ["schemas", schemaId, "content"], body, null);
+   }
+
+   getSchemaContent(schemaId) {
+     return this.callApi('GET', 200, true, ["schemas", schemaId, "content"]);
+   }
+
    deleteSchema(schemaId) {
      return this.callApi('DELETE', 204, false, ["schemas", schemaId], null);
    }
@@ -787,8 +815,12 @@ export default class ApplicationClient extends BaseClient {
           var formData = new FormData()
           var blob = new Blob([data.schemaFile], { type: "application/json"});
           formData.append('schemaFile', blob)
-          formData.append('name' , data.name)
-          formData.append('schemaType', 'json-schema')
+          if(data.name) {
+            formData.append('name' , data.name)
+          }
+          if(data.schemaType) {
+            formData.append('schemaType', 'json-schema')
+          }
           if(data.description) {
             formData.append('description', data.description)
           }
@@ -850,4 +882,116 @@ export default class ApplicationClient extends BaseClient {
      return this.callApi('GET', 200, true, ["event", "types"]);
   }
 
+  createPhysicalInterface(body) {
+     return this.callApi('POST', 201, true, ["physicalinterfaces"], body);
+  }
+
+  getPhysicalInterface(physicalInterfaceId) {
+     return this.callApi('GET', 200, true, ["physicalinterfaces", physicalInterfaceId]);
+  }
+
+  deletePhysicalInterface(physicalInterfaceId) {
+     return this.callApi('DELETE', 204, false, ["physicalinterfaces", physicalInterfaceId]);
+  }
+
+  updatePhysicalInterface(physicalInterfaceId, body) {
+     return this.callApi('PUT', 200, true, ["physicalinterfaces", physicalInterfaceId], body);
+  }
+
+  getPhysicalInterfaces() {
+     return this.callApi('GET', 200, true, ["physicalinterfaces"]);
+  }
+
+  createPhysicalInterfaceEventMapping(physicalInterfaceId, body) {
+     return this.callApi('POST', 201, true, ["physicalinterfaces", physicalInterfaceId, "events"], body);
+  }
+
+  getPhysicalInterfaceEventMappings(physicalInterfaceId) {
+     return this.callApi('GET', 200, true, ["physicalinterfaces", physicalInterfaceId, "events"]);
+  }
+
+  deletePhysicalInterfaceEventMapping(physicalInterfaceId, eventId) {
+     return this.callApi('DELETE', 204, false, ["physicalinterfaces", physicalInterfaceId, "events", eventId]);
+  }
+
+  createAppInterface(name, description, schemaId) {
+    var body = {
+	  	'name': name,
+			'description': description, 
+			'schemaId': schemaId,
+		}
+    return this.callApi('POST', 201, true, ["applicationinterfaces"], JSON.stringify(body));
+  }
+
+  getAppInterface(appInterfaceId) {
+     return this.callApi('GET', 200, true, ["applicationinterfaces", appInterfaceId]);
+  }
+
+  deleteAppInterface(appInterfaceId) {
+     return this.callApi('DELETE', 204, false, ["applicationinterfaces", appInterfaceId]);
+  }
+
+  updateAppInterface(appInterfaceId, body) {
+     return this.callApi('PUT', 200, true, ["applicationinterfaces", appInterfaceId], body);
+  }
+
+  getAppInterfaces() {
+     return this.callApi('GET', 200, true, ["applicationinterfaces"]);
+  }
+
+  // Create device type with physical Interface Id
+  createDeviceType(typeId, description, deviceInfo, metadata, classId, physicalInterfaceId){
+    this.log.debug("[ApplicationClient] registerDeviceType(" + typeId + ", " + description + ", " + deviceInfo + ", " + metadata + ", " + classId + ", " + physicalInterfaceId + ")");
+    classId = classId || "Device";
+    let body = {
+      id: typeId,
+      classId: classId,
+      deviceInfo : deviceInfo,
+      description : description,
+      metadata: metadata,
+      physicalInterfaceId : physicalInterfaceId
+    };
+
+    return this.callApi('POST', 201, true, ['device', 'types' ], JSON.stringify(body));
+  }
+
+  createDeviceTypeAppInterfaceAssociation(typeId, body) {
+    return this.callApi('POST', 201, true, ['device', 'types', typeId, 'applicationinterfaces' ], body);
+  }
+
+  getDeviceTypeAppInterfaces(typeId) {
+    return this.callApi('GET', 200, true, ['device', 'types', typeId, 'applicationinterfaces']);
+  }
+
+  createDeviceTypeAppInterfacePropertyMappings(typeId, appInterfaceId, mappings) {
+    var body = {
+      "applicationInterfaceId" : appInterfaceId,
+			"propertyMappings" : mappings 
+    }
+    return this.callApi('POST', 201, true, ['device', 'types', typeId, 'mappings' ], body);
+  }
+
+  getDeviceTypeAppInterfacePropertyMappings(typeId, appInterfaceId) {
+    return this.callApi('GET', 200, true, ['device', 'types', typeId, 'mappings', appInterfaceId]);
+  }
+
+  getDeviceTypePropertyMappings(typeId) {
+    return this.callApi('GET', 200, true, ['device', 'types', typeId, 'mappings']);
+  }
+
+  updateDeviceTypeAppInterfacePropertyMappings(typeId, appInterfaceId, mappings) {
+    var body = {
+      "applicationInterfaceId" : appInterfaceId,
+			"propertyMappings" : mappings 
+    }
+    return this.callApi('PUT', 200, false, ['device', 'types', typeId, 'mappings', appInterfaceId], body);
+  }
+
+  deleteDeviceTypeAppInterfacePropertyMappings(typeId, appInterfaceId) {
+    return this.callApi('DELETE', 204, false, ['device', 'types', typeId, 'mappings', appInterfaceId]);
+  }
+
+  deleteDeviceTypeAppInterfaceAssociation(typeId, appInterfaceId) {
+    return this.callApi('DELETE', 204, false, ['device', 'types', typeId, 'applicationinterfaces', appInterfaceId]);
+  }
 }
