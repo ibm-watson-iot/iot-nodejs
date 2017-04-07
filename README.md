@@ -46,21 +46,23 @@ Load the generated javascript file - `iotf-client-bundle.js` or `iotf-client-bun
 Supported Features
 ------------------
 
-| Feature   |      Supported?      |
-|----------|:-------------:|
-| Device connectivity |  &#10004; |
-| Gateway connectivity |    &#10004;   |
-| Application connectivity | &#10004; |
-| Watson IoT API | &#10004; |
-| SSL/TLS | &#10004; |
-| Client side Certificate based authentication | &#10004; |
-| Device Management | &#10004; |
-| Device Management Extension(DME) | &#10008; |
-| Scalable Application | &#10004; |
-| Auto reconnect | &#10004; |
-| Websocket | &#10004; |
-| Event/Command publish using MQTT| &#10004; |
-| Event/Command publish using HTTP| &#10004; |
+
+| Feature   |      Supported?      | Description |
+|----------|:-------------:|:-------------|
+| [Device connectivity](https://console.ng.bluemix.net/docs/services/IoT/devices/libraries/nodejs.html) |  &#10004; |  Connect your device(s) to Watson IoT Platform with ease using this library. [Click here](https://console.ng.bluemix.net/docs/services/IoT/devices/libraries/nodejs.html) for detailed information on how devices can publish events and handle commands.|
+| [Gateway connectivity](https://github.com/ibm-watson-iot/iot-nodejs/blob/master/README.md#gateways)  |    &#10004;   |  Connect your gateway(s) to Watson IoT Platform with ease using this library. [Click here](https://github.com/ibm-watson-iot/iot-nodejs/blob/master/README.md#gateways) for detailed information on how gateways can publish events and handle commands for itself and for the attached devices. |
+| [Application connectivity](https://console.ng.bluemix.net/docs/services/IoT/applications/libraries/nodejs.html) | &#10004; |  Connect your application(s) to Watson IoT Platform with ease using this library. [Click here](https://console.ng.bluemix.net/docs/services/IoT/applications/libraries/nodejs.html) for detailed information on how applications can subscribe to device events and publish commands to devices. |
+[Watson IoT API](https://console.ng.bluemix.net/docs/services/IoT/reference/api.html) | &#10004; | Shows how applications can use this library to interact with the Watson IoT Platform through REST APIs. [Click here](https://github.com/ibm-messaging/iot-nodejs/blob/master/samples/api.rst) for more information. |
+[SSL/TLS support](https://console.ng.bluemix.net/docs/services/IoT/reference/security/index.html) | &#10004; | By default, this library connects your devices, gateways and applications **securely** to Watson IoT Platform registered service. Ports 8883(default one) and 443 support secure connections using TLS with the MQTT and HTTP protocol.  Also, use the [enforce-ws setting](https://github.com/ibm-watson-iot/iot-nodejs#constructor) in order to connect your device/gateway/application over WebSockets. <br> Also, note that the library uses port 1883(unsecured) to connect to the Quickstart service.|
+| [Client side Certificate based authentication](https://console.ng.bluemix.net/docs/services/IoT/reference/security/RM_security.html) | &#10004; | Click [here](https://github.com/ibm-watson-iot/iot-nodejs/blob/master/README.md#constructor) for more information on how to use Client side Certificates|
+| [Device Management](https://console.ng.bluemix.net/docs/services/IoT/devices/device_mgmt/index.html) | &#10004; | Connects your device/gateway as managed device/gateway to Watson IoT Platform.|
+| [Device Management Extension(DME)](https://console.ng.bluemix.net/docs/services/IoT/devices/device_mgmt/custom_actions.html)| &#10008; |[Device Management Extension(DME)](https://console.ng.bluemix.net/docs/services/IoT/devices/device_mgmt/custom_actions.html) not supported now and will be added soon.|
+| [Scalable Application](https://console.ng.bluemix.net/docs/services/IoT/applications/mqtt.html) | &#10004; | Provides support for load balancing for applications. [Click here](https://console.ng.bluemix.net/docs/services/IoT/applications/libraries/nodejs.html#constructor) for more information about how to enable scalable application support using this library. |
+| Auto reconnect | &#10004; | When the connection is lost, the client library automatically tries to reconnect to the Watson IoT platform
+| Websocket | &#10004; | Enables device/gateway/application to connect to Watson IoT Platform using WebSockets. To enable this feature, set  [enforce-ws](https://github.com/ibm-watson-iot/iot-nodejs#constructor) option to true. |
+[Event/Command publish using MQTT](https://console.ng.bluemix.net/docs/services/IoT/reference/mqtt/index.html)| &#10004; | Enables device/gateway/application to publish messages using MQTT. Refer to [Device](https://console.ng.bluemix.net/docs/services/IoT/devices/libraries/nodejs.html#publishing_events), [Gateway](https://github.com/ibm-watson-iot/iot-nodejs/blob/master/README.md#gateways) and [Application](https://console.ng.bluemix.net/docs/services/IoT/applications/libraries/nodejs.html) section for more information. |
+| [Event/Command publish using HTTP](https://console.ng.bluemix.net/docs/services/IoT/devices/api.html)| &#10004; |Enables device/gateway/application to publish messages using HTTP.
+
 
 Devices
 ===============================
