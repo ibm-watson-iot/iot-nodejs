@@ -955,6 +955,18 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('POST', 201, true, ['device', 'types' ], JSON.stringify(body));
   }
 
+  updateDeviceTypeWithPhysicalInterface(type, description, deviceInfo, metadata, physicalInterfaceId){
+    this.log.debug("[ApplicationClient] updateDeviceType("+type+", "+description+", "+deviceInfo+", "+metadata+", "+physicalInterfaceId+")");
+    let body = {
+      deviceInfo : deviceInfo,
+      description : description,
+      metadata: metadata,
+      physicalInterfaceId : physicalInterfaceId
+    };
+
+    return this.callApi('PUT', 200, true, ['device', 'types' , type], JSON.stringify(body));
+  }
+
   createDeviceTypeAppInterfaceAssociation(typeId, body) {
     return this.callApi('POST', 201, true, ['device', 'types', typeId, 'applicationinterfaces' ], body);
   }
@@ -994,4 +1006,35 @@ export default class ApplicationClient extends BaseClient {
   deleteDeviceTypeAppInterfaceAssociation(typeId, appInterfaceId) {
     return this.callApi('DELETE', 204, false, ['device', 'types', typeId, 'applicationinterfaces', appInterfaceId]);
   }
+
+  // Device type patch operation and device state calls subject to change based on Things type
+  validatePatchOperationDeviceType(typeId) {
+    var body = {
+      "operation" : 'validate-configuration'
+    }
+    return this.callApi('PATCH', 200, true, ['device', 'types', typeId], body);
+  }
+
+  deployPatchOperationDeviceType(typeId) {
+    var body = {
+      "operation" : 'deploy-configuration'
+    }
+    return this.callApi('PATCH', 202, true, ['device', 'types', typeId], body);
+  }
+
+  removePatchOperationDeviceType(typeId) {
+    var body = {
+      "operation" : 'remove-deployed-configuration'
+    }
+    return this.callApi('PATCH', 202, false, ['device', 'types', typeId], body);
+  }
+
+  getDeviceTypeDeployedConfiguration(typeId) {
+    return this.callApi('GET', 200, true, ['device', 'types', typeId, 'deployedconfiguration']);
+  }
+
+  getDeviceState(typeId, deviceId, appInterfaceId) {
+    return this.callApi('GET', 200, true, ['device', 'types', typeId, 'devices', deviceId, 'state', appInterfaceId]);
+  }
+
 }
