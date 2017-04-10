@@ -106,6 +106,11 @@
         this.httpServer = config.org + ".internetofthings.ibmcloud.com";
       }
 
+      this.withProxy = false;
+      if ((0, _utilUtilJs.isDefined)(config['with-proxy'])) {
+        this.withProxy = config['with-proxy'];
+      }
+
       this.log.info("[ApplicationClient:constructor] ApplicationClient initialized for organization : " + config.org);
     }
 
@@ -361,7 +366,7 @@
 
         return new _Promise['default'](function (resolve, reject) {
           // const API_HOST = "https://%s.internetofthings.ibmcloud.com/api/v0002";
-          var uri = (0, _format2['default'])("https://%s/api/v0002", _this2.httpServer);
+          var uri = _this2.withProxy ? "/api/v0002" : (0, _format2['default'])("https://%s/api/v0002", _this2.httpServer);
 
           if (Array.isArray(paths)) {
             for (var i = 0, l = paths.length; i < l; i++) {
