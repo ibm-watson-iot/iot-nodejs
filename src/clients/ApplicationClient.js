@@ -758,7 +758,12 @@ export default class ApplicationClient extends BaseClient {
      return this.callApi('DELETE', 204, false, ["schemas", schemaId]);
    }
 
-   updateSchema(schemaId, body) {
+   updateSchema(schemaId, name, description) {
+     var body = {
+       "id" : schemaId,
+       "name" : name,
+       "description" : description
+     }
      return this.callApi('PUT', 200, true, ["schemas", schemaId], body);
    }
 
@@ -874,15 +879,25 @@ export default class ApplicationClient extends BaseClient {
      return this.callApi('DELETE', 204, false, ["event", "types", eventTypeId]);
   }
 
-  updateEventType(eventTypeId, body) {
-     return this.callApi('PUT', 200, true, ["event", "types", eventTypeId], body);
+  updateEventType(eventTypeId, name, description, schemaId) {
+    var body = {
+      "id" : eventTypeId,
+      "name" : name,
+      "description" : description,
+      "schemaId" : schemaId
+    }
+    return this.callApi('PUT', 200, true, ["event", "types", eventTypeId], body);
   }
 
   getEventTypes() {
      return this.callApi('GET', 200, true, ["event", "types"]);
   }
 
-  createPhysicalInterface(body) {
+  createPhysicalInterface(name, description) {
+     var body = {
+       'name' : name,
+       'description' : description
+     }
      return this.callApi('POST', 201, true, ["physicalinterfaces"], body);
   }
 
@@ -894,7 +909,12 @@ export default class ApplicationClient extends BaseClient {
      return this.callApi('DELETE', 204, false, ["physicalinterfaces", physicalInterfaceId]);
   }
 
-  updatePhysicalInterface(physicalInterfaceId, body) {
+  updatePhysicalInterface(physicalInterfaceId, name, description) {
+     var body = {
+       'id' : physicalInterfaceId,
+       'name' : name,
+       'description' : description
+     }
      return this.callApi('PUT', 200, true, ["physicalinterfaces", physicalInterfaceId], body);
   }
 
@@ -902,8 +922,12 @@ export default class ApplicationClient extends BaseClient {
      return this.callApi('GET', 200, true, ["physicalinterfaces"]);
   }
 
-  createPhysicalInterfaceEventMapping(physicalInterfaceId, body) {
-     return this.callApi('POST', 201, true, ["physicalinterfaces", physicalInterfaceId, "events"], body);
+  createPhysicalInterfaceEventMapping(physicalInterfaceId, eventId, eventTypeId) {
+    var body = {
+      "eventId": eventId,
+      "eventTypeId": eventTypeId
+    }
+    return this.callApi('POST', 201, true, ["physicalinterfaces", physicalInterfaceId, "events"], body);
   }
 
   getPhysicalInterfaceEventMappings(physicalInterfaceId) {
@@ -931,8 +955,15 @@ export default class ApplicationClient extends BaseClient {
      return this.callApi('DELETE', 204, false, ["applicationinterfaces", appInterfaceId]);
   }
 
-  updateAppInterface(appInterfaceId, body) {
-     return this.callApi('PUT', 200, true, ["applicationinterfaces", appInterfaceId], body);
+  updateAppInterface(appInterfaceId, name, description, schemaId) {
+    var body = {
+      "id" : appInterfaceId,
+      "name" : name,
+      "description" : description,
+      "schemaId" : schemaId
+    }
+
+    return this.callApi('PUT', 200, true, ["applicationinterfaces", appInterfaceId], body);
   }
 
   getAppInterfaces() {
@@ -967,7 +998,10 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('PUT', 200, true, ['device', 'types' , type], JSON.stringify(body));
   }
 
-  createDeviceTypeAppInterfaceAssociation(typeId, body) {
+  createDeviceTypeAppInterfaceAssociation(typeId, appInterfaceId) {
+    var body = {
+      'id' : appInterfaceId
+    }
     return this.callApi('POST', 201, true, ['device', 'types', typeId, 'applicationinterfaces' ], body);
   }
 
