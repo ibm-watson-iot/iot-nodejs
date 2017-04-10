@@ -1,6 +1,6 @@
 {
         "name": "ibmiotf",
-        "version": "0.2.34",
+        "version": "0.2.35",
         "description": "A library for developing device and application clients for IBM Watson IoT Platform",
         "main": "dist/iotf-client.js",
         "dependencies": {
