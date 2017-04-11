@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.js"></script>
+	<script type="text/javascript">
+
+	$(document).ready(function(){
+		$('#t01 td.r_g').each(function(){
+			if ($(this).text() == 'Disconnect') {
+				$(this).css('background-color','#f00');
+			}
+			else
+			{
+				$(this).css('background-color','#0f0');
+			}
+		});
+	});
+
+	</script>
+	
+
+
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+		<style>
+		table {
+			width:100%;
+		}
+		table, th, td {
+			border: 1px solid black;
+			border-collapse: collapse;
+		}
+		th, td {
+			padding: 5px;
+			text-align: left;
+		}
+		table#t01 tr:nth-child(even) {
+			background-color: #eee;
+		}
+		table#t01 tr:nth-child(odd) {
+		   background-color: #fff;
+		}
+		table#t01 th {
+			background-color: black;
+			color: white;
+		}
+		</style>
+		
+
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <h2>Device Status Dashboard</h2>
+	
+	
+	<p></p>
+	<p></p>
+	<p></p>
+	<p></p>
+   
+
+	
+<form action="/">
+
+  Authentication Key:<br>
+  <input type="text" name="auth_key" value="" required>
+  <br><br><br>
+  Authentication Token:<br>
+  <input type="text" name="auth_token" value="" required>
+  <br><br><br>
+  <a href="status"> <input type="submit" value="Submit"> </a>
+</form> 
+
+  </body>
+</html>
