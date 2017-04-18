@@ -1071,4 +1071,76 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('GET', 200, true, ['device', 'types', typeId, 'devices', deviceId, 'state', appInterfaceId]);
   }
 
+  createSchemaAndEventType(schemaContents, schemaFileName, eventTypeName, eventDescription) {
+    var body = {
+	  	'schemaFile': schemaContents,
+			'schemaType': 'json-schema', 
+			'name': schemaFileName
+		}
+    
+    var createSchema = new Promise((resolve, reject) => {
+        this.callFormDataApi('POST', 201, true, ["schemas"], body, null).then(result => {
+          resolve(result)
+        }, error => {
+          reject(error)
+        })
+    })
+
+    return createSchema.then(value => { 
+      var schemaId = value.id
+      return this.createEventType(eventTypeName, eventDescription, schemaId)
+    })
+  }
+
+  createSchemaAndApplicationInterface(schemaContents, schemaFileName, appInterfaceName, appInterfaceDescription) {
+    var body = {
+	  	'schemaFile': schemaContents,
+			'schemaType': 'json-schema', 
+			'name': schemaFileName
+		}
+    
+    var createSchema = new Promise((resolve, reject) => {
+        this.callFormDataApi('POST', 201, true, ["schemas"], body, null).then(result => {
+          resolve(result)
+        }, error => {
+          reject(error)
+        })
+    })
+
+    return createSchema.then(value => { 
+      var schemaId = value.id
+      return this.createAppInterface(appInterfaceName, appInterfaceDescription, schemaId)
+    })
+  }
+
+  createPhysicalInterfaceWithEventMapping(physicalInterfaceName, description, eventId, eventTypeId) {
+   var createPhysicalInterface = new Promise((resolve, reject) => {
+     this.createPhysicalInterface(physicalInterfaceName, description).then(result => {
+       resolve(result)
+     }, error => {
+       reject(error)
+    })
+   })
+
+    return createPhysicalInterface.then(value => { 
+      var physicalInterfaceId = value.id
+      return [value, this.createPhysicalInterfaceEventMapping(physicalInterfaceId, eventId, eventTypeId)]
+    })
+  }
+
+  createDeviceTypeAppInterfaceEventMapping(deviceTypeName, description, appInterfaceId, eventMapping){
+    var createDeviceType = new Promise((resolve, reject) => {
+      this.createDeviceType(deviceTypeName, description).then(result => {
+        resolve(result)
+      }, error => {
+        reject(error)
+      })
+    })
+
+    return createDeviceType.then(value => { 
+      var deviceTypeId = value.id
+      return [value, this.createDeviceTypeAppInterfaceAssociation(deviceTypeId, appInterfaceId), 
+      this.createDeviceTypeAppInterfacePropertyMappings(deviceTypeId, appInterfaceId, eventMapping)]
+    }) 
+  }
 }
