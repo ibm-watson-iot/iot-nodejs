@@ -25,20 +25,20 @@ const QUICKSTART_ORG_ID = "quickstart";
 const DEVICE_EVT_RE = /^iot-2\/type\/(.+)\/id\/(.+)\/evt\/(.+)\/fmt\/(.+)$/;
 const DEVICE_CMD_RE = /^iot-2\/type\/(.+)\/id\/(.+)\/cmd\/(.+)\/fmt\/(.+)$/;
 const DEVICE_MON_RE = /^iot-2\/type\/(.+)\/id\/(.+)\/mon$/;
-const APP_MON_RE    = /^iot-2\/app\/(.+)\/mon$/;
+const APP_MON_RE = /^iot-2\/app\/(.+)\/mon$/;
 
 export default class ApplicationClient extends BaseClient {
-  constructor(config){
+  constructor(config) {
     super(config);
 
-    if(config.org !== QUICKSTART_ORG_ID){
-      if(config.useLtpa){
+    if (config.org !== QUICKSTART_ORG_ID) {
+      if (config.useLtpa) {
         this.useLtpa = true;
       } else {
-        if(!isDefined(config['auth-key'])){
+        if (!isDefined(config['auth-key'])) {
           throw new Error('[ApplicationClient:constructor] config must contain auth-key');
         }
-        else if(!isString(config['auth-key'])){
+        else if (!isString(config['auth-key'])) {
           throw new Error('[ApplicationClient:constructor] auth-key must be a string');
         }
 
@@ -50,41 +50,40 @@ export default class ApplicationClient extends BaseClient {
     this.apiKey = config['auth-key'];
     this.apiToken = config['auth-token'];
     //support for shared subscription
-    this.shared = ((config['type']+'').toLowerCase() === "shared") || false;
-    if(this.shared) {
-        this.mqttConfig.clientId = "A:" + config.org + ":" + config.id;
+    this.shared = ((config['type'] + '').toLowerCase() === "shared") || false;
+    if (this.shared) {
+      this.mqttConfig.clientId = "A:" + config.org + ":" + config.id;
     } else {
-        this.mqttConfig.clientId = "a:" + config.org + ":" + config.id;
+      this.mqttConfig.clientId = "a:" + config.org + ":" + config.id;
     }
     this.subscriptions = [];
 
     this.httpServer = "";
     // Parse http-server & domain property. http-server takes precedence over domain
-    if(isDefined(config['http-server'])) {
-        if(!isString(config['http-server'])){
-            throw new Error('[BaseClient:constructor] http-server must be a string, ' +
-                'see Bluemix Watson IoT service credentials for more information');
-        }
-        this.httpServer = config['http-server'];
-    } else if(isDefined(config.domain)){
-        if(!isString(config.domain)){
-            throw new Error('[BaseClient:constructor] domain must be a string');
-        }
-        this.httpServer = config.org + "." + config.domain;
-        this.domainName = config.domain;
+    if (isDefined(config['http-server'])) {
+      if (!isString(config['http-server'])) {
+        throw new Error('[BaseClient:constructor] http-server must be a string, ' +
+          'see Bluemix Watson IoT service credentials for more information');
+      }
+      this.httpServer = config['http-server'];
+    } else if (isDefined(config.domain)) {
+      if (!isString(config.domain)) {
+        throw new Error('[BaseClient:constructor] domain must be a string');
+      }
+      this.httpServer = config.org + "." + config.domain;
+      this.domainName = config.domain;
     } else {
-        this.httpServer = config.org + ".internetofthings.ibmcloud.com";
+      this.httpServer = config.org + ".internetofthings.ibmcloud.com";
     }
 
     this.withProxy = false;
-    if(isDefined(config['with-proxy'])) {
+    if (isDefined(config['with-proxy'])) {
       this.withProxy = config['with-proxy'];
     }
-	
     this.log.info("[ApplicationClient:constructor] ApplicationClient initialized for organization : " + config.org);
   }
 
-  connect(QoS){
+  connect(QoS) {
     QoS = QoS || 0;
     super.connect();
 
@@ -92,7 +91,7 @@ export default class ApplicationClient extends BaseClient {
       this.log.info("[ApplicationClient:connnect] ApplicationClient Connected");
       this.isConnected = true;
 
-      if(this.retryCount === 0){
+      if (this.retryCount === 0) {
         this.emit('connect');
       } else {
         this.emit('reconnect');
@@ -101,14 +100,14 @@ export default class ApplicationClient extends BaseClient {
       //reset the counter to 0 incase of reconnection
       this.retryCount = 0;
 
-      try	{
-        for(var i = 0, l = this.subscriptions.length; i < l; i++) {
-          this.mqtt.subscribe(this.subscriptions[i], {qos: parseInt(QoS)});
+      try {
+        for (var i = 0, l = this.subscriptions.length; i < l; i++) {
+          this.mqtt.subscribe(this.subscriptions[i], { qos: parseInt(QoS) });
         }
 
       }
-      catch (err){
-        this.log.error("[ApplicationClient:connect] Error while trying to subscribe : "+err);
+      catch (err) {
+        this.log.error("[ApplicationClient:connect] Error while trying to subscribe : " + err);
       }
     });
 
@@ -119,7 +118,7 @@ export default class ApplicationClient extends BaseClient {
       // If matches, forward the payload and various fields from the topic (extracted using groups in the regexp)
 
       var match = DEVICE_EVT_RE.exec(topic);
-      if(match){
+      if (match) {
         this.emit('deviceEvent',
           match[1],
           match[2],
@@ -134,7 +133,7 @@ export default class ApplicationClient extends BaseClient {
 
 
       var match = DEVICE_CMD_RE.exec(topic);
-      if(match){
+      if (match) {
         this.emit('deviceCommand',
           match[1],
           match[2],
@@ -148,7 +147,7 @@ export default class ApplicationClient extends BaseClient {
       }
 
       var match = DEVICE_MON_RE.exec(topic);
-      if(match){
+      if (match) {
         this.emit('deviceStatus',
           match[1],
           match[2],
@@ -160,7 +159,7 @@ export default class ApplicationClient extends BaseClient {
       }
 
       var match = APP_MON_RE.exec(topic);
-        if(match){
+      if (match) {
         this.emit('appStatus',
           match[1],
           payload,
@@ -170,11 +169,11 @@ export default class ApplicationClient extends BaseClient {
       }
 
       // catch all which logs the receipt of an unexpected message
-      this.log.warn("[ApplicationClient:onMessage] Message received on unexpected topic"+", "+topic+", "+payload);
+      this.log.warn("[ApplicationClient:onMessage] Message received on unexpected topic" + ", " + topic + ", " + payload);
     });
   }
 
-  subscribe(topic, QoS){
+  subscribe(topic, QoS) {
     QoS = QoS || 0;
     if (!this.isConnected) {
       this.log.error("[ApplicationClient:subscribe] Client is not connected");
@@ -183,15 +182,15 @@ export default class ApplicationClient extends BaseClient {
       this.emit('error', "[ApplicationClient:subscribe] Client is not connected");
     }
 
-    this.log.debug("[ApplicationClient:subscribe] Subscribing to topic "+topic+" with QoS "+QoS);
+    this.log.debug("[ApplicationClient:subscribe] Subscribing to topic " + topic + " with QoS " + QoS);
     this.subscriptions.push(topic);
 
-    this.mqtt.subscribe(topic, {qos: parseInt(QoS)});
-    this.log.debug("[ApplicationClient:subscribe] Subscribed to topic "+topic+" with QoS "+QoS);
+    this.mqtt.subscribe(topic, { qos: parseInt(QoS) });
+    this.log.debug("[ApplicationClient:subscribe] Subscribed to topic " + topic + " with QoS " + QoS);
 
   }
 
-  unsubscribe(topic){
+  unsubscribe(topic) {
     if (!this.isConnected) {
       this.log.error("[ApplicationClient:unsubscribe] Client is not connected");
       // throw new Error("Client is not connected");
@@ -199,18 +198,18 @@ export default class ApplicationClient extends BaseClient {
       this.emit('error', "[ApplicationClient:unsubscribe] Client is not connected");
     }
 
-    this.log.debug("[ApplicationClient:unsubscribe] Unsubscribe: "+topic);
+    this.log.debug("[ApplicationClient:unsubscribe] Unsubscribe: " + topic);
     var i = this.subscriptions.indexOf(topic);
-      if(i != -1) {
-        this.subscriptions.splice(i, 1);
+    if (i != -1) {
+      this.subscriptions.splice(i, 1);
     }
 
     this.mqtt.unsubscribe(topic);
-    this.log.debug("[ApplicationClient:unsubscribe] Unsubscribed to: " +  topic);
+    this.log.debug("[ApplicationClient:unsubscribe] Unsubscribed to: " + topic);
 
   }
 
-  publish(topic, msg, QoS, callback){
+  publish(topic, msg, QoS, callback) {
     QoS = QoS || 0;
     if (!this.isConnected) {
       this.log.error("[ApplicationClient:publish] Client is not connected");
@@ -219,86 +218,86 @@ export default class ApplicationClient extends BaseClient {
       this.emit('error', "[ApplicationClient:publish] Client is not connected");
     }
 
-    if( (typeof msg === 'object' || typeof msg === 'boolean' || typeof msg === 'number') && !Buffer.isBuffer(msg) ) {
+    if ((typeof msg === 'object' || typeof msg === 'boolean' || typeof msg === 'number') && !Buffer.isBuffer(msg)) {
       // mqtt library does not support sending JSON/Boolean/Number data. So stringifying it.
       // All JSON object, array will be encoded.
       msg = JSON.stringify(msg);
     }
-    this.log.debug("[ApplicationClient:publish] Publish: "+topic+", "+msg+", QoS : "+QoS);
-    this.mqtt.publish(topic, msg, {qos:parseInt(QoS)}, callback);
+    this.log.debug("[ApplicationClient:publish] Publish: " + topic + ", " + msg + ", QoS : " + QoS);
+    this.mqtt.publish(topic, msg, { qos: parseInt(QoS) }, callback);
 
   }
 
-  subscribeToDeviceEvents(type, id, event, format, qos){
+  subscribeToDeviceEvents(type, id, event, format, qos) {
     type = type || '+';
     id = id || '+';
     event = event || '+';
     format = format || '+';
     qos = qos || 0;
 
-    var topic = "iot-2/type/" + type + "/id/" + id + "/evt/"+ event + "/fmt/" + format;
-    this.log.debug("[ApplicationClient:subscribeToDeviceEvents] Calling subscribe with QoS "+qos);
+    var topic = "iot-2/type/" + type + "/id/" + id + "/evt/" + event + "/fmt/" + format;
+    this.log.debug("[ApplicationClient:subscribeToDeviceEvents] Calling subscribe with QoS " + qos);
     this.subscribe(topic, qos);
     return this;
   }
 
-  unsubscribeToDeviceEvents(type, id, event, format){
+  unsubscribeToDeviceEvents(type, id, event, format) {
     type = type || '+';
     id = id || '+';
     event = event || '+';
     format = format || '+';
 
-    var topic = "iot-2/type/" + type + "/id/" + id + "/evt/"+ event + "/fmt/" + format;
+    var topic = "iot-2/type/" + type + "/id/" + id + "/evt/" + event + "/fmt/" + format;
     this.unsubscribe(topic);
     return this;
   }
 
-  subscribeToDeviceCommands(type, id, command, format, qos){
+  subscribeToDeviceCommands(type, id, command, format, qos) {
     type = type || '+';
     id = id || '+';
     command = command || '+';
     format = format || '+';
     qos = qos || 0;
 
-    var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/"+ command + "/fmt/" + format;
-    this.log.debug("[ApplicationClient:subscribeToDeviceCommands] Calling subscribe with QoS "+qos);
+    var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/" + command + "/fmt/" + format;
+    this.log.debug("[ApplicationClient:subscribeToDeviceCommands] Calling subscribe with QoS " + qos);
     this.subscribe(topic, qos);
     return this;
   }
 
-  unsubscribeToDeviceCommands(type, id, command, format){
+  unsubscribeToDeviceCommands(type, id, command, format) {
     type = type || '+';
     id = id || '+';
     command = command || '+';
     format = format || '+';
 
-    var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/"+ command + "/fmt/" + format;
+    var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/" + command + "/fmt/" + format;
     this.unsubscribe(topic);
     return this;
   }
 
-  subscribeToDeviceStatus(type, id, qos){
+  subscribeToDeviceStatus(type, id, qos) {
     type = type || '+';
     id = id || '+';
     qos = qos || 0;
 
     var topic = "iot-2/type/" + type + "/id/" + id + "/mon";
-    this.log.debug("[ApplicationClient:subscribeToDeviceStatus] Calling subscribe with QoS "+qos);
+    this.log.debug("[ApplicationClient:subscribeToDeviceStatus] Calling subscribe with QoS " + qos);
     this.subscribe(topic, qos);
     return this;
   }
 
-  subscribeToAppStatus(id, qos){
+  subscribeToAppStatus(id, qos) {
     id = id || '+';
     qos = qos || 0;
 
     var topic = "iot-2/app/" + id + "/mon";
-    this.log.debug("[ApplicationClient:subscribeToAppStatus] Calling subscribe with QoS "+qos);
+    this.log.debug("[ApplicationClient:subscribeToAppStatus] Calling subscribe with QoS " + qos);
     this.subscribe(topic, qos);
     return this;
   }
 
-  unsubscribeToDeviceStatus(type, id){
+  unsubscribeToDeviceStatus(type, id) {
     type = type || '+';
     id = id || '+';
 
@@ -307,7 +306,7 @@ export default class ApplicationClient extends BaseClient {
     return this;
   }
 
-  unsubscribeToAppStatus(id){
+  unsubscribeToAppStatus(id) {
     id = id || '+';
 
     var topic = "iot-2/app/" + id + "/mon";
@@ -316,9 +315,9 @@ export default class ApplicationClient extends BaseClient {
     return this;
   }
 
-  publishDeviceEvent(type, id, event, format, data, qos, callback){
+  publishDeviceEvent(type, id, event, format, data, qos, callback) {
     qos = qos || 0;
-    if(!isDefined(type) || !isDefined(id) || !isDefined(event) || !isDefined(format) ) {
+    if (!isDefined(type) || !isDefined(id) || !isDefined(event) || !isDefined(format)) {
       this.log.error("[ApplicationClient:publishDeviceEvent] Required params for publishDeviceEvent not present");
       //instead of throwing error, will emit 'error' event.
       this.emit('error', "[ApplicationClient:publishDeviceEvent] Required params for publishDeviceEvent not present");
@@ -329,9 +328,9 @@ export default class ApplicationClient extends BaseClient {
     return this;
   }
 
-  publishDeviceCommand(type, id, command, format, data, qos, callback){
+  publishDeviceCommand(type, id, command, format, data, qos, callback) {
     qos = qos || 0;
-    if(!isDefined(type) || !isDefined(id) || !isDefined(command) || !isDefined(format) ) {
+    if (!isDefined(type) || !isDefined(id) || !isDefined(command) || !isDefined(format)) {
       this.log.error("[ApplicationClient:publishToDeviceCommand] Required params for publishDeviceCommand not present");
       //instead of throwing error, will emit 'error' event.
       this.emit('error', "[ApplicationClient:subscribeToDeviceCommand] Required params for publishDeviceCommand not present");
@@ -342,7 +341,7 @@ export default class ApplicationClient extends BaseClient {
     return this;
   }
 
-  callApi(method, expectedHttpCode, expectJsonContent, paths, body, params){
+  callApi(method, expectedHttpCode, expectJsonContent, paths, body, params) {
     return new Promise((resolve, reject) => {
       // const API_HOST = "https://%s.internetofthings.ibmcloud.com/api/v0002";
       let uri = this.withProxy
@@ -351,9 +350,9 @@ export default class ApplicationClient extends BaseClient {
 
       console.log(uri);
 
-      if(Array.isArray(paths)){
-        for(var i = 0, l = paths.length; i < l; i++){
-          uri += '/'+paths[i];
+      if (Array.isArray(paths)) {
+        for (var i = 0, l = paths.length; i < l; i++) {
+          uri += '/' + paths[i];
         }
       }
 
@@ -365,24 +364,24 @@ export default class ApplicationClient extends BaseClient {
         }
       };
 
-      if(this.useLtpa){
+      if (this.useLtpa) {
         xhrConfig.withCredentials = true;
       }
       else {
         xhrConfig.headers['Authorization'] = 'Basic ' + btoa(this.apiKey + ':' + this.apiToken);
       }
 
-      if(body) {
+      if (body) {
         xhrConfig.data = body;
       }
 
-      if(params) {
+      if (params) {
         xhrConfig.params = params;
       }
 
-      function transformResponse(response){
-        if(response.status === expectedHttpCode){
-          if(expectJsonContent && !(typeof response.data === 'object')){
+      function transformResponse(response) {
+        if (response.status === expectedHttpCode) {
+          if (expectJsonContent && !(typeof response.data === 'object')) {
             try {
               resolve(JSON.parse(response.data));
             } catch (e) {
@@ -395,271 +394,271 @@ export default class ApplicationClient extends BaseClient {
           reject(new Error(method + " " + uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.status + ". Error Body: " + data));
         }
       }
-      this.log.debug("[ApplicationClient:transformResponse] "+xhrConfig);
+      this.log.debug("[ApplicationClient:transformResponse] " + xhrConfig);
       xhr(xhrConfig).then(transformResponse, reject);
     });
   }
 
-  getOrganizationDetails(){
+  getOrganizationDetails() {
     this.log.debug("[ApplicationClient] getOrganizationDetails()");
     return this.callApi('GET', 200, true, null, null);
   }
 
-  listAllDevicesOfType(type){
-    this.log.debug("[ApplicationClient] listAllDevicesOfType("+type+")");
-    return this.callApi('GET', 200, true, ['device', 'types' , type, 'devices'], null);
+  listAllDevicesOfType(type) {
+    this.log.debug("[ApplicationClient] listAllDevicesOfType(" + type + ")");
+    return this.callApi('GET', 200, true, ['device', 'types', type, 'devices'], null);
   }
 
-  deleteDeviceType(type){
-    this.log.debug("[ApplicationClient] deleteDeviceType("+type+")");
-    return this.callApi('DELETE', 204, false, ['device', 'types' , type], null);
+  deleteDeviceType(type) {
+    this.log.debug("[ApplicationClient] deleteDeviceType(" + type + ")");
+    return this.callApi('DELETE', 204, false, ['device', 'types', type], null);
   }
 
-  getDeviceType(type){
-    this.log.debug("[ApplicationClient] getDeviceType("+type+")");
-    return this.callApi('GET', 200, true, ['device', 'types' , type], null);
+  getDeviceType(type) {
+    this.log.debug("[ApplicationClient] getDeviceType(" + type + ")");
+    return this.callApi('GET', 200, true, ['device', 'types', type], null);
   }
 
-  getAllDeviceTypes(){
+  getAllDeviceTypes() {
     this.log.debug("[ApplicationClient] getAllDeviceTypes()");
     return this.callApi('GET', 200, true, ['device', 'types'], null);
   }
 
-  updateDeviceType(type, description, deviceInfo, metadata){
-    this.log.debug("[ApplicationClient] updateDeviceType("+type+", "+description+", "+deviceInfo+", "+metadata+")");
+  updateDeviceType(type, description, deviceInfo, metadata) {
+    this.log.debug("[ApplicationClient] updateDeviceType(" + type + ", " + description + ", " + deviceInfo + ", " + metadata + ")");
     let body = {
-      deviceInfo : deviceInfo,
-      description : description,
+      deviceInfo: deviceInfo,
+      description: description,
       metadata: metadata
     };
 
-    return this.callApi('PUT', 200, true, ['device', 'types' , type], JSON.stringify(body));
+    return this.callApi('PUT', 200, true, ['device', 'types', type], JSON.stringify(body));
   }
 
 
-  registerDeviceType(typeId, description, deviceInfo, metadata, classId){
+  registerDeviceType(typeId, description, deviceInfo, metadata, classId) {
     this.log.debug("[ApplicationClient] registerDeviceType(" + typeId + ", " + description + ", " + deviceInfo + ", " + metadata + ", " + classId + ")");
     // TODO: field validation
     classId = classId || "Device";
     let body = {
       id: typeId,
       classId: classId,
-      deviceInfo : deviceInfo,
-      description : description,
+      deviceInfo: deviceInfo,
+      description: description,
       metadata: metadata
     };
 
-    return this.callApi('POST', 201, true, ['device', 'types' ], JSON.stringify(body));
+    return this.callApi('POST', 201, true, ['device', 'types'], JSON.stringify(body));
   }
 
-  registerDevice(type, deviceId, authToken, deviceInfo, location, metadata){
-    this.log.debug("[ApplicationClient] registerDevice("+type+", "+deviceId+", "+deviceInfo+", "+location+", "+metadata+")");
+  registerDevice(type, deviceId, authToken, deviceInfo, location, metadata) {
+    this.log.debug("[ApplicationClient] registerDevice(" + type + ", " + deviceId + ", " + deviceInfo + ", " + location + ", " + metadata + ")");
     // TODO: field validation
     let body = {
       deviceId: deviceId,
-      authToken : authToken,
-      deviceInfo : deviceInfo,
-      location : location,
+      authToken: authToken,
+      deviceInfo: deviceInfo,
+      location: location,
       metadata: metadata
     };
 
-    return this.callApi('POST', 201, true, ['device', 'types' , type, 'devices'], JSON.stringify(body));
+    return this.callApi('POST', 201, true, ['device', 'types', type, 'devices'], JSON.stringify(body));
   }
 
-  unregisterDevice(type, deviceId){
-    this.log.debug("[ApplicationClient] unregisterDevice("+type+", "+deviceId+")");
-    return this.callApi('DELETE', 204, false, ['device', 'types' , type, 'devices', deviceId], null);
+  unregisterDevice(type, deviceId) {
+    this.log.debug("[ApplicationClient] unregisterDevice(" + type + ", " + deviceId + ")");
+    return this.callApi('DELETE', 204, false, ['device', 'types', type, 'devices', deviceId], null);
   }
 
-  updateDevice(type, deviceId, deviceInfo, status, metadata, extensions){
-    this.log.debug("[ApplicationClient] updateDevice("+type+", "+deviceId+", "+deviceInfo+", "+status+", "+metadata+")");
+  updateDevice(type, deviceId, deviceInfo, status, metadata, extensions) {
+    this.log.debug("[ApplicationClient] updateDevice(" + type + ", " + deviceId + ", " + deviceInfo + ", " + status + ", " + metadata + ")");
     let body = {
-      deviceInfo : deviceInfo,
-      status : status,
+      deviceInfo: deviceInfo,
+      status: status,
       metadata: metadata,
       extensions: extensions
     };
 
-    return this.callApi('PUT', 200, true, ['device', 'types' , type, 'devices', deviceId], JSON.stringify(body));
+    return this.callApi('PUT', 200, true, ['device', 'types', type, 'devices', deviceId], JSON.stringify(body));
   }
 
-  getDevice(type, deviceId){
-    this.log.debug("[ApplicationClient] getDevice("+type+", "+deviceId+")");
-    return this.callApi('GET', 200, true, ['device', 'types' , type, 'devices', deviceId], null);
+  getDevice(type, deviceId) {
+    this.log.debug("[ApplicationClient] getDevice(" + type + ", " + deviceId + ")");
+    return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId], null);
   }
 
-  getDeviceLocation(type, deviceId){
-    this.log.debug("[ApplicationClient] getDeviceLocation("+type+", "+deviceId+")");
-    return this.callApi('GET', 200, true, ['device', 'types' , type, 'devices', deviceId, 'location'], null);
+  getDeviceLocation(type, deviceId) {
+    this.log.debug("[ApplicationClient] getDeviceLocation(" + type + ", " + deviceId + ")");
+    return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'location'], null);
   }
 
-  updateDeviceLocation(type, deviceId, location){
-    this.log.debug("[ApplicationClient] updateDeviceLocation("+type+", "+deviceId+", "+location+")");
+  updateDeviceLocation(type, deviceId, location) {
+    this.log.debug("[ApplicationClient] updateDeviceLocation(" + type + ", " + deviceId + ", " + location + ")");
 
-    return this.callApi('PUT', 200, true, ['device', 'types' , type, 'devices', deviceId, 'location'], JSON.stringify(location));
+    return this.callApi('PUT', 200, true, ['device', 'types', type, 'devices', deviceId, 'location'], JSON.stringify(location));
   }
 
-  getDeviceManagementInformation(type, deviceId){
-    this.log.debug("[ApplicationClient] getDeviceManagementInformation("+type+", "+deviceId+")");
-    return this.callApi('GET', 200, true, ['device', 'types' , type, 'devices', deviceId, 'mgmt'], null);
+  getDeviceManagementInformation(type, deviceId) {
+    this.log.debug("[ApplicationClient] getDeviceManagementInformation(" + type + ", " + deviceId + ")");
+    return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'mgmt'], null);
   }
 
-  getAllDiagnosticLogs(type, deviceId){
-    this.log.debug("[ApplicationClient] getAllDiagnosticLogs("+type+", "+deviceId+")");
-    return this.callApi('GET', 200, true, ['device', 'types' , type, 'devices', deviceId, 'diag','logs'], null);
+  getAllDiagnosticLogs(type, deviceId) {
+    this.log.debug("[ApplicationClient] getAllDiagnosticLogs(" + type + ", " + deviceId + ")");
+    return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs'], null);
   }
 
-  clearAllDiagnosticLogs(type, deviceId){
-    this.log.debug("[ApplicationClient] clearAllDiagnosticLogs("+type+", "+deviceId+")");
-    return this.callApi('DELETE', 204, false, ['device', 'types' , type, 'devices', deviceId, 'diag','logs'], null);
+  clearAllDiagnosticLogs(type, deviceId) {
+    this.log.debug("[ApplicationClient] clearAllDiagnosticLogs(" + type + ", " + deviceId + ")");
+    return this.callApi('DELETE', 204, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs'], null);
   }
 
-  addDeviceDiagLogs(type, deviceId, log){
-    this.log.debug("[ApplicationClient] addDeviceDiagLogs("+type+", "+deviceId+", "+log+")");
-    return this.callApi('POST', 201, false, ['device', 'types' , type, 'devices', deviceId, 'diag','logs'], JSON.stringify(log));
+  addDeviceDiagLogs(type, deviceId, log) {
+    this.log.debug("[ApplicationClient] addDeviceDiagLogs(" + type + ", " + deviceId + ", " + log + ")");
+    return this.callApi('POST', 201, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs'], JSON.stringify(log));
   }
 
-  getDiagnosticLog(type, deviceId, logId){
-    this.log.debug("[ApplicationClient] getAllDiagnosticLogs("+type+", "+deviceId+", "+logId+")");
-    return this.callApi('GET', 200, true, ['device', 'types' , type, 'devices', deviceId, 'diag','logs',logId], null);
+  getDiagnosticLog(type, deviceId, logId) {
+    this.log.debug("[ApplicationClient] getAllDiagnosticLogs(" + type + ", " + deviceId + ", " + logId + ")");
+    return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs', logId], null);
   }
 
-  deleteDiagnosticLog(type, deviceId, logId){
-    this.log.debug("[ApplicationClient] deleteDiagnosticLog("+type+", "+deviceId+", "+logId+")");
-    return this.callApi('DELETE', 204, false, ['device', 'types' , type, 'devices', deviceId, 'diag','logs',logId], null);
+  deleteDiagnosticLog(type, deviceId, logId) {
+    this.log.debug("[ApplicationClient] deleteDiagnosticLog(" + type + ", " + deviceId + ", " + logId + ")");
+    return this.callApi('DELETE', 204, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs', logId], null);
   }
 
-  getDeviceErrorCodes(type, deviceId){
-    this.log.debug("[ApplicationClient] getDeviceErrorCodes("+type+", "+deviceId+")");
-    return this.callApi('GET', 200, true, ['device', 'types' , type, 'devices', deviceId, 'diag','errorCodes'], null);
+  getDeviceErrorCodes(type, deviceId) {
+    this.log.debug("[ApplicationClient] getDeviceErrorCodes(" + type + ", " + deviceId + ")");
+    return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'diag', 'errorCodes'], null);
   }
 
-  clearDeviceErrorCodes(type, deviceId){
-    this.log.debug("[ApplicationClient] clearDeviceErrorCodes("+type+", "+deviceId+")");
-    return this.callApi('DELETE', 204, false, ['device', 'types' , type, 'devices', deviceId, 'diag','errorCodes'], null);
+  clearDeviceErrorCodes(type, deviceId) {
+    this.log.debug("[ApplicationClient] clearDeviceErrorCodes(" + type + ", " + deviceId + ")");
+    return this.callApi('DELETE', 204, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'errorCodes'], null);
   }
 
-  addErrorCode(type, deviceId, log){
-    this.log.debug("[ApplicationClient] addErrorCode("+type+", "+deviceId+", "+log+")");
-    return this.callApi('POST', 201, false, ['device', 'types' , type, 'devices', deviceId, 'diag','errorCodes'], JSON.stringify(log));
+  addErrorCode(type, deviceId, log) {
+    this.log.debug("[ApplicationClient] addErrorCode(" + type + ", " + deviceId + ", " + log + ")");
+    return this.callApi('POST', 201, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'errorCodes'], JSON.stringify(log));
   }
 
-  getDeviceConnectionLogs(typeId, deviceId){
-    this.log.debug("[ApplicationClient] getDeviceConnectionLogs("+typeId+", "+deviceId+")");
+  getDeviceConnectionLogs(typeId, deviceId) {
+    this.log.debug("[ApplicationClient] getDeviceConnectionLogs(" + typeId + ", " + deviceId + ")");
     let params = {
-      typeId : typeId,
-      deviceId : deviceId
+      typeId: typeId,
+      deviceId: deviceId
     };
     return this.callApi('GET', 200, true, ['logs', 'connection'], null, params);
   }
 
-  getServiceStatus(){
+  getServiceStatus() {
     this.log.debug("[ApplicationClient] getServiceStatus()");
     return this.callApi('GET', 200, true, ['service-status'], null);
   }
 
-  getAllDeviceManagementRequests(){
+  getAllDeviceManagementRequests() {
     this.log.debug("[ApplicationClient] getAllDeviceManagementRequests()");
     return this.callApi('GET', 200, true, ['mgmt', 'requests'], null);
   }
 
-  initiateDeviceManagementRequest(action, parameters, devices){
-    this.log.debug("[ApplicationClient] initiateDeviceManagementRequest("+action+", "+parameters+", "+devices+")");
+  initiateDeviceManagementRequest(action, parameters, devices) {
+    this.log.debug("[ApplicationClient] initiateDeviceManagementRequest(" + action + ", " + parameters + ", " + devices + ")");
     let body = {
-      action : action,
-      parameters : parameters,
+      action: action,
+      parameters: parameters,
       devices: devices
     };
     return this.callApi('POST', 202, true, ['mgmt', 'requests'], JSON.stringify(body));
   }
 
-  getDeviceManagementRequest(requestId){
-    this.log.debug("[ApplicationClient] getDeviceManagementRequest("+requestId+")");
+  getDeviceManagementRequest(requestId) {
+    this.log.debug("[ApplicationClient] getDeviceManagementRequest(" + requestId + ")");
     return this.callApi('GET', 200, true, ['mgmt', 'requests', requestId], null);
   }
 
-  deleteDeviceManagementRequest(requestId){
-    this.log.debug("[ApplicationClient] deleteDeviceManagementRequest("+requestId+")");
+  deleteDeviceManagementRequest(requestId) {
+    this.log.debug("[ApplicationClient] deleteDeviceManagementRequest(" + requestId + ")");
     return this.callApi('DELETE', 204, false, ['mgmt', 'requests', requestId], null);
   }
 
-  getDeviceManagementRequestStatus(requestId){
-    this.log.debug("[ApplicationClient] getDeviceManagementRequestStatus("+requestId+")");
+  getDeviceManagementRequestStatus(requestId) {
+    this.log.debug("[ApplicationClient] getDeviceManagementRequestStatus(" + requestId + ")");
     return this.callApi('GET', 200, true, ['mgmt', 'requests', requestId, 'deviceStatus'], null);
   }
 
-  getDeviceManagementRequestStatusByDevice(requestId, typeId, deviceId){
-    this.log.debug("[ApplicationClient] getDeviceManagementRequestStatusByDevice("+requestId+", "+typeId+", "+deviceId+")");
+  getDeviceManagementRequestStatusByDevice(requestId, typeId, deviceId) {
+    this.log.debug("[ApplicationClient] getDeviceManagementRequestStatusByDevice(" + requestId + ", " + typeId + ", " + deviceId + ")");
     return this.callApi('GET', 200, true, ['mgmt', 'requests', requestId, 'deviceStatus', typeId, deviceId], null);
   }
 
   //Usage Management
   getActiveDevices(start, end, detail) {
-    this.log.debug("[ApplicationClient] getActiveDevices("+start+", "+end+")");
+    this.log.debug("[ApplicationClient] getActiveDevices(" + start + ", " + end + ")");
     detail = detail | false;
     let params = {
-      start : start,
-      end : end,
-      detail : detail
+      start: start,
+      end: end,
+      detail: detail
     };
     return this.callApi('GET', 200, true, ['usage', 'active-devices'], null, params);
   }
 
   getHistoricalDataUsage(start, end, detail) {
-    this.log.debug("[ApplicationClient] getHistoricalDataUsage("+start+", "+end+")");
+    this.log.debug("[ApplicationClient] getHistoricalDataUsage(" + start + ", " + end + ")");
     detail = detail | false;
     let params = {
-      start : start,
-      end : end,
-      detail : detail
+      start: start,
+      end: end,
+      detail: detail
     };
     return this.callApi('GET', 200, true, ['usage', 'historical-data'], null, params);
   }
 
   getDataUsage(start, end, detail) {
-    this.log.debug("[ApplicationClient] getDataUsage("+start+", "+end+")");
+    this.log.debug("[ApplicationClient] getDataUsage(" + start + ", " + end + ")");
     detail = detail | false;
     let params = {
-      start : start,
-      end : end,
-      detail : detail
+      start: start,
+      end: end,
+      detail: detail
     };
     return this.callApi('GET', 200, true, ['usage', 'data-traffic'], null, params);
   }
 
   //Historian
-  getAllHistoricalEvents(evtType,start,end) {
-    this.log.debug("[ApplicationClient] getAllHistoricalEvents("+evtType+", "+start+", "+end+")");
+  getAllHistoricalEvents(evtType, start, end) {
+    this.log.debug("[ApplicationClient] getAllHistoricalEvents(" + evtType + ", " + start + ", " + end + ")");
     let params = {
-      start : start,
-      end : end,
-      evt_type : evtType
+      start: start,
+      end: end,
+      evt_type: evtType
     };
-    return this.callApi('GET', 200, true, [ 'historian'], null, params);
+    return this.callApi('GET', 200, true, ['historian'], null, params);
   }
 
-  getAllHistoricalEventsByDeviceType(evtType,start,end, typeId) {
-    this.log.debug("[ApplicationClient] getAllHistoricalEvents("+evtType+", "+start+", "+end+")");
+  getAllHistoricalEventsByDeviceType(evtType, start, end, typeId) {
+    this.log.debug("[ApplicationClient] getAllHistoricalEvents(" + evtType + ", " + start + ", " + end + ")");
     let params = {
-      start : start,
-      end : end,
-      evt_type : evtType
+      start: start,
+      end: end,
+      evt_type: evtType
     };
-    return this.callApi('GET', 200, true, [ 'historian', 'types', typeId], null, params);
+    return this.callApi('GET', 200, true, ['historian', 'types', typeId], null, params);
   }
 
-  getAllHistoricalEventsByDeviceId(evtType,start,end, typeId, deviceId) {
-    this.log.debug("[ApplicationClient] getAllHistoricalEvents("+evtType+", "+start+", "+end+")");
+  getAllHistoricalEventsByDeviceId(evtType, start, end, typeId, deviceId) {
+    this.log.debug("[ApplicationClient] getAllHistoricalEvents(" + evtType + ", " + start + ", " + end + ")");
     let params = {
-      start : start,
-      end : end,
-      evt_type : evtType
+      start: start,
+      end: end,
+      evt_type: evtType
     };
-    return this.callApi('GET', 200, true, [ 'historian', 'types', typeId, 'devices', deviceId], null, params);
+    return this.callApi('GET', 200, true, ['historian', 'types', typeId, 'devices', deviceId], null, params);
   }
 
-  publishHTTPS(deviceType, deviceId, eventType, eventFormat, payload){
-    this.log.debug("[ApplicationClient:publishHTTPS] Publishing event of Type: "+ eventType + " with payload : "+payload);
+  publishHTTPS(deviceType, deviceId, eventType, eventFormat, payload) {
+    this.log.debug("[ApplicationClient:publishHTTPS] Publishing event of Type: " + eventType + " with payload : " + payload);
     return new Promise((resolve, reject) => {
 
       let uri = format("https://%s/api/v0002/application/types/%s/devices/%s/events/%s", this.mqttServer, deviceType, deviceId, eventType);
@@ -667,40 +666,40 @@ export default class ApplicationClient extends BaseClient {
       let xhrConfig = {
         url: uri,
         method: 'POST',
-        data : payload,
-        headers : {
+        data: payload,
+        headers: {
 
         }
       };
 
-      if(eventFormat === 'json') {
+      if (eventFormat === 'json') {
         xhrConfig.headers['Content-Type'] = 'application/json';
-      } else if(eventFormat === 'xml') {
+      } else if (eventFormat === 'xml') {
         xhrConfig.headers['Content-Type'] = 'application/xml';
       }
 
-      if(this.org !== QUICKSTART_ORG_ID) {
+      if (this.org !== QUICKSTART_ORG_ID) {
         xhrConfig.headers['Authorization'] = 'Basic ' + btoa(this.apiKey + ':' + this.apiToken);
       }
-      this.log.debug("[ApplicationClient:publishHTTPS]"+ xhrConfig);
+      this.log.debug("[ApplicationClient:publishHTTPS]" + xhrConfig);
 
       xhr(xhrConfig).then(resolve, reject);
     });
   }
 
   //event cache
-  getLastEvents(type, id){
+  getLastEvents(type, id) {
     this.log.debug("[ApplicationClient] getLastEvents() - event cache");
-    return this.callApi('GET', 200, true, ["device", "types", type, "devices", id , "events"], null);
+    return this.callApi('GET', 200, true, ["device", "types", type, "devices", id, "events"], null);
   }
 
-  getLastEventsByEventType(type, id, eventType){
+  getLastEventsByEventType(type, id, eventType) {
     this.log.debug("[ApplicationClient] getLastEventsByEventType() - event cache");
-    return this.callApi('GET', 200, true, ["device", "types", type, "devices", id , "events", eventType], null);
+    return this.callApi('GET', 200, true, ["device", "types", type, "devices", id, "events", eventType], null);
   }
 
   //bulk apis
-  getAllDevices(params){
+  getAllDevices(params) {
     this.log.debug("[ApplicationClient] getAllDevices() - BULK");
     return this.callApi('GET', 200, true, ["bulk", "devices"], null, params);
   }
@@ -715,21 +714,433 @@ export default class ApplicationClient extends BaseClient {
    * <a href="https://docs.internetofthings.ibmcloud.com/swagger/v0002.html#!/Bulk_Operations/post_bulk_devices_add">link</a>
    * for more information about the schema to be used
    */
-   registerMultipleDevices(arryOfDevicesToBeAdded) {
+  registerMultipleDevices(arryOfDevicesToBeAdded) {
     this.log.debug("[ApplicationClient] arryOfDevicesToBeAdded() - BULK");
     return this.callApi('POST', 201, true, ["bulk", "devices", "add"], JSON.stringify(arryOfDevicesToBeAdded));
-   }
+  }
 
-   /**
-   * Delete multiple devices, each request can contain a maximum of 512Kb
-   *
-   * @param arryOfDevicesToBeDeleted Array of JSON devices to be deleted. Refer to
-   * <a href="https://docs.internetofthings.ibmcloud.com/swagger/v0002.html#!/Bulk_Operations/post_bulk_devices_remove">link</a>
-   * for more information about the schema to be used.
-   */
-   deleteMultipleDevices(arryOfDevicesToBeDeleted) {
+  /**
+  * Delete multiple devices, each request can contain a maximum of 512Kb
+  *
+  * @param arryOfDevicesToBeDeleted Array of JSON devices to be deleted. Refer to
+  * <a href="https://docs.internetofthings.ibmcloud.com/swagger/v0002.html#!/Bulk_Operations/post_bulk_devices_remove">link</a>
+  * for more information about the schema to be used.
+  */
+  deleteMultipleDevices(arryOfDevicesToBeDeleted) {
 
     this.log.debug("[ApplicationClient] deleteMultipleDevices() - BULK");
     return this.callApi('POST', 201, true, ["bulk", "devices", "remove"], JSON.stringify(arryOfDevicesToBeDeleted));
-   }
+  }
+
+  // IM Device state API
+
+  createSchema(schemaContents, name, description, type) {
+    var body = {
+      'schemaFile': schemaContents,
+      'schemaType': 'json-schema',
+      'name': name,
+    }
+    if (description) {
+      body.description = description
+    }
+    return this.callFormDataApi('POST', 201, true, ["schemas"], body, null);
+  }
+
+  getSchema(schemaId) {
+    return this.callApi('GET', 200, true, ["schemas", schemaId]);
+  }
+
+  getSchemas() {
+    return this.callApi('GET', 200, true, ["schemas"]);
+  }
+
+  deleteSchema(schemaId) {
+    return this.callApi('DELETE', 204, false, ["schemas", schemaId]);
+  }
+
+  updateSchema(schemaId, name, description) {
+    var body = {
+      "id": schemaId,
+      "name": name,
+      "description": description
+    }
+    return this.callApi('PUT', 200, true, ["schemas", schemaId], body);
+  }
+
+  updateSchemaContent(schemaId, schemaContents) {
+    var body = {
+      'schemaFile': schemaContents
+    }
+
+    return this.callFormDataApi('PUT', 204, false, ["schemas", schemaId, "content"], body, null);
+  }
+
+  getSchemaContent(schemaId) {
+    return this.callApi('GET', 200, true, ["schemas", schemaId, "content"]);
+  }
+
+  deleteSchema(schemaId) {
+    return this.callApi('DELETE', 204, false, ["schemas", schemaId], null);
+  }
+
+  callFormDataApi(method, expectedHttpCode, expectJsonContent, paths, body, params) {
+    return new Promise((resolve, reject) => {
+      // const API_HOST = "https://%s.internetofthings.ibmcloud.com/api/v0002";
+      let uri = this.withProxy
+        ? "/api/v0002"
+        : format("https://%s/api/v0002", this.httpServer);
+
+      console.log(uri);
+
+      if (Array.isArray(paths)) {
+        for (var i = 0, l = paths.length; i < l; i++) {
+          uri += '/' + paths[i];
+        }
+      }
+
+      let xhrConfig = {
+        url: uri,
+        method: method,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      };
+
+      if (this.useLtpa) {
+        xhrConfig.withCredentials = true;
+      }
+      else {
+        xhrConfig.headers['Authorization'] = 'Basic ' + btoa(this.apiKey + ':' + this.apiToken);
+      }
+
+      if (body) {
+        xhrConfig.data = body;
+
+        xhrConfig.transformRequest = [function (data) {
+          var formData = new FormData()
+          var blob = new Blob([data.schemaFile], { type: "application/json" });
+          formData.append('schemaFile', blob)
+          if (data.name) {
+            formData.append('name', data.name)
+          }
+          if (data.schemaType) {
+            formData.append('schemaType', 'json-schema')
+          }
+          if (data.description) {
+            formData.append('description', data.description)
+          }
+          /*for (var value of formData.values()) {
+            console.log(value); 
+          }*/
+          return formData;
+        }]
+      }
+
+
+      if (params) {
+        xhrConfig.params = params;
+      }
+
+      function transformResponse(response) {
+        if (response.status === expectedHttpCode) {
+          if (expectJsonContent && !(typeof response.data === 'object')) {
+            try {
+              resolve(JSON.parse(response.data));
+            } catch (e) {
+              reject(e);
+            }
+          } else {
+            resolve(response.data);
+          }
+        } else {
+          reject(new Error(method + " " + uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.status + ". Error Body: " + data));
+        }
+      }
+      this.log.debug("[ApplicationClient:transformResponse] " + xhrConfig);
+      xhr(xhrConfig).then(transformResponse, reject);
+    });
+  }
+
+  createEventType(name, description, schemaId) {
+    var body = {
+      'name': name,
+      'description': description,
+      'schemaId': schemaId,
+    }
+
+    return this.callApi('POST', 201, true, ["event", "types"], JSON.stringify(body));
+  }
+
+  getEventType(eventTypeId) {
+    return this.callApi('GET', 200, true, ["event", "types", eventTypeId]);
+  }
+
+  deleteEventType(eventTypeId) {
+    return this.callApi('DELETE', 204, false, ["event", "types", eventTypeId]);
+  }
+
+  updateEventType(eventTypeId, name, description, schemaId) {
+    var body = {
+      "id": eventTypeId,
+      "name": name,
+      "description": description,
+      "schemaId": schemaId
+    }
+    return this.callApi('PUT', 200, true, ["event", "types", eventTypeId], body);
+  }
+
+  getEventTypes() {
+    return this.callApi('GET', 200, true, ["event", "types"]);
+  }
+
+  createPhysicalInterface(name, description) {
+    var body = {
+      'name': name,
+      'description': description
+    }
+    return this.callApi('POST', 201, true, ["physicalinterfaces"], body);
+  }
+
+  getPhysicalInterface(physicalInterfaceId) {
+    return this.callApi('GET', 200, true, ["physicalinterfaces", physicalInterfaceId]);
+  }
+
+  deletePhysicalInterface(physicalInterfaceId) {
+    return this.callApi('DELETE', 204, false, ["physicalinterfaces", physicalInterfaceId]);
+  }
+
+  updatePhysicalInterface(physicalInterfaceId, name, description) {
+    var body = {
+      'id': physicalInterfaceId,
+      'name': name,
+      'description': description
+    }
+    return this.callApi('PUT', 200, true, ["physicalinterfaces", physicalInterfaceId], body);
+  }
+
+  getPhysicalInterfaces() {
+    return this.callApi('GET', 200, true, ["physicalinterfaces"]);
+  }
+
+  createPhysicalInterfaceEventMapping(physicalInterfaceId, eventId, eventTypeId) {
+    var body = {
+      "eventId": eventId,
+      "eventTypeId": eventTypeId
+    }
+    return this.callApi('POST', 201, true, ["physicalinterfaces", physicalInterfaceId, "events"], body);
+  }
+
+  getPhysicalInterfaceEventMappings(physicalInterfaceId) {
+    return this.callApi('GET', 200, true, ["physicalinterfaces", physicalInterfaceId, "events"]);
+  }
+
+  deletePhysicalInterfaceEventMapping(physicalInterfaceId, eventId) {
+    return this.callApi('DELETE', 204, false, ["physicalinterfaces", physicalInterfaceId, "events", eventId]);
+  }
+
+  createAppInterface(name, description, schemaId) {
+    var body = {
+      'name': name,
+      'description': description,
+      'schemaId': schemaId,
+    }
+    return this.callApi('POST', 201, true, ["applicationinterfaces"], JSON.stringify(body));
+  }
+
+  getAppInterface(appInterfaceId) {
+    return this.callApi('GET', 200, true, ["applicationinterfaces", appInterfaceId]);
+  }
+
+  deleteAppInterface(appInterfaceId) {
+    return this.callApi('DELETE', 204, false, ["applicationinterfaces", appInterfaceId]);
+  }
+
+  updateAppInterface(appInterfaceId, name, description, schemaId) {
+    var body = {
+      "id": appInterfaceId,
+      "name": name,
+      "description": description,
+      "schemaId": schemaId
+    }
+
+    return this.callApi('PUT', 200, true, ["applicationinterfaces", appInterfaceId], body);
+  }
+
+  getAppInterfaces() {
+    return this.callApi('GET', 200, true, ["applicationinterfaces"]);
+  }
+
+  // Create device type with physical Interface Id
+  createDeviceType(typeId, description, deviceInfo, metadata, classId, physicalInterfaceId) {
+    this.log.debug("[ApplicationClient] registerDeviceType(" + typeId + ", " + description + ", " + deviceInfo + ", " + metadata + ", " + classId + ", " + physicalInterfaceId + ")");
+    classId = classId || "Device";
+    let body = {
+      id: typeId,
+      classId: classId,
+      deviceInfo: deviceInfo,
+      description: description,
+      metadata: metadata,
+      physicalInterfaceId: physicalInterfaceId
+    };
+
+    return this.callApi('POST', 201, true, ['device', 'types'], JSON.stringify(body));
+  }
+
+  updateDeviceTypeWithPhysicalInterface(type, description, deviceInfo, metadata, physicalInterfaceId) {
+    this.log.debug("[ApplicationClient] updateDeviceType(" + type + ", " + description + ", " + deviceInfo + ", " + metadata + ", " + physicalInterfaceId + ")");
+    let body = {
+      deviceInfo: deviceInfo,
+      description: description,
+      metadata: metadata,
+      physicalInterfaceId: physicalInterfaceId
+    };
+
+    return this.callApi('PUT', 200, true, ['device', 'types', type], JSON.stringify(body));
+  }
+
+  createDeviceTypeAppInterfaceAssociation(typeId, appInterfaceId) {
+    var body = {
+      'id': appInterfaceId
+    }
+    return this.callApi('POST', 201, true, ['device', 'types', typeId, 'applicationinterfaces'], body);
+  }
+
+  getDeviceTypeAppInterfaces(typeId) {
+    return this.callApi('GET', 200, true, ['device', 'types', typeId, 'applicationinterfaces']);
+  }
+
+  createDeviceTypeAppInterfacePropertyMappings(typeId, appInterfaceId, mappings) {
+    var body = {
+      "applicationInterfaceId": appInterfaceId,
+      "propertyMappings": mappings
+    }
+    return this.callApi('POST', 201, true, ['device', 'types', typeId, 'mappings'], body);
+  }
+
+  getDeviceTypeAppInterfacePropertyMappings(typeId, appInterfaceId) {
+    return this.callApi('GET', 200, true, ['device', 'types', typeId, 'mappings', appInterfaceId]);
+  }
+
+  getDeviceTypePropertyMappings(typeId) {
+    return this.callApi('GET', 200, true, ['device', 'types', typeId, 'mappings']);
+  }
+
+  updateDeviceTypeAppInterfacePropertyMappings(typeId, appInterfaceId, mappings) {
+    var body = {
+      "applicationInterfaceId": appInterfaceId,
+      "propertyMappings": mappings
+    }
+    return this.callApi('PUT', 200, false, ['device', 'types', typeId, 'mappings', appInterfaceId], body);
+  }
+
+  deleteDeviceTypeAppInterfacePropertyMappings(typeId, appInterfaceId) {
+    return this.callApi('DELETE', 204, false, ['device', 'types', typeId, 'mappings', appInterfaceId]);
+  }
+
+  deleteDeviceTypeAppInterfaceAssociation(typeId, appInterfaceId) {
+    return this.callApi('DELETE', 204, false, ['device', 'types', typeId, 'applicationinterfaces', appInterfaceId]);
+  }
+
+  // Device type patch operation and device state calls subject to change based on Things type
+  validatePatchOperationDeviceType(typeId) {
+    var body = {
+      "operation": 'validate-configuration'
+    }
+    return this.callApi('PATCH', 200, true, ['device', 'types', typeId], body);
+  }
+
+  deployPatchOperationDeviceType(typeId) {
+    var body = {
+      "operation": 'deploy-configuration'
+    }
+    return this.callApi('PATCH', 202, true, ['device', 'types', typeId], body);
+  }
+
+  removePatchOperationDeviceType(typeId) {
+    var body = {
+      "operation": 'remove-deployed-configuration'
+    }
+    return this.callApi('PATCH', 202, false, ['device', 'types', typeId], body);
+  }
+
+  getDeviceTypeDeployedConfiguration(typeId) {
+    return this.callApi('GET', 200, true, ['device', 'types', typeId, 'deployedconfiguration']);
+  }
+
+  getDeviceState(typeId, deviceId, appInterfaceId) {
+    return this.callApi('GET', 200, true, ['device', 'types', typeId, 'devices', deviceId, 'state', appInterfaceId]);
+  }
+
+  createSchemaAndEventType(schemaContents, schemaFileName, eventTypeName, eventDescription) {
+    var body = {
+      'schemaFile': schemaContents,
+      'schemaType': 'json-schema',
+      'name': schemaFileName
+    }
+
+    var createSchema = new Promise((resolve, reject) => {
+      this.callFormDataApi('POST', 201, true, ["schemas"], body, null).then(result => {
+        resolve(result)
+      }, error => {
+        reject(error)
+      })
+    })
+
+    return createSchema.then(value => {
+      var schemaId = value.id
+      return this.createEventType(eventTypeName, eventDescription, schemaId)
+    })
+  }
+
+  createSchemaAndApplicationInterface(schemaContents, schemaFileName, appInterfaceName, appInterfaceDescription) {
+    var body = {
+      'schemaFile': schemaContents,
+      'schemaType': 'json-schema',
+      'name': schemaFileName
+    }
+
+    var createSchema = new Promise((resolve, reject) => {
+      this.callFormDataApi('POST', 201, true, ["schemas"], body, null).then(result => {
+        resolve(result)
+      }, error => {
+        reject(error)
+      })
+    })
+
+    return createSchema.then(value => {
+      var schemaId = value.id
+      return this.createAppInterface(appInterfaceName, appInterfaceDescription, schemaId)
+    })
+  }
+
+  createPhysicalInterfaceWithEventMapping(physicalInterfaceName, description, eventId, eventTypeId) {
+    var createPhysicalInterface = new Promise((resolve, reject) => {
+      this.createPhysicalInterface(physicalInterfaceName, description).then(result => {
+        resolve(result)
+      }, error => {
+        reject(error)
+      })
+    })
+
+    return createPhysicalInterface.then(value => {
+      var physicalInterfaceId = value.id
+      return [value, this.createPhysicalInterfaceEventMapping(physicalInterfaceId, eventId, eventTypeId)]
+    })
+  }
+
+  createDeviceTypeAppInterfaceEventMapping(deviceTypeName, description, appInterfaceId, eventMapping) {
+    var createDeviceType = new Promise((resolve, reject) => {
+      this.createDeviceType(deviceTypeName, description).then(result => {
+        resolve(result)
+      }, error => {
+        reject(error)
+      })
+    })
+
+    return createDeviceType.then(value => {
+      var deviceTypeId = value.id
+      return [value, this.createDeviceTypeAppInterfaceAssociation(deviceTypeId, appInterfaceId),
+        this.createDeviceTypeAppInterfacePropertyMappings(deviceTypeId, appInterfaceId, eventMapping)]
+    })
+  }
 }
