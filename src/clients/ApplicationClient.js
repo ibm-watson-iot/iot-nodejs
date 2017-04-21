@@ -726,9 +726,9 @@ export default class ApplicationClient extends BaseClient {
 	//addDevicesToGroup(groupId, deviceList[])
 	//removeDevicesFromGroup(groupId, deviceList[])
   
-  getGatewayGroup(gatewayId){
-    this.log.debug("[ApplicationClient] getGatewayGroup("+gatewayId+")");
-    return this.callApi('GET', 200, true, ['authorization', 'devices' , gatewayId], null);
+  getGroupIdsForDevice(deviceId){
+    this.log.debug("[ApplicationClient] getGroupIdsForDevice("+deviceId+")");
+    return this.callApi('GET', 200, true, ['authorization', 'devices' , deviceId], null);
   }
   
   updateDeviceRoles(deviceId, roles){
@@ -768,65 +768,76 @@ export default class ApplicationClient extends BaseClient {
 		// updateDeviceControlProperties(deviceId, withroles)
 
   // Finding a Resource Group
-  getGatewayGroups(){
-    this.log.debug("[ApplicationClient] getGatewayGroups()");
+  getAllGroups(){
+    this.log.debug("[ApplicationClient] getAllGroups()");
     return this.callApi('GET', 200, true, ['groups'], null);  
    }
    
   // Querying a resource group
 
   // Get unique identifiers of the members of the resource group
-  getUniqueDevicesInGroup(groupId){
-    this.log.debug("[ApplicationClient] getUniqueDevicesInGroup("+groupId+")");
+  getAllDeviceIdsInGroup(groupId){
+    this.log.debug("[ApplicationClient] getAllDeviceIdsInGroup("+groupId+")");
     return this.callApi('GET', 200, true, ['bulk', 'devices' , groupId, "ids"], null);
   }
 
   // properties of the resource group
-  getUniqueGatewayGroup(groupId){
-    this.log.debug("[ApplicationClient] getUniqueGatewayGroup("+groupId+")");
+  getGroup(groupId){
+    this.log.debug("[ApplicationClient] getGroup("+groupId+")");
     return this.callApi('GET', 200, true, ['groups', groupId], null);
   } 
   
   // Creating and deleting a resource group
 
   // Create a Resource Group
-  createGatewayGroup(groupName){
-    this.log.debug("[ApplicationClient] createGatewayGroup()");
-    return this.callApi('POST', 201, true, ['groups'], groupName);
+  createGroup(groupInfo){
+    this.log.debug("[ApplicationClient] createGroup()");
+    return this.callApi('POST', 201, true, ['groups'], groupInfo);
   } 
   
   // Delete a Resource Group
-  deleteGatewayGroup(groupId){
-    this.log.debug("[ApplicationClient] deleteGatewayGroup("+groupId+")");
+  deleteGroup(groupId){
+    this.log.debug("[ApplicationClient] deleteGroup("+groupId+")");
     return this.callApi('DELETE', 200, false, ['groups', groupId], null);
   }
 
   // Retrieving and updating device properties
   
   // Get the ID of the devices group of a gateway
-  getGatewayGroupProperties(){
-    this.log.debug("[ApplicationClient] getGatewayGroupProperties()");
+  getAllDeviceAccessControlProperties(){
+    this.log.debug("[ApplicationClient] getAllDeviceAccessControlProperties()");
     return this.callApi('GET', 200, true, ['authorization', 'devices' ], null);
   }
 
   // Get standard role of a gateway
-  getDeviceRoles(deviceId){
-    this.log.debug("[ApplicationClient] getDeviceRoles("+deviceId+")");
+  getDeviceAccessControlProperties(deviceId){
+    this.log.debug("[ApplicationClient] getDeviceAccessControlProperties("+deviceId+")");
     return this.callApi('GET', 200, true, ['authorization', 'devices', deviceId, 'roles'], null);
   }  
 
   // Update device properties without affecting the access control properties
-  updateGatewayProperties(gatewayId,control_props){
-    this.log.debug("[ApplicationClient] updateGatewayProperties("+gatewayId+")");
-    return this.callApi('PUT', 200, true, ['authorization', 'devices' , gatewayId], control_props);
+  updateDeviceAccessControlProperties(deviceId,deviceProps){
+    this.log.debug("[ApplicationClient] updateDeviceAccessControlProperties("+deviceId+")");
+    return this.callApi('PUT', 200, true, ['authorization', 'devices' , deviceId], deviceProps);
   }
   
   // Assign a standard role to a gateway
-  updateDeviceControlProperties(deviceId, withroles){
-    this.log.debug("[ApplicationClient] updateDeviceControlProperties("+deviceId+","+withroles+")");
-    return this.callApi('PUT', 200, true, ['authorization', 'devices', deviceId, 'withroles'], withroles);
+  updateDeviceAccessControlPropertiesWithRoles(deviceId, devicePropsWithRoles){
+    this.log.debug("[ApplicationClient] updateDeviceAccessControlPropertiesWithRoles("+deviceId+","+devicePropsWithRoles+")");
+    return this.callApi('PUT', 200, true, ['authorization', 'devices', deviceId, 'withroles'], devicePropsWithRoles);
+  }
+
+  // Duplicating updateDeviceRoles(deviceId, roles) for Gateway Roles
+  updateGatewayRoles(gatewayId, roles){
+    this.log.debug("[ApplicationClient] updateGatewayRoles("+gatewayId+","+roles+")");
+    return this.callApi('PUT', 200, false, ['authorization', 'devices', gatewayId, 'roles'], roles);
   }
 	
+  // Extending getAllGroups() to fetch individual Groups
+  getGroups(groupId){
+    this.log.debug("[ApplicationClient] getGroups("+groupId+")");
+    return this.callApi('GET', 200, true, ['groups', groupId], null);
+  } 
 	
   /**
    * Register multiple new devices, each request can contain a maximum of 512KB.
