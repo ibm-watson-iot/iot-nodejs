@@ -703,7 +703,141 @@ export default class ApplicationClient extends BaseClient {
     this.log.debug("[ApplicationClient] getAllDevices() - BULK");
     return this.callApi('GET', 200, true, ["bulk", "devices"], null, params);
   }
+	
+   /**
+   * Gateway Access Control (Beta)
+   * The methods in this section follow the documentation listed under the link:
+   * https://console.ng.bluemix.net/docs/services/IoT/gateways/gateway-access-control.html#gateway-access-control-beta-
+   * Involves the following sections from the above mentioned link:
+   * Assigning a role to a gateway
+   * Adding devices to and removing devices from a resource group
+   * Finding a resource group
+   * Querying a resource group
+   * Creating and deleting a resource group
+   * Updating group properties
+   * Retrieving and updating device properties
+   * 
+   */
+  
+	//getGatewayGroup(gatewayId)
+	//updateDeviceRoles(deviceId, roles[])
+	//getAllDevicesInGropu(groupId)
+	//addDevicesToGroup(groupId, deviceList[])
+	//removeDevicesFromGroup(groupId, deviceList[])
+  
+  getGroupIdsForDevice(deviceId){
+    this.log.debug("[ApplicationClient] getGroupIdsForDevice("+deviceId+")");
+    return this.callApi('GET', 200, true, ['authorization', 'devices' , deviceId], null);
+  }
+  
+  updateDeviceRoles(deviceId, roles){
+    this.log.debug("[ApplicationClient] updateDeviceRoles("+deviceId+","+roles+")");
+    return this.callApi('PUT', 200, false, ['authorization', 'devices', deviceId, 'roles'], roles);
+  }  
 
+  getAllDevicesInGroup(groupId){
+    this.log.debug("[ApplicationClient] getAllDevicesInGropu("+groupId+")");
+    return this.callApi('GET', 200, true, ['bulk', 'devices' , groupId], null);
+  }
+
+  addDevicesToGroup(groupId, deviceList){
+    this.log.debug("[ApplicationClient] addDevicesToGroup("+groupId+","+deviceList+")");
+    return this.callApi('PUT', 200, false, ['bulk', 'devices' , groupId, "add"], deviceList);
+  }
+
+  removeDevicesFromGroup(groupId, deviceList){
+    this.log.debug("[ApplicationClient] removeDevicesFromGroup("+groupId+","+deviceList+")");
+    return this.callApi('PUT', 200, false, ['bulk', 'devices' , groupId, "remove"], deviceList);
+  }
+
+  // https://console.ng.bluemix.net/docs/services/IoT/gateways/gateway-access-control.html
+  
+	// Finding a Resource Group
+		// getGatewayGroups()
+	// Querying a resource group
+		// getUniqueDevicesInGroup(groupId)
+		// getUniqueGatewayGroup(groupId)
+	// Creating and deleting a resource group
+		// createGatewayGroup(groupName)
+		// deleteGatewayGroup(groupId)
+	// Retrieving and updating device properties
+		// getGatewayGroupProperties()
+		// getDeviceRoles(deviceId)
+		// updateGatewayProperties(gatewayId,control_props)
+		// updateDeviceControlProperties(deviceId, withroles)
+
+  // Finding a Resource Group
+  getAllGroups(){
+    this.log.debug("[ApplicationClient] getAllGroups()");
+    return this.callApi('GET', 200, true, ['groups'], null);  
+   }
+   
+  // Querying a resource group
+
+  // Get unique identifiers of the members of the resource group
+  getAllDeviceIdsInGroup(groupId){
+    this.log.debug("[ApplicationClient] getAllDeviceIdsInGroup("+groupId+")");
+    return this.callApi('GET', 200, true, ['bulk', 'devices' , groupId, "ids"], null);
+  }
+
+  // properties of the resource group
+  getGroup(groupId){
+    this.log.debug("[ApplicationClient] getGroup("+groupId+")");
+    return this.callApi('GET', 200, true, ['groups', groupId], null);
+  } 
+  
+  // Creating and deleting a resource group
+
+  // Create a Resource Group
+  createGroup(groupInfo){
+    this.log.debug("[ApplicationClient] createGroup()");
+    return this.callApi('POST', 201, true, ['groups'], groupInfo);
+  } 
+  
+  // Delete a Resource Group
+  deleteGroup(groupId){
+    this.log.debug("[ApplicationClient] deleteGroup("+groupId+")");
+    return this.callApi('DELETE', 200, false, ['groups', groupId], null);
+  }
+
+  // Retrieving and updating device properties
+  
+  // Get the ID of the devices group of a gateway
+  getAllDeviceAccessControlProperties(){
+    this.log.debug("[ApplicationClient] getAllDeviceAccessControlProperties()");
+    return this.callApi('GET', 200, true, ['authorization', 'devices' ], null);
+  }
+
+  // Get standard role of a gateway
+  getDeviceAccessControlProperties(deviceId){
+    this.log.debug("[ApplicationClient] getDeviceAccessControlProperties("+deviceId+")");
+    return this.callApi('GET', 200, true, ['authorization', 'devices', deviceId, 'roles'], null);
+  }  
+
+  // Update device properties without affecting the access control properties
+  updateDeviceAccessControlProperties(deviceId,deviceProps){
+    this.log.debug("[ApplicationClient] updateDeviceAccessControlProperties("+deviceId+")");
+    return this.callApi('PUT', 200, true, ['authorization', 'devices' , deviceId], deviceProps);
+  }
+  
+  // Assign a standard role to a gateway
+  updateDeviceAccessControlPropertiesWithRoles(deviceId, devicePropsWithRoles){
+    this.log.debug("[ApplicationClient] updateDeviceAccessControlPropertiesWithRoles("+deviceId+","+devicePropsWithRoles+")");
+    return this.callApi('PUT', 200, true, ['authorization', 'devices', deviceId, 'withroles'], devicePropsWithRoles);
+  }
+
+  // Duplicating updateDeviceRoles(deviceId, roles) for Gateway Roles
+  updateGatewayRoles(gatewayId, roles){
+    this.log.debug("[ApplicationClient] updateGatewayRoles("+gatewayId+","+roles+")");
+    return this.callApi('PUT', 200, false, ['authorization', 'devices', gatewayId, 'roles'], roles);
+  }
+	
+  // Extending getAllGroups() to fetch individual Groups
+  getGroups(groupId){
+    this.log.debug("[ApplicationClient] getGroups("+groupId+")");
+    return this.callApi('GET', 200, true, ['groups', groupId], null);
+  } 
+	
   /**
    * Register multiple new devices, each request can contain a maximum of 512KB.
    * The response body will contain the generated authentication tokens for all devices.
