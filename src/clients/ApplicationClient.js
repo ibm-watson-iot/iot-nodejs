@@ -19,6 +19,7 @@ const btoa = btoa || nodeBtoa; // if browser btoa is available use it otherwise 
 
 import { isDefined, isString, isNode, isBrowser } from '../util/util.js';
 import { default as BaseClient } from './BaseClient.js';
+import request from 'request'
 
 const QUICKSTART_ORG_ID = "quickstart";
 
@@ -935,7 +936,7 @@ export default class ApplicationClient extends BaseClient {
       let xhrConfig = {
         url: uri,
         method: method,
-        headers: {
+        headers: { 
           'Content-Type': 'multipart/form-data'
         }
       };
@@ -949,10 +950,10 @@ export default class ApplicationClient extends BaseClient {
 
       if (body) {
         xhrConfig.data = body;
-
-        xhrConfig.transformRequest = [function (data) {
+        if(isBrowser()) {
+          xhrConfig.transformRequest = [function (data) {
           var formData = new FormData()
-          var blob = new Blob([data.schemaFile], { type: "application/json" });
+          var blob = new Blob([data.schemaFile], { type: "application/json" })
           formData.append('schemaFile', blob)
           if (data.name) {
             formData.append('name', data.name)
@@ -963,13 +964,10 @@ export default class ApplicationClient extends BaseClient {
           if (data.description) {
             formData.append('description', data.description)
           }
-          /*for (var value of formData.values()) {
-            console.log(value); 
-          }*/
           return formData;
-        }]
+          }]
+        }
       }
-
 
       if (params) {
         xhrConfig.params = params;
@@ -991,7 +989,39 @@ export default class ApplicationClient extends BaseClient {
         }
       }
       this.log.debug("[ApplicationClient:transformResponse] " + xhrConfig);
-      xhr(xhrConfig).then(transformResponse, reject);
+
+      if(isBrowser()) {
+        xhr(xhrConfig).then(transformResponse, reject);
+      } else {
+        var formData = {
+          'schemaFile': {
+            value:  body.schemaFile,
+            options: {
+              filename: body.name,
+              contentType: 'application/json'
+            }         
+          },
+          'schemaType': 'json-schema',
+          'name': body.name       
+        }
+        var config = {
+          url: uri,
+          method: method,
+          headers: {'Content-Type': 'multipart/form-data'},
+          auth : {
+            user : this.apiKey,
+            pass : this.apiToken
+          },
+          formData: formData,
+          rejectUnauthorized: false
+        }
+        request.post(config, function optionalCallback(err, response, body) {
+          if (err) {
+            reject(err)
+          }
+          resolve(JSON.parse(body))
+        });
+      }
     });
   }
 
@@ -1221,7 +1251,7 @@ export default class ApplicationClient extends BaseClient {
     })
 
     return createSchema.then(value => {
-      var schemaId = value.id
+      var schemaId = value["id"]
       return this.createEventType(eventTypeName, eventDescription, schemaId)
     })
   }
@@ -1257,8 +1287,19 @@ export default class ApplicationClient extends BaseClient {
     })
 
     return createPhysicalInterface.then(value => {
-      var physicalInterfaceId = value.id
-      return [value, this.createPhysicalInterfaceEventMapping(physicalInterfaceId, eventId, eventTypeId)]
+      var physicalInterface = value
+
+      var PhysicalInterfaceEventMapping = new Promise((resolve, reject) => {
+        this.createPhysicalInterfaceEventMapping(physicalInterface.id, eventId, eventTypeId).then(result => {
+          resolve([physicalInterface, result])
+        }, error => {
+          reject(error)
+        }) 
+      })
+
+      return PhysicalInterfaceEventMapping.then(result => {
+        return result
+      })
     })
   }
 
@@ -1271,10 +1312,32 @@ export default class ApplicationClient extends BaseClient {
       })
     })
 
-    return createDeviceType.then(value => {
-      var deviceTypeId = value.id
-      return [value, this.createDeviceTypeAppInterfaceAssociation(deviceTypeId, appInterfaceId),
-        this.createDeviceTypeAppInterfacePropertyMappings(deviceTypeId, appInterfaceId, eventMapping)]
+    return createDeviceType.then(result => {
+      var deviceObject = result
+      var deviceTypeAppInterface = null
+      var DeviceTypeAppInterface = new Promise((resolve, reject) => {
+        this.createDeviceTypeAppInterfaceAssociation(deviceObject.id, appInterfaceId).then(result => {
+          resolve(result)
+        }, error => {
+          reject(error)
+        })
+      })
+
+      return DeviceTypeAppInterface.then(result => {
+        deviceTypeAppInterface = result
+        var DeviceTypeAppInterfacePropertyMappings = new Promise((resolve, reject) => {
+          this.createDeviceTypeAppInterfacePropertyMappings(deviceObject.id, appInterfaceId, eventMapping).then(result => {
+            var arr = [deviceObject, deviceTypeAppInterface, result]
+            resolve(arr)
+          }, error => {
+            reject(err) 
+          })
+        })
+
+        return DeviceTypeAppInterfacePropertyMappings.then(result => {
+           return result
+        })
+      })
     })
   }
 }
