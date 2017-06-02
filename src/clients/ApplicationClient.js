@@ -1132,15 +1132,19 @@ export default class ApplicationClient extends BaseClient {
       'name': name,
       'description': description
     }
-    return this.callApi('POST', 201, true, ["physicalinterfaces"], body);
+
+    var base = this.draftMode ? ["draft", "physicalinterfaces"] : ["physicalinterfaces"]
+    return this.callApi('POST', 201, true, base, body);
   }
 
   getPhysicalInterface(physicalInterfaceId) {
-    return this.callApi('GET', 200, true, ["physicalinterfaces", physicalInterfaceId]);
+    var base = this.draftMode ? ["draft", "physicalinterfaces", physicalInterfaceId] : ["physicalinterfaces", physicalInterfaceId]
+    return this.callApi('GET', 200, true, base);
   }
 
   deletePhysicalInterface(physicalInterfaceId) {
-    return this.callApi('DELETE', 204, false, ["physicalinterfaces", physicalInterfaceId]);
+    var base = this.draftMode ? ["draft", "physicalinterfaces", physicalInterfaceId] : ["physicalinterfaces", physicalInterfaceId]
+    return this.callApi('DELETE', 204, false, base);
   }
 
   updatePhysicalInterface(physicalInterfaceId, name, description) {
@@ -1149,11 +1153,14 @@ export default class ApplicationClient extends BaseClient {
       'name': name,
       'description': description
     }
-    return this.callApi('PUT', 200, true, ["physicalinterfaces", physicalInterfaceId], body);
+
+    var base = this.draftMode ? ["draft", "physicalinterfaces", physicalInterfaceId] : ["physicalinterfaces", physicalInterfaceId]
+    return this.callApi('PUT', 200, true, base, body);
   }
 
   getPhysicalInterfaces() {
-    return this.callApi('GET', 200, true, ["physicalinterfaces"]);
+    var base = this.draftMode ? ["draft", "physicalinterfaces"] : ["physicalinterfaces"]
+    return this.callApi('GET', 200, true, base);
   }
 
   createPhysicalInterfaceEventMapping(physicalInterfaceId, eventId, eventTypeId) {
@@ -1161,15 +1168,19 @@ export default class ApplicationClient extends BaseClient {
       "eventId": eventId,
       "eventTypeId": eventTypeId
     }
-    return this.callApi('POST', 201, true, ["physicalinterfaces", physicalInterfaceId, "events"], body);
+
+    var base = this.draftMode ? ["draft", "physicalinterfaces", physicalInterfaceId, "events"] : ["physicalinterfaces", physicalInterfaceId, "events"]
+    return this.callApi('POST', 201, true, base, body);
   }
 
   getPhysicalInterfaceEventMappings(physicalInterfaceId) {
-    return this.callApi('GET', 200, true, ["physicalinterfaces", physicalInterfaceId, "events"]);
+    var base = this.draftMode ? ["draft", "physicalinterfaces", physicalInterfaceId, "events"] : ["physicalinterfaces", physicalInterfaceId, "events"]
+    return this.callApi('GET', 200, true, base);
   }
 
   deletePhysicalInterfaceEventMapping(physicalInterfaceId, eventId) {
-    return this.callApi('DELETE', 204, false, ["physicalinterfaces", physicalInterfaceId, "events", eventId]);
+    var base = this.draftMode ? ["draft", "physicalinterfaces", physicalInterfaceId, "events", eventId] : ["physicalinterfaces", physicalInterfaceId, "events", eventId]
+    return this.callApi('DELETE', 204, false, base);
   }
 
   createAppInterface(name, description, schemaId) {
