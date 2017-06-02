@@ -1030,8 +1030,6 @@ export default class ApplicationClient extends BaseClient {
       }
       this.log.debug("[ApplicationClient:transformResponse] " + xhrConfig);
 
-      console.log("Browser " + isBrowser())
-      console.log("Node " + isNode())
       if(isBrowser()) {
         xhr(xhrConfig).then(transformResponse, reject);
       } else {
@@ -1098,16 +1096,18 @@ export default class ApplicationClient extends BaseClient {
       'description': description,
       'schemaId': schemaId,
     }
-
-    return this.callApi('POST', 201, true, ["event", "types"], JSON.stringify(body));
+    var base = this.draftMode ? ["draft", "event", "types"] : ["event", "types"]
+    return this.callApi('POST', 201, true, base, JSON.stringify(body));
   }
 
   getEventType(eventTypeId) {
-    return this.callApi('GET', 200, true, ["event", "types", eventTypeId]);
+    var base = this.draftMode ? ["draft", "event", "types", eventTypeId] : ["event", "types", eventTypeId]
+    return this.callApi('GET', 200, true, base);
   }
 
   deleteEventType(eventTypeId) {
-    return this.callApi('DELETE', 204, false, ["event", "types", eventTypeId]);
+    var base = this.draftMode ? ["draft", "event", "types", eventTypeId] : ["event", "types", eventTypeId]
+    return this.callApi('DELETE', 204, false, base);
   }
 
   updateEventType(eventTypeId, name, description, schemaId) {
@@ -1117,11 +1117,14 @@ export default class ApplicationClient extends BaseClient {
       "description": description,
       "schemaId": schemaId
     }
-    return this.callApi('PUT', 200, true, ["event", "types", eventTypeId], body);
+
+    var base = this.draftMode ? ["draft", "event", "types", eventTypeId] : ["event", "types", eventTypeId]
+    return this.callApi('PUT', 200, true, base, body);
   }
 
   getEventTypes() {
-    return this.callApi('GET', 200, true, ["event", "types"]);
+    var base = this.draftMode ? ["draft", "event", "types"] : ["event", "types"]
+    return this.callApi('GET', 200, true, base);
   }
 
   createPhysicalInterface(name, description) {
