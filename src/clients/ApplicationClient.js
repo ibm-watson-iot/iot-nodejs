@@ -81,6 +81,14 @@ export default class ApplicationClient extends BaseClient {
     if (isDefined(config['with-proxy'])) {
       this.withProxy = config['with-proxy'];
     }
+
+    // draft setting for IM device state
+    if (isDefined(config['draftMode'])) {
+       this.draftMode = config.draftMode;
+    } else {
+      this.draftMode = false
+    }
+    
     this.log.info("[ApplicationClient:constructor] ApplicationClient initialized for organization : " + config.org);
   }
 
@@ -875,22 +883,31 @@ export default class ApplicationClient extends BaseClient {
       'schemaType': 'json-schema',
       'name': name,
     }
+
     if (description) {
       body.description = description
     }
-    return this.callFormDataApi('POST', 201, true, ["schemas"], body, null);
+
+    var base = this.draftMode ? ["draft", "schemas"] : ["schemas"]
+    return this.callFormDataApi('POST', 201, true, base, body, null);
   }
 
   getSchema(schemaId) {
+    var base = this.draftMode ? ["draft", "schemas", schemaId] : ["schemas", schemaId]
+    return this.callApi('GET', 200, true, base);
+  }
+
+  getActiveSchema(schemaId) {
     return this.callApi('GET', 200, true, ["schemas", schemaId]);
   }
 
   getSchemas() {
-    return this.callApi('GET', 200, true, ["schemas"]);
+    var base = this.draftMode ? ["draft", "schemas"] : ["schemas"]
+    return this.callApi('GET', 200, true, base);
   }
 
-  deleteSchema(schemaId) {
-    return this.callApi('DELETE', 204, false, ["schemas", schemaId]);
+  getActiveSchemas() {
+    return this.callApi('GET', 200, true, ["schemas"]);
   }
 
   updateSchema(schemaId, name, description) {
@@ -899,23 +916,33 @@ export default class ApplicationClient extends BaseClient {
       "name": name,
       "description": description
     }
-    return this.callApi('PUT', 200, true, ["schemas", schemaId], body);
+
+    var base = this.draftMode ? ["draft", "schemas", schemaId] : ["schemas", schemaId]
+    return this.callApi('PUT', 200, true, base, body);
   }
 
-  updateSchemaContent(schemaId, schemaContents) {
+  updateSchemaContent(schemaId, schemaContents, filename) {
     var body = {
-      'schemaFile': schemaContents
+        'schemaFile': schemaContents,
+        'name': filename
     }
 
-    return this.callFormDataApi('PUT', 204, false, ["schemas", schemaId, "content"], body, null);
+    var base = this.draftMode ? ["draft", "schemas", schemaId, "content"] : ["schemas", schemaId, "content"]
+    return this.callFormDataApi('PUT', 204, false, base, body, null);
   }
 
   getSchemaContent(schemaId) {
+    var base = this.draftMode ? ["draft", "schemas", schemaId, "content"] : ["schemas", schemaId, "content"]
+    return this.callApi('GET', 200, true, base);
+  }
+
+  getActiveSchemaContent(schemaId) {
     return this.callApi('GET', 200, true, ["schemas", schemaId, "content"]);
   }
 
   deleteSchema(schemaId) {
-    return this.callApi('DELETE', 204, false, ["schemas", schemaId], null);
+    var base = this.draftMode ? ["draft", "schemas", schemaId] : ["schemas", schemaId]
+    return this.callApi('DELETE', 204, false, base, null);
   }
 
   callFormDataApi(method, expectedHttpCode, expectJsonContent, paths, body, params) {
@@ -953,17 +980,30 @@ export default class ApplicationClient extends BaseClient {
         if(isBrowser()) {
           xhrConfig.transformRequest = [function (data) {
           var formData = new FormData()
-          var blob = new Blob([data.schemaFile], { type: "application/json" })
-          formData.append('schemaFile', blob)
-          if (data.name) {
-            formData.append('name', data.name)
+
+          if(xhrConfig.method == "POST") {
+            if(data.schemaFile) {
+              var blob = new Blob([data.schemaFile], { type: "application/json" })
+              formData.append('schemaFile', blob)
+            }
+
+            if(data.name) {
+              formData.append('name', data.name)
+            } 
+
+            if (data.schemaType) {
+              formData.append('schemaType', 'json-schema')
+            }
+            if (data.description) {
+              formData.append('description', data.description)
+            }
+          } else if(xhrConfig.method == "PUT") {
+            if(data.schemaFile) {
+              var blob = new Blob([data.schemaFile], { type: "application/json", name: data.name })
+              formData.append('schemaFile', blob)
+            }
           }
-          if (data.schemaType) {
-            formData.append('schemaType', 'json-schema')
-          }
-          if (data.description) {
-            formData.append('description', data.description)
-          }
+
           return formData;
           }]
         }
@@ -990,20 +1030,12 @@ export default class ApplicationClient extends BaseClient {
       }
       this.log.debug("[ApplicationClient:transformResponse] " + xhrConfig);
 
+      console.log("Browser " + isBrowser())
+      console.log("Node " + isNode())
       if(isBrowser()) {
         xhr(xhrConfig).then(transformResponse, reject);
       } else {
-        var formData = {
-          'schemaFile': {
-            value:  body.schemaFile,
-            options: {
-              filename: body.name,
-              contentType: 'application/json'
-            }         
-          },
-          'schemaType': 'json-schema',
-          'name': body.name       
-        }
+        var formData = null
         var config = {
           url: uri,
           method: method,
@@ -1012,14 +1044,49 @@ export default class ApplicationClient extends BaseClient {
             user : this.apiKey,
             pass : this.apiToken
           },
-          formData: formData,
+          formData: {},
           rejectUnauthorized: false
         }
-        request.post(config, function optionalCallback(err, response, body) {
-          if (err) {
-            reject(err)
+
+        if(xhrConfig.method == "POST") {
+          formData = {
+            'schemaFile': {
+              'value':  body.schemaFile,
+              'options': {
+                'contentType': 'application/json',
+                'filename': body.name
+              }         
+            },
+            'schemaType': 'json-schema',
+            'name': body.name
           }
-          resolve(JSON.parse(body))
+          config.formData = formData
+        } else if(xhrConfig.method == "PUT") {
+            formData = {
+              'schemaFile': {
+                'value': body.schemaFile,
+                'options': {
+                  'contentType': 'application/json',
+                  'filename': body.name
+                }
+              }
+            }
+            config.formData = formData
+        }
+        request(config, function optionalCallback(err, response, body) {
+          if (response.statusCode === expectedHttpCode) {
+            if (expectJsonContent && !(typeof response.data === 'object')) {
+              try {
+                resolve(JSON.parse(body));
+              } catch (e) {
+                reject(e);
+              }
+            } else {
+              resolve(body);
+            }
+          } else {
+            reject(new Error(method + " " + uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.statusCode + ". Error Body: " + err));
+          }
         });
       }
     });
