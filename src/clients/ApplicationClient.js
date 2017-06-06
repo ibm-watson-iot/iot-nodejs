@@ -400,7 +400,7 @@ export default class ApplicationClient extends BaseClient {
             resolve(response.data);
           }
         } else {
-          reject(new Error(method + " " + uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.status + ". Error Body: " + data));
+          reject(new Error(method + " " + uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.status + ". Error Body: " + JSON.stringify(response.data)));
         }
       }
       this.log.debug("[ApplicationClient:transformResponse] " + xhrConfig);
@@ -1025,7 +1025,7 @@ export default class ApplicationClient extends BaseClient {
             resolve(response.data);
           }
         } else {
-          reject(new Error(method + " " + uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.status + ". Error Body: " + data));
+          reject(new Error(method + " " + uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.status + ". Error Body: " + JSON.stringify(response.data)));
         }
       }
       this.log.debug("[ApplicationClient:transformResponse] " + xhrConfig);
@@ -1105,6 +1105,10 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('GET', 200, true, base);
   }
 
+  getActiveEventType(eventTypeId) {
+    return this.callApi('GET', 200, true, ["event", "types", eventTypeId]);
+  }
+
   deleteEventType(eventTypeId) {
     var base = this.draftMode ? ["draft", "event", "types", eventTypeId] : ["event", "types", eventTypeId]
     return this.callApi('DELETE', 204, false, base);
@@ -1127,6 +1131,10 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('GET', 200, true, base);
   }
 
+  getActiveEventTypes() {
+    return this.callApi('GET', 200, true, ["event", "types"]);
+  }
+
   createPhysicalInterface(name, description) {
     var body = {
       'name': name,
@@ -1140,6 +1148,10 @@ export default class ApplicationClient extends BaseClient {
   getPhysicalInterface(physicalInterfaceId) {
     var base = this.draftMode ? ["draft", "physicalinterfaces", physicalInterfaceId] : ["physicalinterfaces", physicalInterfaceId]
     return this.callApi('GET', 200, true, base);
+  }
+
+  getActivePhysicalInterface(physicalInterfaceId) {
+    return this.callApi('GET', 200, true, ["physicalinterfaces", physicalInterfaceId]);
   }
 
   deletePhysicalInterface(physicalInterfaceId) {
@@ -1163,6 +1175,10 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('GET', 200, true, base);
   }
 
+  getActivePhysicalInterfaces() {
+    return this.callApi('GET', 200, true, ["physicalinterfaces"]);
+  }
+
   createPhysicalInterfaceEventMapping(physicalInterfaceId, eventId, eventTypeId) {
     var body = {
       "eventId": eventId,
@@ -1178,41 +1194,101 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('GET', 200, true, base);
   }
 
+  getActivePhysicalInterfaceEventMappings(physicalInterfaceId) {
+    return this.callApi('GET', 200, true, ["physicalinterfaces", physicalInterfaceId, "events"]);
+  }
+
   deletePhysicalInterfaceEventMapping(physicalInterfaceId, eventId) {
     var base = this.draftMode ? ["draft", "physicalinterfaces", physicalInterfaceId, "events", eventId] : ["physicalinterfaces", physicalInterfaceId, "events", eventId]
     return this.callApi('DELETE', 204, false, base);
   }
 
-  createAppInterface(name, description, schemaId) {
+  createLogicalInterface(name, description, schemaId) {
     var body = {
       'name': name,
       'description': description,
       'schemaId': schemaId,
     }
-    return this.callApi('POST', 201, true, ["applicationinterfaces"], JSON.stringify(body));
+
+    var base = this.draftMode ? ["draft", "logicalinterfaces"] : ["logicalinterfaces"]
+    return this.callApi('POST', 201, true, base, body);
   }
 
-  getAppInterface(appInterfaceId) {
-    return this.callApi('GET', 200, true, ["applicationinterfaces", appInterfaceId]);
+  getLogicalInterface(logicalInterfaceId) {
+    var base = this.draftMode ? ["draft", "logicalinterfaces", logicalInterfaceId] : ["logicalinterfaces", logicalInterfaceId]
+    return this.callApi('GET', 200, true, base);
   }
 
-  deleteAppInterface(appInterfaceId) {
-    return this.callApi('DELETE', 204, false, ["applicationinterfaces", appInterfaceId]);
+  getActiveLogicalInterface(logicalInterfaceId) {
+    return this.callApi('GET', 200, true, ["logicalinterfaces", logicalInterfaceId]);
   }
 
-  updateAppInterface(appInterfaceId, name, description, schemaId) {
+  deleteLogicalInterface(logicalInterfaceId) {
+    var base = this.draftMode ? ["draft", "logicalinterfaces", logicalInterfaceId] : ["logicalinterfaces", logicalInterfaceId]
+    return this.callApi('DELETE', 204, false, base);
+  }
+
+  updateLogicalInterface(logicalInterfaceId, name, description, schemaId) {
     var body = {
-      "id": appInterfaceId,
+      "id": logicalInterfaceId,
       "name": name,
       "description": description,
       "schemaId": schemaId
     }
 
-    return this.callApi('PUT', 200, true, ["applicationinterfaces", appInterfaceId], body);
+    var base = this.draftMode ? ["draft", "logicalinterfaces", logicalInterfaceId] : ["logicalinterfaces", logicalInterfaceId]
+    return this.callApi('PUT', 200, true, base, body);
   }
 
-  getAppInterfaces() {
-    return this.callApi('GET', 200, true, ["applicationinterfaces"]);
+  getLogicalInterfaces() {
+    var base = this.draftMode ? ["draft", "logicalinterfaces"] : ["logicalinterfaces"]
+    return this.callApi('GET', 200, true, ["logicalinterfaces"]);
+  }
+
+  getActiveLogicalInterfaces() {
+    return this.callApi('GET', 200, true, ["logicalinterfaces"]);
+  }
+
+ // Application interface patch operation on draft version
+ // Acceptable operation id - validate-configuration, activate-configuration, list-differences
+  patchOperationLogicalInterface(logicalInterfaceId, operationId) {
+    var body = {
+      "operation": operationId
+    }
+
+    if(this.draftMode) {
+      switch(operationId) {
+        case 'validate-configuration':
+          return this.callApi('PATCH', 200, true, ["draft", "logicalinterfaces", logicalInterfaceId], body);
+          break
+        case 'activate-configuration':
+          return this.callApi('PATCH', 202, true, ["draft", "logicalinterfaces", logicalInterfaceId], body);
+        case 'deactivate-configuration':
+          return this.callApi('PATCH', 202, true, ["draft", "logicalinterfaces", logicalInterfaceId], body);
+        // Patch operation list-differences is expected to return 501
+        case 'list-differences':
+          return this.callApi('PATCH', 501, false, ["draft", "logicalinterfaces", logicalInterfaceId], body);
+        default:
+          return this.callApi('PATCH', 200, true, ["draft", "logicalinterfaces", logicalInterfaceId], body);
+      }
+    } else {
+       return (new Error("PATCH operation not allowed on logical interface"));
+    }
+  }  
+
+ // Application interface patch operation on active version
+ // Acceptable operation id - deactivate-configuration 
+  patchOperationActiveLogicalInterface(logicalInterfaceId, operationId) {
+    var body = {
+      "operation": operationId
+    }
+
+    if(this.draftMode) {
+      return this.callApi('PATCH', 202, true, ["logicalinterfaces", logicalInterfaceId], body)
+    }
+    else {
+      return (new Error("This operation not allowed on logical interface"));
+    }
   }
 
   // Create device type with physical Interface Id
@@ -1231,89 +1307,188 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('POST', 201, true, ['device', 'types'], JSON.stringify(body));
   }
 
-  updateDeviceTypeWithPhysicalInterface(type, description, deviceInfo, metadata, physicalInterfaceId) {
-    this.log.debug("[ApplicationClient] updateDeviceType(" + type + ", " + description + ", " + deviceInfo + ", " + metadata + ", " + physicalInterfaceId + ")");
+  createDeviceTypePhysicalInterfaceAssociation(typeId, physicalInterfaceId) {
     let body = {
-      deviceInfo: deviceInfo,
-      description: description,
-      metadata: metadata,
-      physicalInterfaceId: physicalInterfaceId
+      id: physicalInterfaceId
     };
-
-    return this.callApi('PUT', 200, true, ['device', 'types', type], JSON.stringify(body));
-  }
-
-  createDeviceTypeAppInterfaceAssociation(typeId, appInterfaceId) {
-    var body = {
-      'id': appInterfaceId
+    
+    if(this.draftMode) {
+       return this.callApi('POST', 201, true, ['draft', 'device', 'types', typeId, 'physicalinterface'], JSON.stringify(body));
+    } else {
+      return this.callApi('PUT', 200, true, ['device', 'types', typeId], JSON.stringify({physicalInterfaceId : physicalInterfaceId}));
     }
-    return this.callApi('POST', 201, true, ['device', 'types', typeId, 'applicationinterfaces'], body);
+    
   }
 
-  getDeviceTypeAppInterfaces(typeId) {
-    return this.callApi('GET', 200, true, ['device', 'types', typeId, 'applicationinterfaces']);
-  }
-
-  createDeviceTypeAppInterfacePropertyMappings(typeId, appInterfaceId, mappings) {
-    var body = {
-      "applicationInterfaceId": appInterfaceId,
-      "propertyMappings": mappings
+  getDeviceTypePhysicalInterfaces(typeId) {
+    if(this.draftMode) {
+      return this.callApi('GET', 200, true, ['draft', 'device', 'types', typeId, 'physicalinterface']);
+    } else {
+      return (new Error("This operation not allowed on device type"));
     }
-    return this.callApi('POST', 201, true, ['device', 'types', typeId, 'mappings'], body);
   }
 
-  getDeviceTypeAppInterfacePropertyMappings(typeId, appInterfaceId) {
-    return this.callApi('GET', 200, true, ['device', 'types', typeId, 'mappings', appInterfaceId]);
+  getActiveDeviceTypePhysicalInterfaces(typeId) {
+    return this.callApi('GET', 200, true, ['device', 'types', typeId, 'physicalinterface']);
+  }
+
+
+  deleteDeviceTypePhysicalInterfaceAssociation(typeId) {
+    if(this.draftMode) {
+      return this.callApi('DELETE', 204, false, ['draft', 'device', 'types', typeId, 'physicalinterface']);
+    } else {
+      return (new Error("This operation not allowed on device type"));
+    }
+  }
+
+  createDeviceTypeLogicalInterfaceAssociation(typeId, logicalInterfaceId) {
+    var body = {
+      'id': logicalInterfaceId
+    }
+
+    var base = this.draftMode ? ['draft', 'device', 'types', typeId, 'logicalinterfaces'] : ['device', 'types', typeId, 'applicationinterfaces']
+    return this.callApi('POST', 201, true, base, body);
+  }
+
+  getDeviceTypeLogicalInterfaces(typeId) {
+    var base = this.draftMode ? ['draft', 'device', 'types', typeId, 'logicalinterfaces'] : ['device', 'types', typeId, 'applicationinterfaces']
+    return this.callApi('GET', 200, true, base);
+  }
+
+  getActiveDeviceTypeLogicalInterfaces(typeId) {
+    return this.callApi('GET', 200, true, ['device', 'types', typeId, 'logicalinterfaces']);
+  }
+
+  createDeviceTypeLogicalInterfacePropertyMappings(typeId, logicalInterfaceId, mappings, notificationStrategy) {
+    var body = null, base = null
+    if(this.draftMode) {
+      body = {
+        "logicalInterfaceId": logicalInterfaceId,
+        "propertyMappings": mappings,
+        "notificationStrategy": "never"
+      }
+
+      if(notificationStrategy) {
+        body.notificationStrategy = notificationStrategy
+      }
+
+      base = ['draft', 'device', 'types', typeId, 'mappings']
+    } else {
+      body = {
+        "applicationInterfaceId": logicalInterfaceId,
+        "propertyMappings": mappings
+      }   
+      base =  ['device', 'types', typeId, 'mappings']
+    }
+
+    return this.callApi('POST', 201, true, base, body);
   }
 
   getDeviceTypePropertyMappings(typeId) {
+    var base = this.draftMode ? ['draft', 'device', 'types', typeId, 'mappings'] : ['device', 'types', typeId, 'mappings']
+    return this.callApi('GET', 200, true, base);
+  }
+
+  getActiveDeviceTypePropertyMappings(typeId) {
     return this.callApi('GET', 200, true, ['device', 'types', typeId, 'mappings']);
   }
 
-  updateDeviceTypeAppInterfacePropertyMappings(typeId, appInterfaceId, mappings) {
-    var body = {
-      "applicationInterfaceId": appInterfaceId,
-      "propertyMappings": mappings
+  getDeviceTypeLogicalInterfacePropertyMappings(typeId, logicalInterfaceId) {
+    var base = this.draftMode ? ['draft', 'device', 'types', typeId, 'mappings', logicalInterfaceId] : ['device', 'types', typeId, 'mappings', logicalInterfaceId]
+    return this.callApi('GET', 200, true, base);
+  }
+
+  getActiveDeviceTypeLogicalInterfacePropertyMappings(typeId, logicalInterfaceId) {
+    return this.callApi('GET', 200, true, ['device', 'types', typeId, 'mappings', logicalInterfaceId]);
+  }
+
+  updateDeviceTypeLogicalInterfacePropertyMappings(typeId, logicalInterfaceId, mappings, notificationStrategy) {
+    var body = null, base = null
+    if(this.draftMode) {
+      body = {
+        "logicalInterfaceId": logicalInterfaceId,
+        "propertyMappings": mappings,
+        "notificationStrategy": "never"
+      }
+
+      if(notificationStrategy) {
+        body.notificationStrategy = notificationStrategy
+      }
+
+      base = ['draft', 'device', 'types', typeId, 'mappings', logicalInterfaceId]
+    } else {
+      body = {
+        "applicationInterfaceId": logicalInterfaceId,
+        "propertyMappings": mappings
+      }   
+      base =  ['device', 'types', typeId, 'mappings', logicalInterfaceId]
     }
-    return this.callApi('PUT', 200, false, ['device', 'types', typeId, 'mappings', appInterfaceId], body);
+    return this.callApi('PUT', 200, false, base, body);
   }
 
-  deleteDeviceTypeAppInterfacePropertyMappings(typeId, appInterfaceId) {
-    return this.callApi('DELETE', 204, false, ['device', 'types', typeId, 'mappings', appInterfaceId]);
+  deleteDeviceTypeLogicalInterfacePropertyMappings(typeId, logicalInterfaceId) {
+    var base = this.draftMode ? ['draft', 'device', 'types', typeId, 'mappings', logicalInterfaceId] : ['device', 'types', typeId, 'mappings', logicalInterfaceId]
+    return this.callApi('DELETE', 204, false, base);
   }
 
-  deleteDeviceTypeAppInterfaceAssociation(typeId, appInterfaceId) {
-    return this.callApi('DELETE', 204, false, ['device', 'types', typeId, 'applicationinterfaces', appInterfaceId]);
+  deleteDeviceTypeLogicalInterfaceAssociation(typeId, logicalInterfaceId) {
+    var base = this.draftMode ? ['draft', 'device', 'types', typeId, 'logicalinterfaces', logicalInterfaceId] : ['device', 'types', typeId, 'applicationinterfaces', logicalInterfaceId]
+    return this.callApi('DELETE', 204, false, base);
   }
 
-  // Device type patch operation and device state calls subject to change based on Things type
-  validatePatchOperationDeviceType(typeId) {
+ // Device Type patch operation on draft version
+ // Acceptable operation id - validate-configuration, activate-configuration, list-differences 
+  patchOperationDeviceType(typeId, operationId) {
     var body = {
-      "operation": 'validate-configuration'
+      "operation": operationId
     }
-    return this.callApi('PATCH', 200, true, ['device', 'types', typeId], body);
+
+    var base = this.draftMode ? ['draft', 'device', 'types', typeId]: ['device', 'types', typeId]
+    if(this.draftMode) {
+      switch(operationId) {
+        case 'validate-configuration':
+          return this.callApi('PATCH', 200, true, base, body);
+          break
+        case 'activate-configuration':
+          return this.callApi('PATCH', 202, true, base, body);
+        case 'deactivate-configuration':
+          return this.callApi('PATCH', 202, true, base, body);
+        // Patch operation list-differences is expected to return 501
+        case 'list-differences':
+          return this.callApi('PATCH', 501, false, base, body);
+        default:
+          return this.callApi('PATCH', 200, true, base, body);
+      }
+    } else {
+      return this.callApi('PATCH', 202, true, base, body)
+    }
   }
 
-  deployPatchOperationDeviceType(typeId) {
-    var body = {
-      "operation": 'deploy-configuration'
-    }
-    return this.callApi('PATCH', 202, true, ['device', 'types', typeId], body);
-  }
 
-  removePatchOperationDeviceType(typeId) {
+ // Device Type patch operation on active version
+ // Acceptable operation id - deactivate-configuration 
+  patchOperationActiveDeviceType(typeId, operationId) {
     var body = {
-      "operation": 'remove-deployed-configuration'
+      "operation": operationId
     }
-    return this.callApi('PATCH', 202, false, ['device', 'types', typeId], body);
+
+    if(this.draftMode)
+      return this.callApi('PATCH', 202, true, ['device', 'types', typeId], body);
+    else {
+      return (new Error("This operation not allowed on device type"));
+    }
   }
 
   getDeviceTypeDeployedConfiguration(typeId) {
-    return this.callApi('GET', 200, true, ['device', 'types', typeId, 'deployedconfiguration']);
+    if(this.draftMode) {
+       return (new Error("This operation is not allowed on device type"));
+    } else {
+      return this.callApi('GET', 200, true, ['device', 'types', typeId, 'deployedconfiguration']);
+    }
   }
 
-  getDeviceState(typeId, deviceId, appInterfaceId) {
-    return this.callApi('GET', 200, true, ['device', 'types', typeId, 'devices', deviceId, 'state', appInterfaceId]);
+  getDeviceState(typeId, deviceId, logicalInterfaceId) {
+    return this.callApi('GET', 200, true, ['device', 'types', typeId, 'devices', deviceId, 'state', logicalInterfaceId]);
   }
 
   createSchemaAndEventType(schemaContents, schemaFileName, eventTypeName, eventDescription) {
@@ -1384,7 +1559,7 @@ export default class ApplicationClient extends BaseClient {
     })
   }
 
-  createDeviceTypeAppInterfaceEventMapping(deviceTypeName, description, appInterfaceId, eventMapping) {
+  createDeviceTypeAppInterfaceEventMapping(deviceTypeName, description, logicalInterfaceId, eventMapping) {
     var createDeviceType = new Promise((resolve, reject) => {
       this.createDeviceType(deviceTypeName, description).then(result => {
         resolve(result)
@@ -1397,7 +1572,7 @@ export default class ApplicationClient extends BaseClient {
       var deviceObject = result
       var deviceTypeAppInterface = null
       var DeviceTypeAppInterface = new Promise((resolve, reject) => {
-        this.createDeviceTypeAppInterfaceAssociation(deviceObject.id, appInterfaceId).then(result => {
+        this.createDeviceTypeAppInterfaceAssociation(deviceObject.id, logicalInterfaceId).then(result => {
           resolve(result)
         }, error => {
           reject(error)
@@ -1407,7 +1582,7 @@ export default class ApplicationClient extends BaseClient {
       return DeviceTypeAppInterface.then(result => {
         deviceTypeAppInterface = result
         var DeviceTypeAppInterfacePropertyMappings = new Promise((resolve, reject) => {
-          this.createDeviceTypeAppInterfacePropertyMappings(deviceObject.id, appInterfaceId, eventMapping).then(result => {
+          this.createDeviceTypeAppInterfacePropertyMappings(deviceObject.id, logicalInterfaceId, eventMapping).then(result => {
             var arr = [deviceObject, deviceTypeAppInterface, result]
             resolve(arr)
           }, error => {
