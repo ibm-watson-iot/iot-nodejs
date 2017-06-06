@@ -1210,12 +1210,12 @@ export default class ApplicationClient extends BaseClient {
       'schemaId': schemaId,
     }
 
-    var base = this.draftMode ? ["draft", "logicalinterfaces"] : ["logicalinterfaces"]
+    var base = this.draftMode ? ["draft", "logicalinterfaces"] : ["applicationinterfaces"]
     return this.callApi('POST', 201, true, base, body);
   }
 
   getLogicalInterface(logicalInterfaceId) {
-    var base = this.draftMode ? ["draft", "logicalinterfaces", logicalInterfaceId] : ["logicalinterfaces", logicalInterfaceId]
+    var base = this.draftMode ? ["draft", "logicalinterfaces", logicalInterfaceId] : ["applicationinterfaces", logicalInterfaceId]
     return this.callApi('GET', 200, true, base);
   }
 
@@ -1224,7 +1224,7 @@ export default class ApplicationClient extends BaseClient {
   }
 
   deleteLogicalInterface(logicalInterfaceId) {
-    var base = this.draftMode ? ["draft", "logicalinterfaces", logicalInterfaceId] : ["logicalinterfaces", logicalInterfaceId]
+    var base = this.draftMode ? ["draft", "logicalinterfaces", logicalInterfaceId] : ["applicationinterfaces", logicalInterfaceId]
     return this.callApi('DELETE', 204, false, base);
   }
 
@@ -1236,12 +1236,12 @@ export default class ApplicationClient extends BaseClient {
       "schemaId": schemaId
     }
 
-    var base = this.draftMode ? ["draft", "logicalinterfaces", logicalInterfaceId] : ["logicalinterfaces", logicalInterfaceId]
+    var base = this.draftMode ? ["draft", "logicalinterfaces", logicalInterfaceId] : ["applicationinterfaces", logicalInterfaceId]
     return this.callApi('PUT', 200, true, base, body);
   }
 
   getLogicalInterfaces() {
-    var base = this.draftMode ? ["draft", "logicalinterfaces"] : ["logicalinterfaces"]
+    var base = this.draftMode ? ["draft", "logicalinterfaces"] : ["applicationinterfaces"]
     return this.callApi('GET', 200, true, ["logicalinterfaces"]);
   }
 
@@ -1460,7 +1460,17 @@ export default class ApplicationClient extends BaseClient {
           return this.callApi('PATCH', 200, true, base, body);
       }
     } else {
-      return this.callApi('PATCH', 202, true, base, body)
+      switch(operationId) {
+        case 'validate-configuration':
+          return this.callApi('PATCH', 200, true, base, body);
+          break
+        case 'deploy-configuration':
+          return this.callApi('PATCH', 202, true, base, body);
+          break
+        case 'remove-deployed-configuration':
+          return this.callApi('PATCH', 202, true, base, body);
+          break
+      }
     }
   }
 
