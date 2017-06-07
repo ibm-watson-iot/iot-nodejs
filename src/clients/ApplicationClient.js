@@ -1090,6 +1090,12 @@ export default class ApplicationClient extends BaseClient {
     });
   }
 
+  invalidOperation(message) {
+    return new Promise((resolve, reject) => {
+        resolve(message)
+    })
+  }
+
   createEventType(name, description, schemaId) {
     var body = {
       'name': name,
@@ -1272,7 +1278,7 @@ export default class ApplicationClient extends BaseClient {
           return this.callApi('PATCH', 200, true, ["draft", "logicalinterfaces", logicalInterfaceId], body);
       }
     } else {
-       return (new Error("PATCH operation not allowed on logical interface"));
+       return this.invalidOperation("PATCH operation not allowed on logical interface");
     }
   }  
 
@@ -1287,7 +1293,7 @@ export default class ApplicationClient extends BaseClient {
       return this.callApi('PATCH', 202, true, ["logicalinterfaces", logicalInterfaceId], body)
     }
     else {
-      return (new Error("This operation not allowed on logical interface"));
+      return this.invalidOperation("PATCH operation 'deactivate-configuration' not allowed on logical interface");
     }
   }
 
@@ -1324,7 +1330,7 @@ export default class ApplicationClient extends BaseClient {
     if(this.draftMode) {
       return this.callApi('GET', 200, true, ['draft', 'device', 'types', typeId, 'physicalinterface']);
     } else {
-      return (new Error("This operation not allowed on device type"));
+      return this.invalidOperation("GET Device type's physical interface is not allowed");
     }
   }
 
@@ -1337,7 +1343,7 @@ export default class ApplicationClient extends BaseClient {
     if(this.draftMode) {
       return this.callApi('DELETE', 204, false, ['draft', 'device', 'types', typeId, 'physicalinterface']);
     } else {
-      return (new Error("This operation not allowed on device type"));
+      return this.invalidOperation("DELETE Device type's physical interface is not allowed");
     }
   }
 
@@ -1439,11 +1445,16 @@ export default class ApplicationClient extends BaseClient {
  // Device Type patch operation on draft version
  // Acceptable operation id - validate-configuration, activate-configuration, list-differences 
   patchOperationDeviceType(typeId, operationId) {
+    if(!operationId) {
+      return invalidOperation("PATCH operation is not allowed. Operation id is expected")
+    }
+
     var body = {
       "operation": operationId
     }
 
     var base = this.draftMode ? ['draft', 'device', 'types', typeId]: ['device', 'types', typeId]
+
     if(this.draftMode) {
       switch(operationId) {
         case 'validate-configuration':
@@ -1451,13 +1462,16 @@ export default class ApplicationClient extends BaseClient {
           break
         case 'activate-configuration':
           return this.callApi('PATCH', 202, true, base, body);
+          break
         case 'deactivate-configuration':
           return this.callApi('PATCH', 202, true, base, body);
-        // Patch operation list-differences is expected to return 501
+          break
+        // Patch operation list-differences not implemented
         case 'list-differences':
-          return this.callApi('PATCH', 501, false, base, body);
+          return this.invalidOperation("PATCH operation 'list-differences' is not allowed")
+          break
         default:
-          return this.callApi('PATCH', 200, true, base, body);
+          return this.invalidOperation("PATCH operation is not allowed. Invalid operation id")
       }
     } else {
       switch(operationId) {
@@ -1470,6 +1484,11 @@ export default class ApplicationClient extends BaseClient {
         case 'remove-deployed-configuration':
           return this.callApi('PATCH', 202, true, base, body);
           break
+        case 'list-differences':
+          return this.invalidOperation("PATCH operation 'list-differences' is not allowed")
+          break
+        default:
+        return this.invalidOperation("PATCH operation is not allowed. Invalid operation id")
       }
     }
   }
@@ -1482,16 +1501,17 @@ export default class ApplicationClient extends BaseClient {
       "operation": operationId
     }
 
-    if(this.draftMode)
+    if(this.draftMode) {
       return this.callApi('PATCH', 202, true, ['device', 'types', typeId], body);
+    }
     else {
-      return (new Error("This operation not allowed on device type"));
+      return this.invalidOperation("PATCH operation 'deactivate-configuration' is not allowed");
     }
   }
 
   getDeviceTypeDeployedConfiguration(typeId) {
     if(this.draftMode) {
-       return (new Error("This operation is not allowed on device type"));
+       return this.invalidOperation("GET deployed configuration is not allowed");
     } else {
       return this.callApi('GET', 200, true, ['device', 'types', typeId, 'deployedconfiguration']);
     }
