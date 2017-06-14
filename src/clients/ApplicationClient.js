@@ -1529,7 +1529,8 @@ export default class ApplicationClient extends BaseClient {
     }
 
     var createSchema = new Promise((resolve, reject) => {
-      this.callFormDataApi('POST', 201, true, ["schemas"], body, null).then(result => {
+      var base = this.draftMode ? ["draft", "schemas"] : ["schemas"]
+      this.callFormDataApi('POST', 201, true, base, body, null).then(result => {
         resolve(result)
       }, error => {
         reject(error)
@@ -1542,7 +1543,7 @@ export default class ApplicationClient extends BaseClient {
     })
   }
 
-  createSchemaAndApplicationInterface(schemaContents, schemaFileName, appInterfaceName, appInterfaceDescription) {
+  createSchemaAndLogicalInterface(schemaContents, schemaFileName, appInterfaceName, appInterfaceDescription) {
     var body = {
       'schemaFile': schemaContents,
       'schemaType': 'json-schema',
@@ -1550,7 +1551,8 @@ export default class ApplicationClient extends BaseClient {
     }
 
     var createSchema = new Promise((resolve, reject) => {
-      this.callFormDataApi('POST', 201, true, ["schemas"], body, null).then(result => {
+      var base = this.draftMode ? ["draft", "schemas"] : ["schemas"]
+      this.callFormDataApi('POST', 201, true, base, body, null).then(result => {
         resolve(result)
       }, error => {
         reject(error)
@@ -1559,7 +1561,7 @@ export default class ApplicationClient extends BaseClient {
 
     return createSchema.then(value => {
       var schemaId = value.id
-      return this.createAppInterface(appInterfaceName, appInterfaceDescription, schemaId)
+      return this.createLogicalInterface(appInterfaceName, appInterfaceDescription, schemaId)
     })
   }
 
@@ -1589,7 +1591,7 @@ export default class ApplicationClient extends BaseClient {
     })
   }
 
-  createDeviceTypeAppInterfaceEventMapping(deviceTypeName, description, logicalInterfaceId, eventMapping) {
+  createDeviceTypeLogicalInterfaceEventMapping(deviceTypeName, description, logicalInterfaceId, eventMapping, notificationStrategy) {
     var createDeviceType = new Promise((resolve, reject) => {
       this.createDeviceType(deviceTypeName, description).then(result => {
         resolve(result)
@@ -1600,27 +1602,32 @@ export default class ApplicationClient extends BaseClient {
 
     return createDeviceType.then(result => {
       var deviceObject = result
-      var deviceTypeAppInterface = null
-      var DeviceTypeAppInterface = new Promise((resolve, reject) => {
-        this.createDeviceTypeAppInterfaceAssociation(deviceObject.id, logicalInterfaceId).then(result => {
+      var deviceTypeLogicalInterface = null
+      var deviceTypeLogicalInterface = new Promise((resolve, reject) => {
+        this.createDeviceTypeLogicalInterfaceAssociation(deviceObject.id, logicalInterfaceId).then(result => {
           resolve(result)
         }, error => {
           reject(error)
         })
       })
 
-      return DeviceTypeAppInterface.then(result => {
-        deviceTypeAppInterface = result
-        var DeviceTypeAppInterfacePropertyMappings = new Promise((resolve, reject) => {
-          this.createDeviceTypeAppInterfacePropertyMappings(deviceObject.id, logicalInterfaceId, eventMapping).then(result => {
-            var arr = [deviceObject, deviceTypeAppInterface, result]
+      return deviceTypeLogicalInterface.then(result => {
+        deviceTypeLogicalInterface = result
+        var deviceTypeLogicalInterfacePropertyMappings = new Promise((resolve, reject) => {
+          var notificationstrategy = "never"
+          if(notificationStrategy) {
+            notificationstrategy = notificationStrategy
+          }
+
+          this.createDeviceTypeLogicalInterfacePropertyMappings(deviceObject.id, logicalInterfaceId, eventMapping, notificationstrategy).then(result => {
+            var arr = [deviceObject, deviceTypeLogicalInterface, result]
             resolve(arr)
           }, error => {
-            reject(err) 
+            reject(error) 
           })
         })
 
-        return DeviceTypeAppInterfacePropertyMappings.then(result => {
+        return deviceTypeLogicalInterfacePropertyMappings.then(result => {
            return result
         })
       })
