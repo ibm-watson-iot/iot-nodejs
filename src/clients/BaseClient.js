@@ -162,7 +162,7 @@ export default class BaseClient extends events.EventEmitter {
       this.isConnected = false;
       let errorMsg = ''+error;
       if(errorMsg.indexOf('Not authorized') > -1) {
-        this.log.error("[BaseClient:onError] One or more connection parameters is wrong. Update the configuration and try again.");
+        this.log.error("[BaseClient:onError] One or more connection parameters are wrong. Update the configuration and try again.");
         this.mqtt.reconnecting = false;
         this.mqtt.options.reconnectPeriod = 0;
       }
