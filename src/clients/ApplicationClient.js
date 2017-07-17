@@ -363,7 +363,7 @@ export default class ApplicationClient extends BaseClient {
         }
       }
 
-      console.log(uri, body, params);
+      console.log(method, uri, body, params);
 
       let xhrConfig = {
         url: uri,
@@ -958,7 +958,7 @@ export default class ApplicationClient extends BaseClient {
         }
       }
 
-      console.log(uri, body, params);
+      console.log(method, uri, body, params);
 
       let xhrConfig = {
         url: uri,
@@ -1271,9 +1271,8 @@ export default class ApplicationClient extends BaseClient {
           return this.callApi('PATCH', 202, true, ["draft", "logicalinterfaces", logicalInterfaceId], body);
         case 'deactivate-configuration':
           return this.callApi('PATCH', 202, true, ["draft", "logicalinterfaces", logicalInterfaceId], body);
-        // Patch operation list-differences is expected to return 501
         case 'list-differences':
-          return this.callApi('PATCH', 501, false, ["draft", "logicalinterfaces", logicalInterfaceId], body);
+          return this.callApi('PATCH', 200, true, ["draft", "logicalinterfaces", logicalInterfaceId], body);
         default:
           return this.callApi('PATCH', 200, true, ["draft", "logicalinterfaces", logicalInterfaceId], body);
       }
@@ -1466,9 +1465,8 @@ export default class ApplicationClient extends BaseClient {
         case 'deactivate-configuration':
           return this.callApi('PATCH', 202, true, base, body);
           break
-        // Patch operation list-differences not implemented
         case 'list-differences':
-          return this.invalidOperation("PATCH operation 'list-differences' is not allowed")
+          return this.callApi('PATCH', 200, true, base, body);
           break
         default:
           return this.invalidOperation("PATCH operation is not allowed. Invalid operation id")
