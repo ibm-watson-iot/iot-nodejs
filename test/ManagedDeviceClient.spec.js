@@ -54,18 +54,6 @@ describe('IotfManagedDevice', () => {
         }).to.throw(/config must contain type/);
       });
 
-      it('should throw an error if auth-method is not present', () => {
-        expect(() => {
-          let client = new IBMIoTF.IotfManagedDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123'});
-        }).to.throw(/config must contain auth-method/);
-      });
-
-      it('should throw an error if auth-method is not "token"', () => {
-        expect(() => {
-          let client = new IBMIoTF.IotfManagedDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'abc'});
-        }).to.throw(/unsupported authentication method/);
-      });
-
       it('should return an instance if org, id and type are specified', () => {
         let client;
         expect(() => {

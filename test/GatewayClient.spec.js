@@ -64,24 +64,6 @@ describe('IotfGateway', () => {
         }).to.throw(/type must be a string/);
       });
 
-      it('should throw an error if auth-method is not present', () => {
-        expect(() => {
-          let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123'});
-        }).to.throw(/config must contain auth-method/);
-      });
-
-      it('should throw an error if auth-method is not string', () => {
-        expect(() => {
-          let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 123});
-        }).to.throw(/auth-method must be a string/);
-      });
-
-      it('should throw an error if auth-method is not "token"', () => {
-        expect(() => {
-          let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'abc'});
-        }).to.throw(/unsupported authentication method/);
-      });
-
       it('should throw an error if org is set to quickstart', () => {
         expect(() => {
           let client = new IBMIoTF.IotfGateway({org:'quickstart', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'abc'});

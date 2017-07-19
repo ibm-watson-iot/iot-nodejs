@@ -80,11 +80,9 @@ configuration JSON containing the following:
 -   org - Your organization ID
 -   type - The type of your device
 -   id - The ID of your device
--   auth-method - Method of authentication (the only value currently
-    supported is “token”)
--   auth-token - API key token (required if auth-method is “token”)
--   domain - (Optional)The messaging endpoint URL. By default, the value is "internetofthings.ibmcloud.com"(Watson IoT Production server).
--   enforce-ws - (Optional)Enforce Websocket when using the library in Node.js
+-   auth-token - API key token
+-   domain - (Optional) The messaging endpoint URL. By default, the value is "internetofthings.ibmcloud.com"(Watson IoT Production server).
+-   enforce-ws - (Optional) Enforce Websocket when using the library in Node.js
 -   use-client-certs - (Optional) Enforces use of client side certificates when specified as true
 -   server-ca - (Optional) Specifies the custom server certificate signed using device key
 -   client-ca - (Mandatory when use-client-certs:true) Specifies the path to device-client CA certificate
