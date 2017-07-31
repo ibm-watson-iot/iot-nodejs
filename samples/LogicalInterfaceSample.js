@@ -35,7 +35,7 @@ addLogicalInterface("logicalInterface1", "This is my logical interface", "597b2b
 
 
 appClient.
-deletePhysicalInterface('597a9f5152faff0001fdb550'). then (function onSuccess (response) {
+deleteLogicalInterface('597a9f5152faff0001fdb550'). then (function onSuccess (response) {
 	console.log("Success");
 	console.log(response);
 }, function onError (argument) {
@@ -72,6 +72,24 @@ performOperationOnLogicalInterface('597b2e1752faff000178b12a',"validate-configur
 
 appClient.
 getActiveLogicalInterfaces(). then (function onSuccess (response) {
+	console.log("Success");
+	console.log(response);
+}, function onError (argument) {
+	console.log("Fail");
+	console.log(argument);
+});
+
+appClient.
+getActiveLogicalInterface('597b2e1752faff000178b12a'). then (function onSuccess (response) {
+	console.log("Success");
+	console.log(response);
+}, function onError (argument) {
+	console.log("Fail");
+	console.log(argument);
+});
+
+appClient.
+performOperationOnActiveLogicalInterface('597b2e1752faff000178b12a','deactivate-configuration'). then (function onSuccess (response) {
 	console.log("Success");
 	console.log(response);
 }, function onError (argument) {
