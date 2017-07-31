@@ -1,6 +1,6 @@
 {
         "name": "ibmiotf",
-        "version": "0.2.38",
+        "version": "0.2.39",
         "description": "A library for developing device and application clients for IBM Watson IoT Platform",
         "main": "dist/iotf-client.js",
         "dependencies": {
@@ -39,16 +39,12 @@
                 "name": "Jeffrey Dare",
                 "email": "jeffdare@in.ibm.com"
         },
-        "contributors": [{
-                "name": "Tim Jacobi",
-                "email": "tim.jacobi@uk.ibm.com"
-        }, {
-                "name": "Amit M Mangalvedkar",
-                "email": "amitmangalvedkar@in.ibm.com"
-        }, {
-                "name": "Lokesh K Haralakatta",
-                "email": "lokesh.h.k@in.ibm.com"
-        }],
+        "contributors": [
+                {
+                        "name": "Amit M Mangalvedkar",
+                        "email": "amitmangalvedkar@in.ibm.com"
+                }
+        ],
         "repository": {
                 "type": "git",
                 "url": "git+https://github.com/ibm-watson-iot/iot-nodejs.git"

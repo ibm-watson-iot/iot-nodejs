@@ -795,6 +795,325 @@
         this.log.debug("[ApplicationClient] deleteMultipleDevices() - BULK");
         return this.callApi('POST', 201, true, ["bulk", "devices", "remove"], JSON.stringify(arryOfDevicesToBeDeleted));
       }
+
+      /**
+      Support for Interfaces
+      */
+
+      // Physical Interface
+      /**
+      Physical interfaces are used to model the interfaces between physical devices and
+      the Watson IoT Platform. A physical interface references event types. Devices that
+      implement a physical interface publish these events to the platform.
+       The event types are referenced via a mapping that maps an event id to the id of an
+      event type. The event id corresponds to the MQTT topic that the event is published
+      to by a device.
+      */
+
+      /**
+      * returns the list of all of the draft physical interfaces that have been defined
+      * for the organization in the Watson IoT Platform. Various query parameters can be
+      * used to filter, sort and page through the list of draft physical interfaces that are returned.
+      * @param
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Physical_Interfaces/get_draft_physicalinterfaces">link</a>
+       */
+    }, {
+      key: 'getPhysicalInterfaces',
+      value: function getPhysicalInterfaces() {
+        this.log.debug("[ApplicationClient] getPhysicalInterfaces()");
+        return this.callApi('GET', 200, true, ["draft", "physicalinterfaces"], null);
+      }
+
+      /**
+      * Creates a new draft physical interface for the organization in the Watson IoT Platform.
+      * @param name Name of the physical interface
+      * @param description Description of the physical interface
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Physical_Interfaces/get_draft_physicalinterfaces">link</a>
+       */
+    }, {
+      key: 'addPhysicalInterface',
+      value: function addPhysicalInterface(name, description) {
+        this.log.debug("[ApplicationClient] addPhysicalInterface()");
+        var body = {
+          name: name,
+          description: description
+        };
+        return this.callApi('POST', 201, true, ["draft", "physicalinterfaces"], JSON.stringify(body));
+      }
+
+      /**
+      * Deletes the draft physical interface with the specified id from the organization in the Watson IoT Platform.
+      * @param physicalInterfaceId Id of the physical interface
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Physical_Interfaces/get_draft_physicalinterfaces">link</a>
+       */
+    }, {
+      key: 'deletePhysicalInterface',
+      value: function deletePhysicalInterface(physicalInterfaceId) {
+        this.log.debug("[ApplicationClient] deletePhysicalInterface()");
+        return this.callApi('DELETE', 204, false, ["draft", "physicalinterfaces", physicalInterfaceId], null);
+      }
+
+      /**
+      * Retrieve the draft physical interface with the specified id.
+      * @param physicalInterfaceId Id of the physical interface
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Physical_Interfaces/get_draft_physicalinterfaces_physicalInterfaceId">link</a>
+       */
+    }, {
+      key: 'getPhysicalInterface',
+      value: function getPhysicalInterface(physicalInterfaceId) {
+        this.log.debug("[ApplicationClient] getPhysicalInterface()");
+        return this.callApi('GET', 200, true, ["draft", "physicalinterfaces", physicalInterfaceId], null);
+      }
+
+      /**
+      * Updates the draft physical interface with the specified id. The following properties can be updated:
+      * @param physicalInterfaceId Id of the physical interface
+      * @param name Updated name of the physical interface
+      * @param description Updated Description of the physical interface
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Physical_Interfaces/get_draft_physicalinterfaces_physicalInterfaceId">link</a>
+       */
+    }, {
+      key: 'updatePhysicalInterface',
+      value: function updatePhysicalInterface(physicalInterfaceId, name, description) {
+        this.log.debug("[ApplicationClient] updatePhysicalInterface()");
+        var body = {
+          id: physicalInterfaceId,
+          name: name,
+          description: description
+        };
+        return this.callApi('PUT', 200, true, ["draft", "physicalinterfaces", physicalInterfaceId], JSON.stringify(body));
+      }
+
+      /**
+      * Retrieve the list of event mappings for the draft physical interface.
+      * Event mappings are keyed off of the event id specified in the MQTT topic
+      * that the inbound events are published to.
+      * @param physicalInterfaceId Id of the physical interface
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Physical_Interfaces/get_draft_physicalinterfaces_physicalInterfaceId">link</a>
+       */
+    }, {
+      key: 'getPhysicalInterfaceEventMapping',
+      value: function getPhysicalInterfaceEventMapping(physicalInterfaceId) {
+        this.log.debug("[ApplicationClient] getPhysicalInterfaceEventMapping()");
+        return this.callApi('GET', 200, true, ["draft", "physicalinterfaces", physicalInterfaceId, "events"], null);
+      }
+
+      /**
+      * Maps an event id to a specific event type for the draft specified physical interface.
+      * @param physicalInterfaceId Id of the physical interface
+      * @param eventId Event ID
+      * @param eventTypeId Event Type ID
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Physical_Interfaces/post_draft_physicalinterfaces_physicalInterfaceId_events">link</a>
+       */
+    }, {
+      key: 'addPhysicalInterfaceEventMapping',
+      value: function addPhysicalInterfaceEventMapping(physicalInterfaceId, eventId, eventTypeId) {
+        this.log.debug("[ApplicationClient] addPhysicalInterfaceEventMapping(physicalInterfaceId, eventId, eventTypeId)");
+        var body = {
+          eventId: eventId,
+          eventTypeId: eventTypeId
+        };
+        return this.callApi('POST', 201, true, ["draft", "physicalinterfaces", physicalInterfaceId, "events"], JSON.stringify(body));
+      }
+
+      /**
+      * Maps an event id to a specific event type for the draft specified physical interface.
+      * @param physicalInterfaceId Id of the physical interface
+      * @param eventId Event ID
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Physical_Interfaces/delete_draft_physicalinterfaces_physicalInterfaceId_events_eventId">link</a>
+       */
+    }, {
+      key: 'removePhysicalInterfaceEventMapping',
+      value: function removePhysicalInterfaceEventMapping(physicalInterfaceId, eventId) {
+        this.log.debug("[ApplicationClient] removePhysicalInterfaceEventMapping(physicalInterfaceId, eventId)");
+        return this.callApi('DELETE', 204, false, ["draft", "physicalinterfaces", physicalInterfaceId, "events", eventId]);
+      }
+
+      /**
+      * returns the list of all of the active physical interfaces that
+      * have been defined for the organization in the Watson IoT Platform
+      * @param
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Physical_Interfaces/get_physicalinterfaces">link</a>
+       */
+    }, {
+      key: 'getActivePhysicalInterfaces',
+      value: function getActivePhysicalInterfaces() {
+        this.log.debug("[ApplicationClient] getActivePhysicalInterfaces()");
+        return this.callApi('GET', 200, true, ["physicalinterfaces"], null);
+      }
+
+      /**
+      * Retrieve the active physical interface with the specified id.
+      * @param physicalInterfaceId
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Physical_Interfaces/get_physicalinterfaces_physicalInterfaceId">link</a>
+       */
+    }, {
+      key: 'getActivePhysicalInterface',
+      value: function getActivePhysicalInterface(physicalInterfaceId) {
+        this.log.debug("[ApplicationClient] getActivePhysicalInterface()");
+        return this.callApi('GET', 200, true, ["physicalinterfaces", physicalInterfaceId], null);
+      }
+
+      /**
+      * Retrieve the list of event mappings for the active physical interface.
+      * Event mappings are keyed off of the event id specified in the MQTT topic
+      * that the inbound events are published to.
+      * @param
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Physical_Interfaces/get_physicalinterfaces_physicalInterfaceId_events">link</a>
+       */
+    }, {
+      key: 'getActivePhysicalInterfaceEventMapping',
+      value: function getActivePhysicalInterfaceEventMapping(physicalInterfaceId) {
+        this.log.debug("[ApplicationClient] getActivePhysicalInterfaceEventMapping()");
+        return this.callApi('GET', 200, true, ["physicalinterfaces", physicalInterfaceId, "events"], null);
+      }
+
+      /** Logical interfaces
+      Logical interfaces are used to model the interfaces exposed by a device or
+      thing in the Watson IoT Platform. A logical interface must reference a schema
+      definition that defines the structure of the state that will be stored for
+      the device or thing.
+      */
+
+      /**
+      * returns the list of all of the draft logical interfaces that have been defined
+      * for the organization in the Watson IoT Platform
+      * @param
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Logical_Interfaces/get_draft_logicalinterfaces">link</a>
+      */
+    }, {
+      key: 'getLogicalInterfaces',
+      value: function getLogicalInterfaces() {
+        this.log.debug("[ApplicationClient] getLogicalInterfaces()");
+        return this.callApi('GET', 200, true, ["draft", "logicalinterfaces"], null);
+      }
+
+      /**
+      * Creates a new draft logical interface for the organization in the Watson IoT Platform.
+      * The logical interface must reference a schema definition that defines the structure of
+      * the state that will be stored for the device or thing.
+      * @param name Name of the Logical Interface
+      * @param description Description of the Logical Interface
+      * @param schemaId Schema ID for the Logical Interface
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Logical_Interfaces/post_draft_logicalinterfaces">link</a>
+      */
+    }, {
+      key: 'addLogicalInterface',
+      value: function addLogicalInterface(name, description, schemaId) {
+        this.log.debug("[ApplicationClient] addLogicalInterface()");
+        var body = {
+          name: name,
+          description: description,
+          schemaId: schemaId
+        };
+        return this.callApi('POST', 201, true, ["draft", "logicalinterfaces"], JSON.stringify(body));
+      }
+
+      /**
+      * Deletes the draft logical interface with the specified id from the organization in the Watson IoT Platform.
+      * @param logicalInterfaceId Id of the Logical interface
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Logical_Interfaces/delete_draft_logicalinterfaces_logicalInterfaceId">link</a>
+       */
+    }, {
+      key: 'deleteLogicalInterface',
+      value: function deleteLogicalInterface(logicalInterfaceId) {
+        this.log.debug("[ApplicationClient] deleteLogicalInterface()");
+        return this.callApi('DELETE', 204, false, ["draft", "logicalinterfaces", logicalInterfaceId], null);
+      }
+
+      /**
+      * Retrieve the draft logical interface with the specified id.
+       * @param logicalInterfaceId Id of the Logical interface
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Logical_Interfaces/get_draft_logicalinterfaces_logicalInterfaceId">link</a>
+       */
+    }, {
+      key: 'getLogicalInterface',
+      value: function getLogicalInterface(logicalInterfaceId) {
+        this.log.debug("[ApplicationClient] getLogicalInterface()");
+        return this.callApi('GET', 200, true, ["draft", "logicalinterfaces", logicalInterfaceId], null);
+      }
+
+      /**
+      * Updates the draft logical interface with the specified id.
+      * @param logicalInterfaceId Id of the Logical interface
+      * @param name Name of the Logical Interface
+      * @param description Description of the Logical Interface
+      * @param schemaId Schema ID for the Logical Interface
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Logical_Interfaces/put_draft_logicalinterfaces_logicalInterfaceId">link</a>
+       */
+    }, {
+      key: 'updateLogicalInterface',
+      value: function updateLogicalInterface(logicalInterfaceId, name, description, schemaId) {
+        this.log.debug("[ApplicationClient] updatePhysicalInterface()");
+        var body = {
+          id: logicalInterfaceId,
+          name: name,
+          description: description,
+          schemaId: schemaId
+        };
+        return this.callApi('PUT', 200, true, ["draft", "logicalinterfaces", logicalInterfaceId], JSON.stringify(body));
+      }
+
+      /**
+      * Performs the specified operation against the draft logical interface. The following values can be specified for the operation property:
+        1. validate-configuration
+       2. activate-configuration
+       3. list-differences
+       * @param logicalInterfaceId Id of the Logical interface
+      * @param operationName Name of the operation
+       * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Logical_Interfaces/patch_draft_logicalinterfaces_logicalInterfaceId">link</a>
+       */
+    }, {
+      key: 'performOperationOnLogicalInterface',
+      value: function performOperationOnLogicalInterface(logicalInterfaceId, operationName) {
+        this.log.debug("[ApplicationClient] performOperationOnLogicalInterface()");
+        var body = {
+          operation: operationName
+        };
+        return this.callApi('PATCH', 200, true, ["draft", "logicalinterfaces", logicalInterfaceId], JSON.stringify(body));
+      }
+
+      /**
+      * returns the list of all of the active logical interfaces that have been defined
+      * for the organization in the Watson IoT Platform
+      * @param
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Logical_Interfaces/get_logicalinterfaces">link</a>
+      */
+    }, {
+      key: 'getActiveLogicalInterfaces',
+      value: function getActiveLogicalInterfaces() {
+        this.log.debug("[ApplicationClient] getActiveLogicalInterfaces()");
+        return this.callApi('GET', 200, true, ["logicalinterfaces"], null);
+      }
+
+      /**
+      * Retrieve the active logical interface with the specified id.
+      * @param logicalInterfaceId Id of the Logical interface
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Logical_Interfaces/get_logicalinterfaces_logicalInterfaceId">link</a>
+      */
+    }, {
+      key: 'getActiveLogicalInterface',
+      value: function getActiveLogicalInterface(logicalInterfaceId) {
+        this.log.debug("[ApplicationClient] getActiveLogicalInterface()");
+        return this.callApi('GET', 200, true, ["logicalinterfaces", logicalInterfaceId], null);
+      }
+
+      /**
+      * Performs the specified operation against the logical interface. The following values can be specified for the operation property:
+        deactivate-configuration
+       * @param logicalInterfaceId Id of the Logical interface
+      * @param operationName Name of the operation
+      * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Logical_Interfaces/get_logicalinterfaces_logicalInterfaceId">link</a>
+      */
+    }, {
+      key: 'performOperationOnActiveLogicalInterface',
+      value: function performOperationOnActiveLogicalInterface(logicalInterfaceId, operationName) {
+        this.log.debug("[ApplicationClient] performOperationOnActiveLogicalInterface()");
+        var body = {
+          operation: operationName
+        };
+        return this.callApi('PATCH', 202, true, ["logicalinterfaces", logicalInterfaceId], JSON.stringify(body));
+      }
     }]);
 
     return ApplicationClient;
