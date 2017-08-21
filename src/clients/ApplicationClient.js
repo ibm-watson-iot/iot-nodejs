@@ -1032,4 +1032,501 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('PATCH', 202, true, ["logicalinterfaces", logicalInterfaceId], JSON.stringify(body));
    }
 
+   /** Schemas
+   Schemas are used to define the structure of Events, Device State and Thing State in the Watson IoT Platform.
+
+    For Events, they define the structure of the payload of the events that are published to the platform by devices.
+
+    For Device and Thing State, they define the structure of the state that is stored by the platform.
+    */
+
+
+    /**
+    * returns the list of all of the draft schema for the organization
+    * in the Watson IoT Platform
+    * @param
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Schemas/get_draft_schemas">link</a>
+    */
+    getDraftSchemas() {
+     this.log.debug("[ApplicationClient] getDraftSchemas()");
+     return this.callApi('GET', 200, true, ["draft", "schemas"], null);
+    }
+
+    /**
+    * Creates a new draft schema definition for the organization in the Watson IoT Platform.
+    * @param
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Schemas/post_draft_schemas">link</a>
+    */
+    addDraftSchema() {
+    //  this.log.debug("[ApplicationClient] addSchema()");
+    //  return this.callApi('GET', 200, true, ["draft", "schemas"], null);
+    }
+
+    /**
+    * Deletes the draft schema with the specified id from the organization in the Watson IoT Platform.
+    * @param schemaId Id of the schema
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Schemas/delete_draft_schemas_schemaId">link</a>
+
+    */
+    deleteDraftSchema(schemaId) {
+     this.log.debug("[ApplicationClient] deleteDraftSchema()");
+     return this.callApi('DELETE', 204, false, ["draft", "schemas", schemaId], null);
+    }
+
+    /**
+    * Retrieves the metadata for the draft schema definition with the specified id.
+    *
+    * @param schemaId schemaId Id of the schema
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Schemas/get_draft_schemas_schemaId">link</a>
+    */
+    getDraftSchema(schemaId) {
+     this.log.debug("[ApplicationClient] getDraftSchema()");
+     return this.callApi('GET', 200, true, ["draft", "schemas", schemaId], null);
+    }
+
+    /**
+    * Updates the metadata for the draft schema definition with the specified id. The following properties can be updated:
+    * 1. name
+    * 2. description
+    *  Note that if the description field is omitted from the body of the update, then any existing description will be removed from the schema definition.
+    *
+    * @param schemaId Id of the schema
+    * @param name Name of the schema
+    * @param description description of the schema
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Schemas/put_draft_schemas_schemaId">link</a>
+    */
+    updateDraftSchema(schemaId, name, description) {
+      this.log.debug("[ApplicationClient] updateDraftSchema()");
+      let body = {
+        id : schemaId,
+        name : name,
+        description: description
+      };
+     return this.callApi('PUT', 200, true, ["draft", "schemas", schemaId], JSON.stringify(body));
+    }
+
+    /**
+    * Retrieves the content of the draft schema definition file with the specified id.
+    *
+    * @param schemaId Id of the schema
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Schemas/get_draft_schemas_schemaId_content">link</a>
+    */
+    getDraftSchemaContent(schemaId) {
+     this.log.debug("[ApplicationClient] getDraftSchemaContent()");
+     return this.callApi('GET', 200, true, ["draft", "schemas", schemaId, "content"]);
+    }
+
+    /**
+    * Updates the content of a draft schema definition file with the specified id.
+    *
+    * @param schemaId Id of the schema
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Schemas/get_draft_schemas_schemaId_content">link</a>
+    */
+    updateDraftSchemaContent(schemaId, schemaFilePath) {
+    //  this.log.debug("[ApplicationClient] updateDraftSchemaContent()");
+    //  return this.callApi('POST', 200, true, ["draft", "schemas", schemaId, "content"]);
+    }
+
+    /** Schemas are used to define the structure of Events, Device State and Thing State in the Watson IoT Platform.
+
+    For Events, they define the structure of the payload of the events that are published to the platform by devices.
+
+    For Device and Thing State, they define the structure of the state that is stored by the platform.
+
+    */
+
+    /**
+    * returns the list of all of the active schema definitions for the organization in the Watson IoT Platform
+    * in the Watson IoT Platform
+    * @param
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Schemas/get_schemas">link</a>
+    */
+    getSchemas() {
+     this.log.debug("[ApplicationClient] getSchemas()");
+     return this.callApi('GET', 200, true, [ "schemas"], null);
+    }
+
+    /**
+    * Retrieves the metadata for the active schema definition with the specified id.
+    *
+    * @param schemaId schemaId Id of the schema
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Schemas/get_schemas_schemaId">link</a>
+    */
+    getSchema(schemaId) {
+     this.log.debug("[ApplicationClient] getSchema()");
+     return this.callApi('GET', 200, true, [ "schemas", schemaId], null);
+    }
+
+    /**
+    * Retrieves the content of the active schema definition file with the specified id.
+    *
+    * @param schemaId Id of the schema
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Schemas/get_schemas_schemaId_content">link</a>
+    */
+    getSchemaContent(schemaId) {
+     this.log.debug("[ApplicationClient] getSchemaContent()");
+     return this.callApi('GET', 200, true, ["schemas", schemaId, "content"]);
+    }
+
+
+    /* Devices */
+
+    /**
+    * Retrieve the current state of the device with the specified id.
+    *
+    * @param schemaId Id of the schema
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Devices/get_device_types_typeId_devices_deviceId_state_logicalInterfaceId">link</a>
+    */
+    getDeviceState(typeId, deviceId, logicalInterfaceId) {
+     this.log.debug("[ApplicationClient] getDeviceState()");
+     return this.callApi('GET', 200, true, ['device', 'types' , typeId, 'devices', deviceId, "state", logicalInterfaceId]);
+    }
+
+    /* Event Types */
+
+    /**
+    Event types are used to model the events that are published to the Watson IoT Platform.
+    An event type must be created in an organization before more complex processing can be
+    performed on the native event.
+    **/
+
+
+    /**
+    * List of all of the draft event types that have been defined for the organization
+    * in the Watson IoT Platform
+    * @param
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Event_Types/get_draft_event_types">link</a>
+    */
+    getDraftEventTypes() {
+     this.log.debug("[ApplicationClient] getDraftEventTypes()");
+     return this.callApi('GET', 200, true, ["draft", "event","types"], null);
+    }
+
+    /**
+    * Creates a new draft event type for the organization in the Watson IoT Platform.
+    The draft event type must reference the schema definition that defines the structure
+    of the inbound MQTT event.
+    * @param name - Name of the event type
+    * @param description - description of the event type
+    * @param schemaId - Id of the schema
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Event_Types/post_draft_event_types">link</a>
+    */
+    addDraftEventTypes(name, schemaId, description) {
+      this.log.debug("[ApplicationClient] addDraftEventTypes()");
+      let body = {
+        name: name,
+        description: description,
+        schemaId : schemaId
+      };
+      return this.callApi('POST', 201, true, ["draft", "event","types"], JSON.stringify(body));
+    }
+
+    /**
+    * Deletes the draft event type with the specified id from the organization in the Watson IoT Platform.
+    * @param eventTypeId Id of the event type
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Event_Types/delete_draft_event_types_eventTypeId">link</a>
+
+    */
+    deleteDraftEventTypes(eventTypeId) {
+     this.log.debug("[ApplicationClient] deleteDraftEventTypes()");
+     return this.callApi('DELETE', 204, false, ["draft", "event","types", eventTypeId], null);
+    }
+
+    /**
+    * Retrieve the draft event type with the specified id.
+    *
+    * @param eventTypeId Id of the event type
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Event_Types/get_draft_event_types_eventTypeId">link</a>
+    */
+    getDraftEventType(eventTypeId) {
+     this.log.debug("[ApplicationClient] getDraftEventType()");
+     return this.callApi('GET', 200, true, ["draft", "event","types", eventTypeId], null);
+    }
+
+    /**
+    * Updates the draft event type with the specified id. The following properties can be updated:
+      name
+      description
+      schemaId
+    Note that if the description field is omitted from the body of the update, then any existing description will be removed from the event type.
+    * @param eventTypeId Id of the event type
+    * @param schemaId Id of the schema
+    * @param name Name of the schema
+    * @param description description of the schema
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Event_Types/put_draft_event_types_eventTypeId">link</a>
+    */
+    updateDraftEventTypes(eventTypeId, schemaId, name, description) {
+      this.log.debug("[ApplicationClient] updateDraftEventTypes()");
+      let body = {
+        id : eventTypeId,
+        schemaId : schemaId,
+        name : name,
+        description: description
+      };
+     return this.callApi('PUT', 200, true, ["draft", "event","types", eventTypeId], JSON.stringify(body));
+    }
+
+    /**
+    * list of all of the active event types that have been defined for the organization
+    * in the Watson IoT Platform
+    * @param
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Event_Types/get_event_types">link</a>
+    */
+    getActiveEventTypes() {
+     this.log.debug("[ApplicationClient] getActiveEventTypes()");
+     return this.callApi('GET', 200, true, [ "event","types"], null);
+    }
+
+    /**
+    * Retrieve the active event type with the specified id.
+    *
+    * @param eventTypeId Id of the event type
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Event_Types/get_draft_event_types_eventTypeId">link</a>
+    */
+    getActiveEventType(eventTypeId) {
+     this.log.debug("[ApplicationClient] getActiveEventType()");
+     return this.callApi('GET', 200, true, ["event","types", eventTypeId], null);
+    }
+
+    /**
+    * Performs the specified operation against the device type. The following values can be specified for the operation property:
+
+     1. deactivate-configuration
+
+    * @param typeId Id of the Device Type
+    * @param operationName Name of the operation
+
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Device_Types/patch_device_types_typeId">link</a>
+
+    */
+    performOperationOnDeviceType(typeId, operationName) {
+     this.log.debug("[ApplicationClient] performOperationOnDeviceType()");
+     let body = {
+       operation : operationName
+     };
+     return this.callApi('PATCH', 200, true, ["device", "types", typeId], JSON.stringify(body));
+    }
+
+    /**
+    * Retrieve the list of active logical interfaces that have been associated with the device type.
+    *
+    * @param typeId Id of the device type
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Device_Types/get_device_types_typeId_logicalinterfaces">link</a>
+    */
+    getLogicalInterfacesforDeviceType(typeId) {
+     this.log.debug("[ApplicationClient] getLogicalInterfacesforDeviceType()");
+     return this.callApi('GET', 200, true, ["device","types", typeId, "logicalinterfaces" ]);
+    }
+
+    /**
+    * Retrieve the list of active property mappings for the specified device type.
+    *
+    * @param typeId Id of the device type
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Device_Types/get_device_types_typeId_mappings">link</a>
+    */
+    getMappingsforDeviceType(typeId) {
+     this.log.debug("[ApplicationClient] getMappingsforDeviceType()");
+     return this.callApi('GET', 200, true, ["device","types", typeId, "mappings" ]);
+    }
+
+    /**
+    * Retrieves the active property mappings for a specific logical interface for the device type.
+    *
+    * @param typeId Id of the device type
+    * @param logicalInterfaceId ID for logical interface
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Device_Types/get_device_types_typeId_mappings_logicalInterfaceId">link</a>
+    */
+    getMappingsforLogicalInterfaceForDeviceType(typeId, logicalInterfaceId) {
+     this.log.debug("[ApplicationClient] getMappingsforLogicalInterfaceForDeviceType()");
+     return this.callApi('GET', 200, true, ["device","types", typeId, "mappings", logicalInterfaceId ]);
+    }
+
+    /**
+    * Retrieve the active physical interface that has been associated with the device type
+    *
+    * @param typeId Id of the device type
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Device_Types/get_device_types_typeId_physicalinterface">link</a>
+    */
+    getPhysicalInterfacesforDeviceType(typeId) {
+     this.log.debug("[ApplicationClient] getPhysicalInterfacesforDeviceType()");
+     return this.callApi('GET', 200, true, ["device","types", typeId, "physicalinterface" ]);
+    }
+
+    /**
+    * Retrieves the list of device types that are associated with the logical interface and/or physical interface with the ids specified using the corresponding query parameters.
+    *
+      Note that at least one of the following query parameters must be specified:
+
+      logicalInterfaceId
+      physicalInterfaceId
+    * @param logicalInterfaceId ID for logical interface
+    * @param physicalInterfaceId Id for physical interface
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Device_Types/get_draft_device_types">link</a>
+    */
+    getDraftDeviceTypes(logicalInterfaceId, physicalInterfaceId) {
+     this.log.debug("[ApplicationClient] getDraftDeviceTypes()");
+     let params = {};
+     if(logicalInterfaceId) {
+       params['logicalInterfaceId'] = logicalInterfaceId;
+     }
+     if(logicalInterfaceId) {
+       params['physicalInterfaceId'] = physicalInterfaceId;
+     }
+     return this.callApi('GET', 200, true, ["draft","device", "types"],null, params);
+    }
+
+    /**
+    * Performs the specified operation against the draft device type. The following values can be specified for the operation property:
+
+      validate-configuration
+      activate-configuration
+      list-differences
+
+
+    * @param typeId Id of the device type
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Device_Types/patch_draft_device_types_typeId">link</a>
+
+    */
+    performOperationOnDeviceType(typeId, operationName) {
+     this.log.debug("[ApplicationClient] performOperationOnDeviceType()");
+     let body = {
+       operation : operationName
+     };
+     return this.callApi('PATCH', 200, true, ["draft","device", "types", typeId], JSON.stringify(body));
+    }
+
+    /**
+    * Retrieve the list of draft logical interfaces that have been associated with the device type. At least one
+    * active logical interface must be associated with the device type before any mappings can be defined that will
+    * generate state for the device.
+    *
+    * @param typeId Id of the device type
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Device_Types/get_draft_device_types_typeId_logicalinterfaces">link</a>
+    */
+    getDraftLogicalInterfacesforDeviceType(typeId) {
+     this.log.debug("[ApplicationClient] getDraftLogicalInterfacesforDeviceType()");
+     return this.callApi('GET', 200, true, ["draft","device","types", typeId, "logicalinterfaces" ]);
+    }
+
+    /**
+    * Associates a draft logical interface with the specified device type. The draft logical
+    interface must already exist within the organization in the Watson IoT Platform.
+    * @param typeId Id of the device type
+    * @param logicalInterfaceBody JSON representation of the draft logical interface.
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Device_Types/post_draft_device_types_typeId_logicalinterfaces">link</a>
+    */
+    associateLogicalInterfaceToDeviceType(typeId, body) {
+      this.log.debug("[ApplicationClient] associateLogicalInterfaceToDeviceType()");
+
+      return this.callApi('POST', 201, true, ["draft","device","types", typeId, "logicalinterfaces" ], JSON.stringify(body));
+    }
+
+    /**
+    * Disassociates the draft logical interface with the specified id from the device type.
+    * @param typeId Id of the device type
+    * @param logicalInterfaceId ID for logical interface
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Device_Types/delete_draft_device_types_typeId_logicalinterfaces_logicalInterfaceId">link</a>
+    */
+    removeLogicalInterfaceFromDeviceType(typeId, logicalInterfaceId) {
+      this.log.debug("[ApplicationClient] removeLogicalInterfaceFromDeviceType()");
+
+      return this.callApi('DELETE', 204, false, ["draft","device","types", typeId, "logicalinterfaces", logicalInterfaceId ], null);
+    }
+
+    /**
+    * Retrieve the list of draft property mappings for the specified device type.
+    *
+    * @param typeId Id of the device type
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Device_Types/get_draft_device_types_typeId_mappings">link</a>
+    */
+    getMappingsforDeviceType(typeId) {
+     this.log.debug("[ApplicationClient] getMappingsforDeviceType()");
+     return this.callApi('GET', 200, true, ["draft","device","types", typeId, "mappings" ]);
+    }
+
+    /**
+    * Associates a draft logical interface with the specified device type. The draft logical
+    interface must already exist within the organization in the Watson IoT Platform.
+    * @param typeId Id of the device type
+    * @param mappingsBody The JSON representation of the draft device type property mappings.
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Device_Types/post_draft_device_types_typeId_logicalinterfaces">link</a>
+    */
+    addMappingsforDeviceType(typeId, mappingsBody) {
+      this.log.debug("[ApplicationClient] addMappingsforDeviceType()");
+
+      return this.callApi('POST', 201, true, ["draft","device","types", typeId, "mappings" ], JSON.stringify(mappingsBody));
+    }
+
+    /**
+    * Deletes the draft property mappings for a specific logical interface for the device type.
+    * @param typeId Id of the device type
+    * @param logicalInterfaceId ID for logical interface
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Device_Types/delete_draft_device_types_typeId_logicalinterfaces_logicalInterfaceId">link</a>
+    */
+    removeMappingsFromDeviceType(typeId, logicalInterfaceId) {
+      this.log.debug("[ApplicationClient] removeMappingsFromDeviceType()");
+
+      return this.callApi('DELETE', 204, false, ["draft","device","types", typeId, "mappings", logicalInterfaceId ], null);
+    }
+
+    /**
+    * Retrieves the draft property mappings for a specific logical interface for the device type.
+    *
+    * @param typeId Id of the device type
+    * @param logicalInterfaceId ID for logical interface
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Device_Types/get_draft_device_types_typeId_mappings_logicalInterfaceId">link</a>
+    */
+    getMappingsforLogicalInterfaceForDeviceType(typeId, logicalInterfaceId) {
+     this.log.debug("[ApplicationClient] getMappingsforLogicalInterfaceForDeviceType()");
+     return this.callApi('GET', 200, true, ["draft","device","types", typeId, "mappings", logicalInterfaceId ]);
+    }
+
+    /**
+    * Updates the draft property mappings for a specific logical interface for the device type.
+    *
+    * @param typeId Id of the device type
+    * @param logicalInterfaceId ID for logical interface
+    * @param mappingsBody The JSON representation of the draft device type property mappings.
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Device_Types/put_draft_device_types_typeId_mappings_logicalInterfaceId">link</a>
+    */
+    updateMappingsforLogicalInterfaceForDeviceType(typeId, logicalInterfaceId, mappingsBody) {
+     this.log.debug("[ApplicationClient] updateMappingsforLogicalInterfaceForDeviceType()");
+     return this.callApi('PUT', 200, true, ["draft","device","types", typeId, "mappings", logicalInterfaceId ],JSON.stringify(mappingsBody));
+    }
+
+
+    /**
+    * Retrieve the draft physical interface that has been associated with the device type.
+    *
+    * @param typeId Id of the device type
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Device_Types/get_draft_device_types_typeId_physicalinterface">link</a>
+    */
+    getPhysicalInterfaceforDeviceType(typeId) {
+     this.log.debug("[ApplicationClient] getPhysicalInterfaceforDeviceType()");
+     return this.callApi('GET', 200, true, ["draft","device","types", typeId, "physicalinterface" ]);
+    }
+
+    /**
+    * Associates a draft physical interface with the specified device type.
+    The draft physical interface must already exist within the organization in the Watson IoT Platform.
+    * @param typeId Id of the device type
+    * @param physicalinterfaceBody The JSON representation of the draft physical interface.
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Device_Types/post_draft_device_types_typeId_physicalinterface">link</a>
+    */
+    addPhysicalInterfaceforDeviceType(typeId, physicalinterfaceBody) {
+      this.log.debug("[ApplicationClient] addPhysicalInterfaceforDeviceType()");
+
+      return this.callApi('POST', 201, true, ["draft","device","types", typeId, "physicalinterface" ], JSON.stringify(physicalinterfaceBody));
+    }
+
+    /**
+    * Disassociates the draft physical interface from the device type.
+    * @param typeId Id of the device type
+    * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Device_Types/delete_draft_device_types_typeId_physicalinterface">link</a>
+    */
+    removePhysicalInterfaceFromDeviceType(typeId) {
+      this.log.debug("[ApplicationClient] removePhysicalInterfaceFromDeviceType()");
+
+      return this.callApi('DELETE', 204, false, ["draft","device","types", typeId, "physicalinterface" ], null);
+    }
 }
