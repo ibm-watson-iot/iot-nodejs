@@ -15,6 +15,9 @@ import xhr from 'axios';
 import Promise from 'bluebird';
 import format from 'format';
 import nodeBtoa from 'btoa';
+import FormData from 'form-data';
+import concat from 'concat-stream';
+import fs from 'fs';
 const btoa = btoa || nodeBtoa; // if browser btoa is available use it otherwise use node module
 
 import { isDefined, isString, isNode, isBrowser } from '../util/util.js';
@@ -1054,14 +1057,63 @@ export default class ApplicationClient extends BaseClient {
 
     /**
     * Creates a new draft schema definition for the organization in the Watson IoT Platform.
-    * @param
+    * @param name - name of the schema
+    * @param schemaFilePath - path of the schema file
+    * @param description - description of the schema
     * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Schemas/post_draft_schemas">link</a>
     */
-    addDraftSchema() {
-    //  this.log.debug("[ApplicationClient] addSchema()");
-    //  return this.callApi('GET', 200, true, ["draft", "schemas"], null);
+    addDraftSchema(name, schemaFilePath, description) {
+      this.log.debug("[ApplicationClient] addDraftSchema()");
+      const fd = new FormData();
+      fd.append("name", name);
+      fd.append("schemaFile", fs.createReadStream(schemaFilePath));
+      fd.append("description", description);
+      return this.callMultiPartApi('POST', 201, ["draft", "schemas"], fd);
     }
 
+    // helper function
+
+    callMultiPartApi(method, expectedHttpCode, paths, fd) {
+      return new Promise((resolve, reject) => {
+
+        fd.pipe(concat(data => {
+          let headers = fd.getHeaders();
+
+          let uri = this.withProxy
+            ? "/api/v0002"
+            : format("https://%s/api/v0002", this.httpServer);
+
+          if(Array.isArray(paths)){
+            for(var i = 0, l = paths.length; i < l; i++){
+              uri += '/'+paths[i];
+            }
+          }
+
+          let config = {
+            url: uri,
+            method : method,
+            headers : headers,
+            data : data
+          }
+          if(this.useLtpa){
+            config.withCredentials = true;
+          }
+          else {
+            config.headers['Authorization'] = 'Basic ' + btoa(this.apiKey + ':' + this.apiToken);
+          }
+          xhr(config)
+          .then(response => {
+            if(response.status === expectedHttpCode) {
+              resolve(response.data);
+            } else {
+              reject(new Error(uri + ": Expected HTTP "+ expectedHttpCode +" from server but got HTTP " + response.status + ". Error Body: " + response.data));
+            }
+          }).catch(error => {
+            reject(error);
+          })
+        }))
+      });
+    }
     /**
     * Deletes the draft schema with the specified id from the organization in the Watson IoT Platform.
     * @param schemaId Id of the schema
@@ -1123,8 +1175,10 @@ export default class ApplicationClient extends BaseClient {
     * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Schemas/get_draft_schemas_schemaId_content">link</a>
     */
     updateDraftSchemaContent(schemaId, schemaFilePath) {
-    //  this.log.debug("[ApplicationClient] updateDraftSchemaContent()");
-    //  return this.callApi('POST', 200, true, ["draft", "schemas", schemaId, "content"]);
+      this.log.debug("[ApplicationClient] updateDraftSchemaContent()");
+      const fd = new FormData();
+      fd.append("schemaFile", fs.createReadStream(schemaFilePath));
+      return this.callMultiPartApi('PUT', 204, ["draft", "schemas", schemaId, "content"], fd);
     }
 
     /** Schemas are used to define the structure of Events, Device State and Thing State in the Watson IoT Platform.

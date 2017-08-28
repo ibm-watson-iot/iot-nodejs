@@ -1,16 +1,16 @@
 (function (global, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['exports', 'module', 'axios', 'bluebird', 'format', 'btoa', '../util/util.js', './BaseClient.js'], factory);
+    define(['exports', 'module', 'axios', 'bluebird', 'format', 'btoa', 'form-data', 'concat-stream', 'fs', '../util/util.js', './BaseClient.js'], factory);
   } else if (typeof exports !== 'undefined' && typeof module !== 'undefined') {
-    factory(exports, module, require('axios'), require('bluebird'), require('format'), require('btoa'), require('../util/util.js'), require('./BaseClient.js'));
+    factory(exports, module, require('axios'), require('bluebird'), require('format'), require('btoa'), require('form-data'), require('concat-stream'), require('fs'), require('../util/util.js'), require('./BaseClient.js'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod.exports, mod, global.xhr, global.Promise, global.format, global.nodeBtoa, global.util, global.BaseClient);
+    factory(mod.exports, mod, global.xhr, global.Promise, global.format, global.nodeBtoa, global.FormData, global.concat, global.fs, global.util, global.BaseClient);
     global.ApplicationClient = mod.exports;
   }
-})(this, function (exports, module, _axios, _bluebird, _format, _btoa, _utilUtilJs, _BaseClientJs) {
+})(this, function (exports, module, _axios, _bluebird, _format, _btoa, _formData, _concatStream, _fs, _utilUtilJs, _BaseClientJs) {
   /**
    *****************************************************************************
    Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
@@ -43,6 +43,12 @@
   var _format2 = _interopRequireDefault(_format);
 
   var _nodeBtoa = _interopRequireDefault(_btoa);
+
+  var _FormData = _interopRequireDefault(_formData);
+
+  var _concat = _interopRequireDefault(_concatStream);
+
+  var _fs2 = _interopRequireDefault(_fs);
 
   var _BaseClient2 = _interopRequireDefault(_BaseClientJs);
 
@@ -1136,21 +1142,71 @@
 
       /**
       * Creates a new draft schema definition for the organization in the Watson IoT Platform.
-      * @param
+      * @param name - name of the schema
+      * @param schemaFilePath - path of the schema file
+      * @param description - description of the schema
       * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Schemas/post_draft_schemas">link</a>
       */
     }, {
       key: 'addDraftSchema',
-      value: function addDraftSchema() {}
-      //  this.log.debug("[ApplicationClient] addSchema()");
-      //  return this.callApi('GET', 200, true, ["draft", "schemas"], null);
+      value: function addDraftSchema(name, schemaFilePath, description) {
+        this.log.debug("[ApplicationClient] addDraftSchema()");
+        var fd = new _FormData['default']();
+        fd.append("name", name);
+        fd.append("schemaFile", _fs2['default'].createReadStream(schemaFilePath));
+        fd.append("description", description);
+        return this.callMultiPartApi('POST', 201, ["draft", "schemas"], fd);
+      }
+
+      // helper function
+
+    }, {
+      key: 'callMultiPartApi',
+      value: function callMultiPartApi(method, expectedHttpCode, paths, fd) {
+        var _this4 = this;
+
+        return new _Promise['default'](function (resolve, reject) {
+
+          fd.pipe((0, _concat['default'])(function (data) {
+            var headers = fd.getHeaders();
+
+            var uri = _this4.withProxy ? "/api/v0002" : (0, _format2['default'])("https://%s/api/v0002", _this4.httpServer);
+
+            if (Array.isArray(paths)) {
+              for (var i = 0, l = paths.length; i < l; i++) {
+                uri += '/' + paths[i];
+              }
+            }
+
+            var config = {
+              url: uri,
+              method: method,
+              headers: headers,
+              data: data
+            };
+            if (_this4.useLtpa) {
+              config.withCredentials = true;
+            } else {
+              config.headers['Authorization'] = 'Basic ' + btoa(_this4.apiKey + ':' + _this4.apiToken);
+            }
+            (0, _xhr['default'])(config).then(function (response) {
+              if (response.status === expectedHttpCode) {
+                resolve(response.data);
+              } else {
+                reject(new Error(uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.status + ". Error Body: " + response.data));
+              }
+            })['catch'](function (error) {
+              reject(error);
+            });
+          }));
+        });
+      }
 
       /**
       * Deletes the draft schema with the specified id from the organization in the Watson IoT Platform.
       * @param schemaId Id of the schema
       * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Schemas/delete_draft_schemas_schemaId">link</a>
        */
-
     }, {
       key: 'deleteDraftSchema',
       value: function deleteDraftSchema(schemaId) {
@@ -1215,9 +1271,12 @@
       */
     }, {
       key: 'updateDraftSchemaContent',
-      value: function updateDraftSchemaContent(schemaId, schemaFilePath) {}
-      //  this.log.debug("[ApplicationClient] updateDraftSchemaContent()");
-      //  return this.callApi('POST', 200, true, ["draft", "schemas", schemaId, "content"]);
+      value: function updateDraftSchemaContent(schemaId, schemaFilePath) {
+        this.log.debug("[ApplicationClient] updateDraftSchemaContent()");
+        var fd = new _FormData['default']();
+        fd.append("schemaFile", _fs2['default'].createReadStream(schemaFilePath));
+        return this.callMultiPartApi('PUT', 204, ["draft", "schemas", schemaId, "content"], fd);
+      }
 
       /** Schemas are used to define the structure of Events, Device State and Thing State in the Watson IoT Platform.
        For Events, they define the structure of the payload of the events that are published to the platform by devices.
@@ -1230,7 +1289,6 @@
       * @param
       * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Schemas/get_schemas">link</a>
       */
-
     }, {
       key: 'getSchemas',
       value: function getSchemas() {

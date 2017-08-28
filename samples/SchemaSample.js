@@ -1,10 +1,10 @@
 var iotf = require("../");
 
 var appClientConfig = {
-  org: '*****',
+  org: 'xxxxxx',
   id: ''+Date.now(),
-  "auth-key": 'a-*****-********',
-  "auth-token": '**********'
+  "auth-key": 'a-xxxx-xxxxx',
+  "auth-token": 'xxxxxxx'
 };
 
 var appClient = new iotf.IotfApplication(appClientConfig);
@@ -17,6 +17,28 @@ appClient.
 getDraftSchemas(). then (function onSuccess (response) {
 	console.log("Success");
 	console.log("Number of Schemas : "+response.meta.total_rows);
+	console.log(response);
+}, function onError (argument) {
+
+	console.log("Fail");
+	console.log(argument);
+});
+
+appClient.
+addDraftSchema("tempSchema1", '/Users/jeffdare/Documents/jeff/iot/recipes/nodejs/master/iot-nodejs/samples/tempSchema.json', 'schema for temperature'). then (function onSuccess (response) {
+	console.log("Success");
+
+	console.log(response);
+}, function onError (argument) {
+
+	console.log("Fail");
+	console.log(argument);
+});
+
+appClient.
+updateDraftSchemaContent("59a36be052faff002c15f6d0", '/Users/jeffdare/Documents/jeff/iot/recipes/nodejs/master/iot-nodejs/samples/tempSchema.json'). then (function onSuccess (response) {
+	console.log("Success");
+
 	console.log(response);
 }, function onError (argument) {
 
