@@ -1172,6 +1172,7 @@ export default class ApplicationClient extends BaseClient {
     * Updates the content of a draft schema definition file with the specified id.
     *
     * @param schemaId Id of the schema
+    * @param schemaFilePath - path of the schema file
     * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Schemas/get_draft_schemas_schemaId_content">link</a>
     */
     updateDraftSchemaContent(schemaId, schemaFilePath) {

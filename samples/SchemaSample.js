@@ -25,7 +25,7 @@ getDraftSchemas(). then (function onSuccess (response) {
 });
 
 appClient.
-addDraftSchema("tempSchema1", '/Users/jeffdare/Documents/jeff/iot/recipes/nodejs/master/iot-nodejs/samples/tempSchema.json', 'schema for temperature'). then (function onSuccess (response) {
+addDraftSchema("tempSchema1", '/Users/user1/Documents/iot-nodejs/samples/tempSchema.json', 'schema for temperature'). then (function onSuccess (response) {
 	console.log("Success");
 
 	console.log(response);
@@ -36,7 +36,7 @@ addDraftSchema("tempSchema1", '/Users/jeffdare/Documents/jeff/iot/recipes/nodejs
 });
 
 appClient.
-updateDraftSchemaContent("59a36be052faff002c15f6d0", '/Users/jeffdare/Documents/jeff/iot/recipes/nodejs/master/iot-nodejs/samples/tempSchema.json'). then (function onSuccess (response) {
+updateDraftSchemaContent("59a36be052faff002c15f6d0", '/Users/user1/Documents/iot-nodejs/samples/tempSchema.json'). then (function onSuccess (response) {
 	console.log("Success");
 
 	console.log(response);
