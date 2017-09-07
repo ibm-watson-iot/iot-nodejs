@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ibm-watson-iot/iot-nodejs.svg?branch=master)](https://travis-ci.org/ibm-watson-iot/iot-nodejs)
+
 Node.js Client Library
 ========================
 
