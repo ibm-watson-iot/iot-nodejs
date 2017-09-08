@@ -1,11 +1,11 @@
 var iotf = require("../");
 
 var appClientConfig = {
-  org: '*******',
-  id: ''+Date.now(),
-  "auth-key": 'a-*****-gwzm0w4scj',
-  "auth-token": '******'
-};
+	org: '******',
+	id: ''+Date.now(),
+	"auth-key": 'a-*****-gwzm0w4scj',
+	"auth-token": '**************'
+  };
 
 var appClient = new iotf.IotfApplication(appClientConfig);
 
@@ -15,7 +15,7 @@ appClient.log.setLevel('info');
 //
 appClient.
 getLogicalInterfaces(). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getLogicalInterfaces");
 	console.log("Number of Logical interfaces : "+response.meta.total_rows);
 	console.log(response);
 }, function onError (argument) {
@@ -26,7 +26,7 @@ getLogicalInterfaces(). then (function onSuccess (response) {
 
 appClient.
 addLogicalInterface("logicalInterface1", "This is my logical interface", "597b2bde52faff00019649bb"). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully addLogicalInterface");
 	console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
@@ -36,7 +36,7 @@ addLogicalInterface("logicalInterface1", "This is my logical interface", "597b2b
 
 appClient.
 deleteLogicalInterface('597a9f5152faff0001fdb550'). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully deleteLogicalInterface");
 	console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
@@ -45,7 +45,7 @@ deleteLogicalInterface('597a9f5152faff0001fdb550'). then (function onSuccess (re
 
 appClient.
 getLogicalInterface('597b2e1752faff000178b12a'). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getLogicalInterface");
 	console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
@@ -54,7 +54,7 @@ getLogicalInterface('597b2e1752faff000178b12a'). then (function onSuccess (respo
 
 appClient.
 updateLogicalInterface('597b2e1752faff000178b12a',"logicalInterface2", "This is updated logical interface", "597b2bde52faff00019649bb"). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully updateLogicalInterface");
 	console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
@@ -63,7 +63,7 @@ updateLogicalInterface('597b2e1752faff000178b12a',"logicalInterface2", "This is 
 
 appClient.
 performOperationOnLogicalInterface('597b2e1752faff000178b12a',"validate-configuration"). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully performOperationOnLogicalInterface");
 	console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
@@ -72,7 +72,7 @@ performOperationOnLogicalInterface('597b2e1752faff000178b12a',"validate-configur
 
 appClient.
 getActiveLogicalInterfaces(). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getActiveLogicalInterfaces");
 	console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
@@ -81,7 +81,7 @@ getActiveLogicalInterfaces(). then (function onSuccess (response) {
 
 appClient.
 getActiveLogicalInterface('597b2e1752faff000178b12a'). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getActiveLogicalInterface");
 	console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
@@ -90,7 +90,7 @@ getActiveLogicalInterface('597b2e1752faff000178b12a'). then (function onSuccess 
 
 appClient.
 performOperationOnActiveLogicalInterface('597b2e1752faff000178b12a','deactivate-configuration'). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully performOperationOnActiveLogicalInterface");
 	console.log(response);
 }, function onError (argument) {
 	console.log("Fail");

@@ -1,23 +1,24 @@
 var iotf = require("../");
 
 var appClientConfig = {
-  org: '*****',
-  id: ''+Date.now(),
-  "auth-key": 'a-*****-******',
-  "auth-token": '*********'
-};
+	org: '******',
+	id: ''+Date.now(),
+	"auth-key": 'a-*****-gwzm0w4scj',
+	"auth-token": '**************'
+  };
 
 var appClient = new iotf.IotfApplication(appClientConfig);
 
 //setting the log level to trace. By default its 'warn'
 appClient.log.setLevel('info');
 
+var id = "";
 
 appClient.
 getPhysicalInterfaces(). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getPhysicalInterfaces");
 	console.log("Number of Physical interfaces : "+response.meta.total_rows);
-	console.log(response);
+	// console.log(response);
 }, function onError (argument) {
 
 	console.log("Fail");
@@ -26,36 +27,27 @@ getPhysicalInterfaces(). then (function onSuccess (response) {
 
 appClient.
 addPhysicalInterface("physicalinterface1", "This is my physical interface"). then (function onSuccess (response) {
-	console.log("Success");
-	console.log(response);
-}, function onError (argument) {
-	console.log("Fail");
-	console.log(argument);
-});
-
-
-appClient.
-deletePhysicalInterface('597a9f5152faff0001fdb550'). then (function onSuccess (response) {
-	console.log("Success");
-	console.log(response);
+	console.log("should successfully addPhysicalInterface");
+	//console.log(response);
+	id = response.id;
 }, function onError (argument) {
 	console.log("Fail");
 	console.log(argument);
 });
 
 appClient.
-getPhysicalInterface('597aae3e52faff0001fdb551'). then (function onSuccess (response) {
-	console.log("Success");
-	console.log(response);
+getPhysicalInterface(id). then (function onSuccess (response) {
+	console.log("should successfully getPhysicalInterface");
+	// console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
 	console.log(argument);
 });
 
 appClient.
-updatePhysicalInterface('597aae3e52faff0001fdb551',"physicalinterface2", "This is updated physical interface"). then (function onSuccess (response) {
-	console.log("Success");
-	console.log(response);
+updatePhysicalInterface(id,"physicalinterface2", "This is updated physical interface"). then (function onSuccess (response) {
+	console.log("should successfully updatePhysicalInterface");
+	//console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
 	console.log(argument);
@@ -63,26 +55,35 @@ updatePhysicalInterface('597aae3e52faff0001fdb551',"physicalinterface2", "This i
 
 appClient.
 getActivePhysicalInterfaces(). then (function onSuccess (response) {
-	console.log("Success");
-	console.log(response);
+	console.log("should successfully getActivePhysicalInterfaces");
+	//console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
 	console.log(argument);
 });
 
 appClient.
-getPhysicalInterfaceEventMapping('597aae3e52faff0001fdb551'). then (function onSuccess (response) {
-	console.log("Success");
-	console.log(response);
+getPhysicalInterfaceEventMapping(id). then (function onSuccess (response) {
+	console.log("should successfully getPhysicalInterfaceEventMapping");
+	//console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
 	console.log(argument);
 });
 
+// appClient.
+// addPhysicalInterfaceEventMapping(id, 'eventId', 'eventTypeID'). then (function onSuccess (response) {
+// 	console.log("Success");
+// 	console.log(response);
+// }, function onError (argument) {
+// 	console.log("Fail");
+// 	console.log(argument);
+// });
+
 appClient.
-addPhysicalInterfaceEventMapping('597aae3e52faff0001fdb551', 'eventId', 'eventTypeID'). then (function onSuccess (response) {
-	console.log("Success");
-	console.log(response);
+deletePhysicalInterface(id). then (function onSuccess (response) {
+	console.log("should successfully deletePhysicalInterface");
+	//console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
 	console.log(argument);

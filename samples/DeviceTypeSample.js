@@ -15,7 +15,7 @@ appClient.log.setLevel('info');
 
 appClient.
 getLogicalInterfacesforDeviceType("drone"). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getLogicalInterfacesforDeviceType");
 	console.log("Number of Logical Interfaces : "+response.meta.total_rows);
 	console.log(response);
 }, function onError (argument) {
@@ -26,7 +26,7 @@ getLogicalInterfacesforDeviceType("drone"). then (function onSuccess (response) 
 
 appClient.
 getMappingsforDeviceType("drone"). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getMappingsforDeviceType");
 	console.log(response);
 }, function onError (argument) {
 
@@ -36,7 +36,7 @@ getMappingsforDeviceType("drone"). then (function onSuccess (response) {
 //
 appClient.
 getMappingsforLogicalInterfaceForDeviceType("drone",'59965e0b52faff0031aa569a'). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getMappingsforLogicalInterfaceForDeviceType");
 	console.log(response);
 }, function onError (argument) {
 
@@ -46,7 +46,7 @@ getMappingsforLogicalInterfaceForDeviceType("drone",'59965e0b52faff0031aa569a').
 
 appClient.
 getPhysicalInterfacesforDeviceType('drone'). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getPhysicalInterfacesforDeviceType");
 
 	console.log(response);
 }, function onError (argument) {
@@ -57,7 +57,7 @@ getPhysicalInterfacesforDeviceType('drone'). then (function onSuccess (response)
 
 appClient.
 getPhysicalInterfacesforDeviceType('drone'). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getPhysicalInterfacesforDeviceType");
 
 	console.log(response);
 }, function onError (argument) {
@@ -68,7 +68,7 @@ getPhysicalInterfacesforDeviceType('drone'). then (function onSuccess (response)
 
 appClient.
 getDraftLogicalInterfacesforDeviceType('testgwdev'). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getDraftLogicalInterfacesforDeviceType");
 
 	console.log(response);
 }, function onError (argument) {
@@ -88,7 +88,7 @@ let logicalInterfaceBody = { id: '597b2e1752faff000178b12a',
        updatedBy: 'a-ld95lc-gwzm0w4scj' }
 appClient.
 associateLogicalInterfaceToDeviceType('testgwdev',logicalInterfaceBody). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully associateLogicalInterfaceToDeviceType");
 	console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
@@ -97,7 +97,7 @@ associateLogicalInterfaceToDeviceType('testgwdev',logicalInterfaceBody). then (f
 
 appClient.
 removeLogicalInterfaceFromDeviceType('testgwdev',"597b2e1752faff000178b12a"). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully removeLogicalInterfaceFromDeviceType");
 	console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
@@ -106,7 +106,7 @@ removeLogicalInterfaceFromDeviceType('testgwdev',"597b2e1752faff000178b12a"). th
 
 appClient.
 getMappingsforDeviceType('testgwdev'). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getMappingsforDeviceType");
 
 	console.log(response);
 }, function onError (argument) {
@@ -122,7 +122,7 @@ let mappingsBody = {
 }
 appClient.
 addMappingsforDeviceType('testgwdev',mappingsBody). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully addMappingsforDeviceType");
 	console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
@@ -131,7 +131,7 @@ addMappingsforDeviceType('testgwdev',mappingsBody). then (function onSuccess (re
 
 appClient.
 removeMappingsFromDeviceType('testgwdev',"597b2e1752faff000178b12a"). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully removeMappingsFromDeviceType");
 	console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
@@ -140,7 +140,7 @@ removeMappingsFromDeviceType('testgwdev',"597b2e1752faff000178b12a"). then (func
 
 appClient.
 getMappingsforLogicalInterfaceForDeviceType('testgwdev',"597b2e1752faff000178b12a"). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getMappingsforLogicalInterfaceForDeviceType");
 	console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
@@ -154,7 +154,7 @@ let mappingsBody = {
 }
 appClient.
 updateMappingsforLogicalInterfaceForDeviceType('testgwdev','597b2e1752faff000178b12a',mappingsBody). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully updateMappingsforLogicalInterfaceForDeviceType");
 	console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
@@ -163,7 +163,7 @@ updateMappingsforLogicalInterfaceForDeviceType('testgwdev','597b2e1752faff000178
 
 appClient.
 getPhysicalInterfaceforDeviceType('testgwdev'). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getPhysicalInterfaceforDeviceType");
 	console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
@@ -181,7 +181,7 @@ let physicalinterfaceBody = { id: '597b2da352faff00010b0af6',
        updatedBy: 'a-ld95lc-gwzm0w4scj' }
 appClient.
 addPhysicalInterfaceforDeviceType('testgwdev',physicalinterfaceBody). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully addPhysicalInterfaceforDeviceType");
 	console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
@@ -190,7 +190,7 @@ addPhysicalInterfaceforDeviceType('testgwdev',physicalinterfaceBody). then (func
 
 appClient.
 removePhysicalInterfaceFromDeviceType('testgwdev'). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully removePhysicalInterfaceFromDeviceType");
 	console.log(response);
 }, function onError (argument) {
 	console.log("Fail");
