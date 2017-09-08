@@ -1,11 +1,11 @@
 var iotf = require("../");
 
 var appClientConfig = {
-  org: 'xxxxxx',
-  id: ''+Date.now(),
-  "auth-key": 'a-xxxx-xxxxx',
-  "auth-token": 'xxxxxxx'
-};
+	org: '******',
+	id: ''+Date.now(),
+	"auth-key": 'a-*****-gwzm0w4scj',
+	"auth-token": '**************'
+  };
 
 var appClient = new iotf.IotfApplication(appClientConfig);
 
@@ -15,7 +15,7 @@ appClient.log.setLevel('info');
 
 appClient.
 getDraftSchemas(). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getDraftSchemas")
 	console.log("Number of Schemas : "+response.meta.total_rows);
 	console.log(response);
 }, function onError (argument) {
@@ -25,8 +25,8 @@ getDraftSchemas(). then (function onSuccess (response) {
 });
 
 appClient.
-addDraftSchema("tempSchema1", '/Users/user1/Documents/iot-nodejs/samples/tempSchema.json', 'schema for temperature'). then (function onSuccess (response) {
-	console.log("Success");
+addDraftSchema("tempSchema1", '/Users/jeffdare/Documents/jeff/iot/recipes/nodejs/master/iot-nodejs/samples/tempSchema.json', 'schema for temperature'). then (function onSuccess (response) {
+	console.log(" should successfully addDraftSchema");
 
 	console.log(response);
 }, function onError (argument) {
@@ -36,8 +36,8 @@ addDraftSchema("tempSchema1", '/Users/user1/Documents/iot-nodejs/samples/tempSch
 });
 
 appClient.
-updateDraftSchemaContent("59a36be052faff002c15f6d0", '/Users/user1/Documents/iot-nodejs/samples/tempSchema.json'). then (function onSuccess (response) {
-	console.log("Success");
+updateDraftSchemaContent("59a36be052faff002c15f6d0", '/Users/jeffdare/Documents/jeff/iot/recipes/nodejs/master/iot-nodejs/samples/tempSchema.json'). then (function onSuccess (response) {
+	console.log("should successfully updateDraftSchemaContent");
 
 	console.log(response);
 }, function onError (argument) {
@@ -48,7 +48,7 @@ updateDraftSchemaContent("59a36be052faff002c15f6d0", '/Users/user1/Documents/iot
 
 appClient.
 deleteDraftSchema('597b2bde52faff00019649bb'). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully deleteDraftSchema");
 	console.log(response);
 }, function onError (argument) {
 
@@ -58,7 +58,7 @@ deleteDraftSchema('597b2bde52faff00019649bb'). then (function onSuccess (respons
 
 appClient.
 getDraftSchema('597b2bde52faff00019649bb'). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getDraftSchema");
 
 	console.log(response);
 }, function onError (argument) {
@@ -69,7 +69,7 @@ getDraftSchema('597b2bde52faff00019649bb'). then (function onSuccess (response) 
 
 appClient.
 updateDraftSchema('597b2bde52faff00019649bb', 'tEventSchema', 'This is a temperature schema'). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully updateDraftSchema");
 
 	console.log(response);
 }, function onError (argument) {
@@ -80,7 +80,7 @@ updateDraftSchema('597b2bde52faff00019649bb', 'tEventSchema', 'This is a tempera
 
 appClient.
 getDraftSchemaContent('597b2bde52faff00019649bb'). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getDraftSchemaContent");
 
 	console.log(response);
 }, function onError (argument) {
@@ -92,7 +92,7 @@ getDraftSchemaContent('597b2bde52faff00019649bb'). then (function onSuccess (res
 
 appClient.
 getSchemas(). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getSchemas");
 	console.log("Number of Schemas : "+response.meta.total_rows);
 	console.log(response);
 }, function onError (argument) {
@@ -103,7 +103,7 @@ getSchemas(). then (function onSuccess (response) {
 
 appClient.
 getSchema('597b2bde52faff00019649bb'). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getSchema");
 
 	console.log(response);
 }, function onError (argument) {
@@ -114,8 +114,8 @@ getSchema('597b2bde52faff00019649bb'). then (function onSuccess (response) {
 
 appClient.
 getSchemaContent('597b2bde52faff00019649bb'). then (function onSuccess (response) {
-	console.log("Success");
-
+	console.log("should successfully getSchemaContent");
+ 
 	console.log(response);
 }, function onError (argument) {
 
@@ -125,7 +125,7 @@ getSchemaContent('597b2bde52faff00019649bb'). then (function onSuccess (response
 
 appClient.
 getDeviceState('drone', 'drone1','597b2bde52faff00019649bb'). then (function onSuccess (response) {
-	console.log("Success");
+	console.log("should successfully getDeviceState");
 
 	console.log(response);
 }, function onError (argument) {

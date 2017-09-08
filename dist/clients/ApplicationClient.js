@@ -414,7 +414,7 @@
                 resolve(response.data);
               }
             } else {
-              reject(new Error(method + " " + uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.status + ". Error Body: " + data));
+              reject(new Error(method + " " + uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.status + ". Error Body: " + response.data));
             }
           }
           _this2.log.debug("[ApplicationClient:transformResponse] " + xhrConfig);
@@ -1076,7 +1076,13 @@
         var body = {
           operation: operationName
         };
-        return this.callApi('PATCH', 200, true, ["draft", "logicalinterfaces", logicalInterfaceId], JSON.stringify(body));
+        var returnCode = 0;
+        if (operationName === "activate-configuration") {
+          returnCode = 202;
+        } else {
+          returnCode = 200;
+        }
+        return this.callApi('PATCH', returnCode, true, ["draft", "logicalinterfaces", logicalInterfaceId], JSON.stringify(body));
       }
 
       /**
@@ -1267,6 +1273,7 @@
       * Updates the content of a draft schema definition file with the specified id.
       *
       * @param schemaId Id of the schema
+      * @param schemaFilePath - path of the schema file
       * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Schemas/get_draft_schemas_schemaId_content">link</a>
       */
     }, {
@@ -1463,13 +1470,13 @@
        * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Device_Types/patch_device_types_typeId">link</a>
        */
     }, {
-      key: 'performOperationOnDeviceType',
-      value: function performOperationOnDeviceType(typeId, operationName) {
-        this.log.debug("[ApplicationClient] performOperationOnDeviceType()");
+      key: 'performOperationOnActiveDeviceType',
+      value: function performOperationOnActiveDeviceType(typeId, operationName) {
+        this.log.debug("[ApplicationClient] performOperationOnActiveDeviceType()");
         var body = {
           operation: operationName
         };
-        return this.callApi('PATCH', 200, true, ["device", "types", typeId], JSON.stringify(body));
+        return this.callApi('PATCH', 202, true, ["device", "types", typeId], JSON.stringify(body));
       }
 
       /**
@@ -1543,7 +1550,7 @@
         if (logicalInterfaceId) {
           params['logicalInterfaceId'] = logicalInterfaceId;
         }
-        if (logicalInterfaceId) {
+        if (physicalInterfaceId) {
           params['physicalInterfaceId'] = physicalInterfaceId;
         }
         return this.callApi('GET', 200, true, ["draft", "device", "types"], null, params);
@@ -1558,13 +1565,19 @@
       * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Device_Types/patch_draft_device_types_typeId">link</a>
        */
     }, {
-      key: 'performOperationOnDeviceType',
-      value: function performOperationOnDeviceType(typeId, operationName) {
-        this.log.debug("[ApplicationClient] performOperationOnDeviceType()");
+      key: 'performOperationOnDraftDeviceType',
+      value: function performOperationOnDraftDeviceType(typeId, operationName) {
+        this.log.debug("[ApplicationClient] performOperationOnDraftDeviceType()");
         var body = {
           operation: operationName
         };
-        return this.callApi('PATCH', 200, true, ["draft", "device", "types", typeId], JSON.stringify(body));
+        var returnCode = 0;
+        if (operationName === "activate-configuration") {
+          returnCode = 202;
+        } else {
+          returnCode = 200;
+        }
+        return this.callApi('PATCH', returnCode, true, ["draft", "device", "types", typeId], JSON.stringify(body));
       }
 
       /**

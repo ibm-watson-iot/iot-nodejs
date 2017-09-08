@@ -393,7 +393,7 @@ export default class ApplicationClient extends BaseClient {
             resolve(response.data);
           }
         } else {
-          reject(new Error(method + " " + uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.status + ". Error Body: " + data));
+          reject(new Error(method + " " + uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.status + ". Error Body: " + response.data));
         }
       }
       this.log.debug("[ApplicationClient:transformResponse] "+xhrConfig);
@@ -994,7 +994,13 @@ export default class ApplicationClient extends BaseClient {
     let body = {
       operation : operationName
     };
-    return this.callApi('PATCH', 200, true, ["draft", "logicalinterfaces", logicalInterfaceId], JSON.stringify(body));
+    let returnCode = 0;
+    if(operationName === "activate-configuration") {
+     returnCode = 202
+    } else {
+     returnCode = 200
+    }
+    return this.callApi('PATCH', returnCode, true, ["draft", "logicalinterfaces", logicalInterfaceId], JSON.stringify(body));
    }
 
    /**
@@ -1354,12 +1360,12 @@ export default class ApplicationClient extends BaseClient {
     * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html?cm_mc_uid=95177996809014882617847&cm_mc_sid_50200000=1502710506#!/Device_Types/patch_device_types_typeId">link</a>
 
     */
-    performOperationOnDeviceType(typeId, operationName) {
-     this.log.debug("[ApplicationClient] performOperationOnDeviceType()");
+    performOperationOnActiveDeviceType(typeId, operationName) {
+     this.log.debug("[ApplicationClient] performOperationOnActiveDeviceType()");
      let body = {
        operation : operationName
      };
-     return this.callApi('PATCH', 200, true, ["device", "types", typeId], JSON.stringify(body));
+     return this.callApi('PATCH', 202, true, ["device", "types", typeId], JSON.stringify(body));
     }
 
     /**
@@ -1424,7 +1430,7 @@ export default class ApplicationClient extends BaseClient {
      if(logicalInterfaceId) {
        params['logicalInterfaceId'] = logicalInterfaceId;
      }
-     if(logicalInterfaceId) {
+     if(physicalInterfaceId) {
        params['physicalInterfaceId'] = physicalInterfaceId;
      }
      return this.callApi('GET', 200, true, ["draft","device", "types"],null, params);
@@ -1442,12 +1448,18 @@ export default class ApplicationClient extends BaseClient {
     * Refer to <a href="https://docs.internetofthings.ibmcloud.com/apis/swagger/v0002/state-mgmt.html#!/Device_Types/patch_draft_device_types_typeId">link</a>
 
     */
-    performOperationOnDeviceType(typeId, operationName) {
-     this.log.debug("[ApplicationClient] performOperationOnDeviceType()");
+    performOperationOnDraftDeviceType(typeId, operationName) {
+     this.log.debug("[ApplicationClient] performOperationOnDraftDeviceType()");
      let body = {
        operation : operationName
      };
-     return this.callApi('PATCH', 200, true, ["draft","device", "types", typeId], JSON.stringify(body));
+     let returnCode = 0;
+     if(operationName === "activate-configuration") {
+      returnCode = 202
+     } else {
+      returnCode = 200
+     }
+     return this.callApi('PATCH', returnCode, true, ["draft","device", "types", typeId], JSON.stringify(body));
     }
 
     /**

@@ -6,3 +6,5 @@ coverage
 dist/iotf-client-bundle.js
 dist/iotf-client-bundle.min.js
 package-lock.json
+IoTFoundation.pem
+src/util/IoTFoundation.pem
