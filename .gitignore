@@ -3,3 +3,8 @@ node_modules
 coverage
 .idea
 .DS_Store
+dist/iotf-client-bundle.js
+dist/iotf-client-bundle.min.js
+package-lock.json
+IoTFoundation.pem
+src/util/IoTFoundation.pem

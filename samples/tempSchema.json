@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type" : "object",
+  "title" : "EnvSensor2 tempEvent Schema",
+  "description" : "defines the structure of a temperature event in degrees Fahrenheit",
+  "properties" : {
+    "temp" : {
+      "description" : "temperature in degrees Fahrenheit",
+      "type" : "number",
+      "minimum" : -459.67,
+      "default" : 0.0
+    }
+  },
+  "required" : ["temp"]
+}

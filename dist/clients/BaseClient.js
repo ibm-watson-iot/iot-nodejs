@@ -201,6 +201,12 @@
         this.mqtt.on('error', function (error) {
           _this.log.error("[BaseClient:onError] Connection Error :: " + error);
           _this.isConnected = false;
+          var errorMsg = '' + error;
+          if (errorMsg.indexOf('Not authorized') > -1) {
+            _this.log.error("[BaseClient:onError] One or more connection parameters are wrong. Update the configuration and try again.");
+            _this.mqtt.reconnecting = false;
+            _this.mqtt.options.reconnectPeriod = 0;
+          }
           _this.emit('error', error);
         });
       }

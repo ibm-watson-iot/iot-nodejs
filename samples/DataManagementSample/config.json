@@ -1,0 +1,8 @@
+{
+        "org": "xxxxxx",
+        "id": "myapp",
+        "auth-key": "a-xxxxxx-xxxxx",
+        "auth-token": "xxxxxxxxxxx",
+        "devicetype": "dt",
+        "deviceid": "d1"
+}

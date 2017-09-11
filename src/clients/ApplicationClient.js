@@ -15,6 +15,9 @@ import xhr from 'axios';
 import Promise from 'bluebird';
 import format from 'format';
 import nodeBtoa from 'btoa';
+import FormData from 'form-data';
+import concat from 'concat-stream';
+import fs from 'fs';
 const btoa = btoa || nodeBtoa; // if browser btoa is available use it otherwise use node module
 
 import { isDefined, isString, isNode, isBrowser } from '../util/util.js';
@@ -400,7 +403,7 @@ export default class ApplicationClient extends BaseClient {
             resolve(response.data);
           }
         } else {
-          reject(new Error(method + " " + uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.status + ". Error Body: " + JSON.stringify(response.data)));
+          reject(new Error(method + " " + uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.status + ". Error Body: " + response.data));
         }
       }
       this.log.debug("[ApplicationClient:transformResponse] " + xhrConfig);
