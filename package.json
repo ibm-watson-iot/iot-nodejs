@@ -1,5 +1,5 @@
 {
-  "name": "@watson-iot/ibmiotf",
+  "name": "@wiotp-webui/ibmiotf",
   "version": "0.2.39.beta",
   "description": "A library for developing device and application clients for IBM Watson IoT Platform",
   "main": "dist/iotf-client.js",
