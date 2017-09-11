@@ -62,7 +62,7 @@
     "url": "git+https://github.com/ibm-watson-iot/iot-nodejs.git"
   },
   "publishConfig": {
-    "registry": "https://npm.whitewater.ibm.com"
+    "registry": "https://na.artifactory.swg-devops.com/artifactory/api/npm/wiotp-npm-local"
   },
   "license": "EPL-1.0"
 }
