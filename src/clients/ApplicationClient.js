@@ -366,8 +366,6 @@ export default class ApplicationClient extends BaseClient {
         }
       }
 
-      console.log(method, uri, body, params);
-
       let xhrConfig = {
         url: uri,
         method: method,
@@ -960,8 +958,6 @@ export default class ApplicationClient extends BaseClient {
           uri += '/' + paths[i];
         }
       }
-
-      console.log(method, uri, body, params);
 
       let xhrConfig = {
         url: uri,
