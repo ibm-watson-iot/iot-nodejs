@@ -389,8 +389,6 @@
             }
           }
 
-          console.log(method, uri, body, params);
-
           var xhrConfig = {
             url: uri,
             method: method,
@@ -1069,8 +1067,6 @@
               uri += '/' + paths[i];
             }
           }
-
-          console.log(method, uri, body, params);
 
           var xhrConfig = {
             url: uri,
