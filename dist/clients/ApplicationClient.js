@@ -88,7 +88,18 @@
       this.apiToken = config['auth-token'];
       //support for shared subscription
       this.shared = (config['type'] + '').toLowerCase() === "shared" || false;
-      if (this.shared) {
+
+      //Support for mixed durable subscription
+      if ((0, _utilUtilJs.isDefined)(config['instance-id'])) {
+        if (!(0, _utilUtilJs.isString)(config['instance-id'])) {
+          throw new Error('[ApplicationClient:constructor] instance-id must be a string');
+        }
+        this.instanceId = config['instance-id'];
+      }
+
+      if (this.shared && this.instanceId) {
+        this.mqttConfig.clientId = "A:" + config.org + ":" + config.id + ":" + this.instanceId;
+      } else if (this.shared) {
         this.mqttConfig.clientId = "A:" + config.org + ":" + config.id;
       } else {
         this.mqttConfig.clientId = "a:" + config.org + ":" + config.id;

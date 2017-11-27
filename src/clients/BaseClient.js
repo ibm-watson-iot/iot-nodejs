@@ -109,6 +109,12 @@ export default class BaseClient extends events.EventEmitter {
         this.mqttConfig.caPaths = [__dirname + '/IoTFoundation.pem'];
       }
     }
+
+    // Support for passing clean session from config
+    if(isDefined(config['clean-session'])) {
+      this.setCleanSession(config['clean-session']);
+    }
+
     this.mqttConfig.connectTimeout = 90*1000;
     this.retryCount = 0;
     this.isConnected = false;
@@ -119,7 +125,7 @@ export default class BaseClient extends events.EventEmitter {
     this.log.debug("[BaseClient:setKeepAliveInterval] Connection Keep Alive Interval value set to "+this.mqttConfig.keepalive+" Seconds");
   }
 
-  setCleanSession(cleanSession){
+  setCleanSession(cleanSession) {
     if(!isBoolean(cleanSession) && cleanSession !== 'true' && cleanSession !== 'false'){
       this.log.debug("[BaseClient:setCleanSession] Value given for cleanSession is "+cleanSession+" , is not a Boolean, setting to true");
       cleanSession = true;
@@ -129,7 +135,7 @@ export default class BaseClient extends events.EventEmitter {
   }
 
   connect(){
-    this.log.info("[BaseClient:connect] Connecting to IoTF with host : "+this.host);
+    this.log.info("[BaseClient:connect] Connecting to IoTF with host : "+this.host + " and with client id : "+this.mqttConfig.clientId);
 
     this.mqtt = mqtt.connect(this.host, this.mqttConfig);
 

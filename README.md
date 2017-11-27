@@ -93,6 +93,7 @@ configuration JSON containing the following:
 -   client-cert - (Mandatory when use-client-certs:true) Specifies the path to device-client certificate
 -   client-key - (Mandatory when use-client-certs:true) Specifies the path to device-client key
 -   client-key-passphrase - (Optional) Specifies the passphrase for the device-client key if exists
+-   clean-session - (Optional) Sets the clean session flag on the connection. It is used for durable and non-durable subscriptions.
 
 If you want to use quickstart, then enter only the first three properties.
 
@@ -345,6 +346,9 @@ configuration json containing the following :
 -   type - use 'shared' to enable shared subscription
 -   domain - (Optional)The messaging endpoint URL. By default the value is "internetofthings.ibmcloud.com"(Watson IoT Production server).
 -   enforce-ws - (Optional)Enforce Websocket when using the library in Node.js
+-   clean-session - (Optional) Sets the clean session flag on the connection. It is used for durable and non-durable subscriptions.
+-   instance-id - (Optional) Sets the instance Id for the connection. This is used for Mixed-durability shared subscriptions. Use this when the clean-session is set false and type is shared.
+
 If you want to use quickstart, then send only the first two properties.
 
 ``` {.sourceCode .javascript}
@@ -435,6 +439,34 @@ appClient.on("error", function (err) {
 });
 ....
 ```
+
+For Mixed-durability shared subscriptions, you will also have to set the instance Id to the connection. Following example has this functionality explained
+
+``` {.sourceCode .javascript}
+var appClientConfig = {
+  org: 'xxxxx',
+  id: 'myapp',
+  "auth-key": 'a-xxxxxx-xxxxxxxxx',
+  "auth-token": 'xxxxx!xxxxxxxx',
+  "type" : "shared",
+  "instance-id" : "xxxxxxx",
+  "clean-session" : false
+};
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+
+//Add your code here
+});
+
+appClient.on("error", function (err) {
+    console.log("Error : "+err);
+});
+....
+```
+
 
 Handling errors
 ------------------
