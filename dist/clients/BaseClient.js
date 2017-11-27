@@ -144,6 +144,12 @@
           this.mqttConfig.caPaths = [__dirname + '/IoTFoundation.pem'];
         }
       }
+
+      // Support for passing clean session from config
+      if ((0, _utilUtilJs.isDefined)(config['clean-session'])) {
+        this.setCleanSession(config['clean-session']);
+      }
+
       this.mqttConfig.connectTimeout = 90 * 1000;
       this.retryCount = 0;
       this.isConnected = false;
@@ -170,7 +176,7 @@
       value: function connect() {
         var _this = this;
 
-        this.log.info("[BaseClient:connect] Connecting to IoTF with host : " + this.host);
+        this.log.info("[BaseClient:connect] Connecting to IoTF with host : " + this.host + " and with client id : " + this.mqttConfig.clientId);
 
         this.mqtt = _mqtt2['default'].connect(this.host, this.mqttConfig);
 
