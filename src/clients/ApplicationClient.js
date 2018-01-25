@@ -25,10 +25,12 @@ import { default as BaseClient } from './BaseClient.js';
 
 const QUICKSTART_ORG_ID = "quickstart";
 
-const DEVICE_EVT_RE = /^iot-2\/type\/(.+)\/id\/(.+)\/evt\/(.+)\/fmt\/(.+)$/;
-const DEVICE_CMD_RE = /^iot-2\/type\/(.+)\/id\/(.+)\/cmd\/(.+)\/fmt\/(.+)$/;
-const DEVICE_MON_RE = /^iot-2\/type\/(.+)\/id\/(.+)\/mon$/;
-const APP_MON_RE    = /^iot-2\/app\/(.+)\/mon$/;
+const DEVICE_EVT_RE   = /^iot-2\/type\/(.+)\/id\/(.+)\/evt\/(.+)\/fmt\/(.+)$/;
+const DEVICE_CMD_RE   = /^iot-2\/type\/(.+)\/id\/(.+)\/cmd\/(.+)\/fmt\/(.+)$/;
+const RULE_TRIGGER_RE = /^iot-2\/intf\/(.+)\/rule\/(.+)\/evt\/trigger$/;
+const RULE_ERROR_RE   = /^iot-2\/intf\/(.+)\/rule\/(.+)\/err\/data$/;
+const DEVICE_MON_RE   = /^iot-2\/type\/(.+)\/id\/(.+)\/mon$/;
+const APP_MON_RE      = /^iot-2\/app\/(.+)\/mon$/;
 
 export default class ApplicationClient extends BaseClient {
   constructor(config){
@@ -161,6 +163,30 @@ export default class ApplicationClient extends BaseClient {
         return;
       }
 
+      var match = RULE_TRIGGER_RE.exec(topic);
+      if(match){
+        this.emit('ruleTrigger',
+          match[1],
+          match[2],
+          payload,
+          topic
+        );
+
+        return;
+      }
+
+      var match = RULE_ERROR_RE.exec(topic);
+      if(match){
+        this.emit('ruleError',
+          match[1],
+          match[2],
+          payload,
+          topic
+        );
+
+        return;
+      }
+
       var match = DEVICE_MON_RE.exec(topic);
       if(match){
         this.emit('deviceStatus',
@@ -263,6 +289,46 @@ export default class ApplicationClient extends BaseClient {
     format = format || '+';
 
     var topic = "iot-2/type/" + type + "/id/" + id + "/evt/"+ event + "/fmt/" + format;
+    this.unsubscribe(topic);
+    return this;
+  }
+
+  subscribeToRuleTriggerEvents(interfaceId, ruleId, qos){
+    interfaceId = interfaceId || '+';
+    ruleId = ruleId || '+';
+    qos = qos || 0;
+
+    var topic = "iot-2/intf/" + interfaceId + "/rule/" + ruleId + "/evt/trigger";
+    this.log.debug("[ApplicationClient:subscribeToRuleTriggerEvents] Calling subscribe with QoS "+qos);
+    this.subscribe(topic, qos);
+    return this;
+  }
+
+  unsubscribeToRuleTriggerEvents(interfaceId, ruleId){
+    interfaceId = interfaceId || '+';
+    ruleId = ruleId || '+';
+
+    var topic = "iot-2/intf/" + interfaceId + "/rule/" + ruleId + "/evt/trigger";
+    this.unsubscribe(topic);
+    return this;
+  }
+
+  subscribeToRuleErrorEvents(interfaceId, ruleId, qos){
+    interfaceId = interfaceId || '+';
+    ruleId = ruleId || '+';
+    qos = qos || 0;
+
+    var topic = "iot-2/intf/" + interfaceId + "/rule/" + ruleId + "/err/data";
+    this.log.debug("[ApplicationClient:subscribeToRuleErrorEvents] Calling subscribe with QoS "+qos);
+    this.subscribe(topic, qos);
+    return this;
+  }
+
+  unsubscribeToRuleErrorEvents(interfaceId, ruleId){
+    interfaceId = interfaceId || '+';
+    ruleId = ruleId || '+';
+
+    var topic = "iot-2/intf/" + interfaceId + "/rule/" + ruleId + "/err/data";
     this.unsubscribe(topic);
     return this;
   }

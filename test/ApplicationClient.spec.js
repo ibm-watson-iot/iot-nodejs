@@ -193,6 +193,58 @@ describe('IotfApplication', () => {
       expect(args).to.deep.equal(expectation);
     });
 
+    it('should setup a "ruleTrigger" event for messages arriving on the rule-trigger topic', () => {
+      let callback = sinon.spy();
+      let fakeMqtt = new events.EventEmitter();
+      let mqttConnect = sinon.stub(mqtt, 'connect').returns(fakeMqtt);
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+
+      client.on('ruleTrigger', callback);
+
+      let topic = 'iot-2/intf/123/rule/abc/evt/trigger';
+      let payload = '{}';
+
+      fakeMqtt.emit('message', topic, payload);
+
+      let expectation = [
+        '123',
+        'abc',
+        payload,
+        topic
+      ];
+
+      let args = callback.getCall(0).args;
+      expect(args).to.deep.equal(expectation);
+    });
+
+    it('should setup a "ruleError" event for messages arriving on the rule-error topic', () => {
+      let callback = sinon.spy();
+      let fakeMqtt = new events.EventEmitter();
+      let mqttConnect = sinon.stub(mqtt, 'connect').returns(fakeMqtt);
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+
+      client.on('ruleError', callback);
+
+      let topic = 'iot-2/intf/123/rule/abc/err/data';
+      let payload = '{}';
+
+      fakeMqtt.emit('message', topic, payload);
+
+      let expectation = [
+        '123',
+        'abc',
+        payload,
+        topic
+      ];
+
+      let args = callback.getCall(0).args;
+      expect(args).to.deep.equal(expectation);
+    });
+
     it('should setup a "deviceCommand" event for messages arriving on the device-command topic', () => {
       let callback = sinon.spy();
       let fakeMqtt = new events.EventEmitter();
@@ -352,7 +404,7 @@ describe('IotfApplication', () => {
     });
   });
 
-  describe('.subscribe to Events, commands, status', () => {
+  describe('.subscribe to Events, commands, rule trigger, rule error, status', () => {
 
     it('should successfully subscribe to device event', () => {
 
@@ -390,6 +442,82 @@ describe('IotfApplication', () => {
       subSpy.restore();
       expect(client.subscriptions[0]).to.equal('iot-2/type/+/id/+/evt/+/fmt/+')
       expect(subSpy.calledWith('iot-2/type/+/id/+/evt/+/fmt/+',{qos: QOS})).to.be.true;
+    });
+
+    it('should successfully subscribe to rule trigger', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'subscribe');
+
+      let QOS = 0;
+
+      client.subscribeToRuleTriggerEvents('123', 'abc');
+
+      subSpy.restore();
+      expect(client.subscriptions[0]).to.equal('iot-2/intf/123/rule/abc/evt/trigger')
+      expect(subSpy.calledWith('iot-2/intf/123/rule/abc/evt/trigger',{qos: QOS})).to.be.true;
+    });
+
+    it('should successfully subscribe to rule trigger with wild card', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'subscribe');
+
+      let QOS = 0;
+
+      client.subscribeToRuleTriggerEvents();
+
+      subSpy.restore();
+      expect(client.subscriptions[0]).to.equal('iot-2/intf/+/rule/+/evt/trigger')
+      expect(subSpy.calledWith('iot-2/intf/+/rule/+/evt/trigger',{qos: QOS})).to.be.true;
+    });
+
+    it('should successfully subscribe to rule error', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'subscribe');
+
+      let QOS = 0;
+
+      client.subscribeToRuleErrorEvents('123', 'abc');
+
+      subSpy.restore();
+      expect(client.subscriptions[0]).to.equal('iot-2/intf/123/rule/abc/err/data')
+      expect(subSpy.calledWith('iot-2/intf/123/rule/abc/err/data',{qos: QOS})).to.be.true;
+    });
+
+    it('should successfully subscribe to rule error with wild card', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'subscribe');
+
+      let QOS = 0;
+
+      client.subscribeToRuleErrorEvents();
+
+      subSpy.restore();
+      expect(client.subscriptions[0]).to.equal('iot-2/intf/+/rule/+/err/data')
+      expect(subSpy.calledWith('iot-2/intf/+/rule/+/err/data',{qos: QOS})).to.be.true;
     });
 
     it('should successfully subscribe to device commands', () => {
@@ -462,6 +590,74 @@ describe('IotfApplication', () => {
 
       subSpy.restore();
       expect(subSpy.calledWith('iot-2/type/+/id/+/evt/+/fmt/+')).to.be.true;
+    });
+
+    it('should successfully unsubscribe to rule trigger', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'unsubscribe');
+
+      let QOS = 0;
+
+      client.unsubscribeToRuleTriggerEvents('123', 'abc');
+
+      subSpy.restore();
+      expect(subSpy.calledWith('iot-2/intf/123/rule/abc/evt/trigger')).to.be.true;
+    });
+
+    it('should successfully unsubscribe to rule trigger with wild card', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'unsubscribe');
+
+      client.unsubscribeToRuleTriggerEvents();
+
+      subSpy.restore();
+      expect(subSpy.calledWith('iot-2/intf/+/rule/+/evt/trigger')).to.be.true;
+    });
+
+    it('should successfully unsubscribe to rule error', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'unsubscribe');
+
+      let QOS = 0;
+
+      client.unsubscribeToRuleErrorEvents('123', 'abc');
+
+      subSpy.restore();
+      expect(subSpy.calledWith('iot-2/intf/123/rule/abc/err/data')).to.be.true;
+    });
+
+    it('should successfully unsubscribe to rule error with wild card', () => {
+
+      let client = new IBMIoTF.IotfApplication({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
+      client.connect();
+      client.log.setLevel('silent');
+      //simulate connect
+      client.isConnected = true;
+
+      let subSpy = sinon.spy(client.mqtt,'unsubscribe');
+
+      client.unsubscribeToRuleErrorEvents();
+
+      subSpy.restore();
+      expect(subSpy.calledWith('iot-2/intf/+/rule/+/err/data')).to.be.true;
     });
 
     it('should successfully unsubscribe to device commands', () => {
