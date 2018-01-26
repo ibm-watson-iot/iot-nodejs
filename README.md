@@ -907,7 +907,7 @@ properties
 
 - interfaceId
 - ruleId
-- payload - state error event payload
+- payload - rule trigger event payload
 - topic - Original topic
 
 ``` {.sourceCode .javascript}
@@ -1006,7 +1006,7 @@ properties
 
 - interfaceId
 - ruleId
-- payload - state error event payload
+- payload - rule error event payload
 - topic - Original topic
 
 ``` {.sourceCode .javascript}
