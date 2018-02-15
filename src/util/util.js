@@ -43,7 +43,7 @@ export function generateUUID() {
 export function initializeMqttConfig(config){
   var mqttConfig = {
      password: config['auth-token'],
-     rejectUnauthorized : true
+     rejectUnauthorized: (config['reject-unauthorized']) ? config['reject-unauthorized'] : true
   };
   if(config['use-client-certs'] == true || config['use-client-certs'] == "true"){
     var serverCA = fs.readFileSync(__dirname + '/IoTFoundation.pem');
