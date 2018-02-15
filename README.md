@@ -94,6 +94,7 @@ configuration JSON containing the following:
 -   client-key - (Mandatory when use-client-certs:true) Specifies the path to device-client key
 -   client-key-passphrase - (Optional) Specifies the passphrase for the device-client key if exists
 -   clean-session - (Optional) Sets the clean session flag on the connection. It is used for durable and non-durable subscriptions.
+-   reject-unauthorized - (Optional) Set the server certificate validation. Recommended to be used only for development and testing and never in production. 
 
 If you want to use quickstart, then enter only the first three properties.
 
