@@ -84,7 +84,11 @@ export default class ApplicationClient extends BaseClient {
     if (isDefined(config['with-proxy'])) {
       this.withProxy = config['with-proxy'];
     }
-
+    this.withHttps = true;
+    if (isDefined(config['with-https'])) {
+      this.withHttps = config['with-https'];
+    }
+	  
     // draft setting for IM device state
     if (isDefined(config['draftMode'])) {
        this.draftMode = config.draftMode;
@@ -358,7 +362,9 @@ export default class ApplicationClient extends BaseClient {
       // const API_HOST = "https://%s.internetofthings.ibmcloud.com/api/v0002";
       let uri = this.withProxy
         ? "/api/v0002"
-        : format("https://%s/api/v0002", this.httpServer);
+        : this.withHttps
+          ? format("https://%s/api/v0002", this.httpServer)
+          : format("http://%s/api/v0002", this.httpServer);
 
       if (Array.isArray(paths)) {
         for (var i = 0, l = paths.length; i < l; i++) {
