@@ -87,26 +87,6 @@ describe('IotfDevice', () => {
         }).to.throw(/config must contain type/);
       });
 
-      it('should throw an error if auth-method is not present', () => {
-        expect(() => {
-          let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123'});
-        }).to.throw(/config must contain auth-method/);
-      });
-
-      it('should throw an error if auth-method is not "token"', () => {
-        expect(() => {
-          let client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'abc'});
-        }).to.throw(/unsupported authentication method/);
-      });
-
-      it('should throw an error if auth-method is not "token"', () => {
-        let client;
-        expect(() => {
-          client = new IBMIoTF.IotfDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-        }).not.to.throw();
-        expect(client).to.be.instanceof(IBMIoTF.IotfDevice);
-      });
-
       it('should run in registered mode if org is not set to "quickstart"', () => {
         let client = new IBMIoTF.IotfDevice({org: 'qs', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         expect(client.isQuickstart).to.equal(false);
