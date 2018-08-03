@@ -51,6 +51,9 @@ export function initializeMqttConfig(config){
         mqttConfig.ca = [config['client-ca'],serverCA];
         mqttConfig.cert = config['client-cert'];
         mqttConfig.key = config['client-key'];
+        if(isDefined(config['client-key-passphrase'])){
+          mqttConfig.passphrase = config['client-key-passphrase'];
+       }
     }
     else {
        if(isDefined(config['server-ca'])){

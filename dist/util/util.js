@@ -74,7 +74,7 @@
    function initializeMqttConfig(config) {
       var mqttConfig = {
          password: config['auth-token'],
-         rejectUnauthorized: true
+         rejectUnauthorized: config['reject-unauthorized'] ? config['reject-unauthorized'] : true
       };
       if (config['use-client-certs'] == true || config['use-client-certs'] == "true") {
          var serverCA = _fs2['default'].readFileSync(__dirname + '/IoTFoundation.pem');
@@ -82,6 +82,9 @@
             mqttConfig.ca = [config['client-ca'], serverCA];
             mqttConfig.cert = config['client-cert'];
             mqttConfig.key = config['client-key'];
+            if (isDefined(config['client-key-passphrase'])) {
+               mqttConfig.passphrase = config['client-key-passphrase'];
+            }
          } else {
             if (isDefined(config['server-ca'])) {
                serverCA = _fs2['default'].readFileSync(config['server-ca']);
