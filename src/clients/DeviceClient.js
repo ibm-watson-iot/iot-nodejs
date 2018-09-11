@@ -38,16 +38,6 @@ export default class DeviceClient extends BaseClient {
     }
 
     if(config.org !== QUICKSTART_ORG_ID){
-      if(!isDefined(config['auth-method'])){
-        throw new Error('[DeviceClient:constructor] config must contain auth-method');
-      }
-      else if(!isString(config['auth-method'])){
-        throw new Error('[DeviceClient:constructor] auth-method must be a string');
-      }
-      else if(config['auth-method'] !== 'token'){
-        throw new Error('[DeviceClient:constructor] unsupported authentication method' + config['auth-method']);
-      }
-
       this.mqttConfig.username = 'use-token-auth';
     }
 

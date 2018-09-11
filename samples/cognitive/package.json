@@ -1,0 +1,51 @@
+{
+  "name": "watson-iot-echo",
+  "version": "0.0.2",
+  "description": "A sample nodejs app for integrating Watson IoT platform with Watson services - Speech To Text, Language Translation & Text To Speech",
+  "engines": {
+    "node": ">=0.10.x"
+  },
+  "author": "IBM Corp.",
+  "contributors": [
+    {
+      "name": "Sathiskumar Palaniappan",
+      "email": "sathipal@in.ibm.com",
+      "name": "Prasanna A Mathada",
+      "email": "amprasanna@in.ibm.com"
+    }
+  ],
+  "license": "EPL-1.0",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "async": "^1.5.1",
+    "body-parser": "~1.14.1",
+    "errorhandler": "~1.4.1",
+    "express": "*",
+    "request": "^2.67.0",
+    "node-red": "0.x",
+    "node-red-bluemix-nodes":"0.x",
+    "watson-developer-cloud": "~1.0.6",
+    "cookie-parser":"*",
+    "morgan":"*",
+    "node-rest-client":"*",
+    "express-session":"*",
+    "when": "~3.x",
+    "mongodb": "~1.4.x",
+    "nano": "~5.11.0",
+    "cfenv":"~1.0.0",
+    "feedparser":"~0.19.2",
+    "redis":"~0.10.1",
+    "node-red-bluemix-nodes":"0.x",
+    "node-red-node-cf-cloudant":"0.x",
+    "node-red-contrib-ibmpush":"0.x",
+    "node-red-contrib-bluemix-hdfs":"0.x",
+    "node-red-nodes-cf-sqldb-dashdb":"0.x",
+    "node-red-contrib-scx-ibmiotapp":"0.x",
+    "request":"~2.36.0"
+  },
+  "config": {
+    "engine-strict": true
+  }
+}

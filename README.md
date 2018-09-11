@@ -82,17 +82,17 @@ configuration JSON containing the following:
 -   org - Your organization ID
 -   type - The type of your device
 -   id - The ID of your device
--   auth-method - Method of authentication (the only value currently
-    supported is “token”)
--   auth-token - API key token (required if auth-method is “token”)
--   domain - (Optional)The messaging endpoint URL. By default, the value is "internetofthings.ibmcloud.com"(Watson IoT Production server).
--   enforce-ws - (Optional)Enforce Websocket when using the library in Node.js
+-   auth-token - API key token
+-   domain - (Optional) The messaging endpoint URL. By default, the value is "internetofthings.ibmcloud.com"(Watson IoT Production server).
+-   enforce-ws - (Optional) Enforce Websocket when using the library in Node.js
 -   use-client-certs - (Optional) Enforces use of client side certificates when specified as true
 -   server-ca - (Optional) Specifies the custom server certificate signed using device key
 -   client-ca - (Mandatory when use-client-certs:true) Specifies the path to device-client CA certificate
 -   client-cert - (Mandatory when use-client-certs:true) Specifies the path to device-client certificate
 -   client-key - (Mandatory when use-client-certs:true) Specifies the path to device-client key
 -   client-key-passphrase - (Optional) Specifies the passphrase for the device-client key if exists
+-   clean-session - (Optional) Sets the clean session flag on the connection. It is used for durable and non-durable subscriptions.
+-   reject-unauthorized - (Optional) Set the server certificate validation. Recommended to be used only for development and testing and never in production. 
 
 If you want to use quickstart, then enter only the first three properties.
 
@@ -345,6 +345,9 @@ configuration json containing the following :
 -   type - use 'shared' to enable shared subscription
 -   domain - (Optional)The messaging endpoint URL. By default the value is "internetofthings.ibmcloud.com"(Watson IoT Production server).
 -   enforce-ws - (Optional)Enforce Websocket when using the library in Node.js
+-   clean-session - (Optional) Sets the clean session flag on the connection. It is used for durable and non-durable subscriptions.
+-   instance-id - (Optional) Sets the instance Id for the connection. This is used for Mixed-durability shared subscriptions. Use this when the clean-session is set false and type is shared.
+
 If you want to use quickstart, then send only the first two properties.
 
 ``` {.sourceCode .javascript}
@@ -435,6 +438,34 @@ appClient.on("error", function (err) {
 });
 ....
 ```
+
+For Mixed-durability shared subscriptions, you will also have to set the instance Id to the connection. Following example has this functionality explained
+
+``` {.sourceCode .javascript}
+var appClientConfig = {
+  org: 'xxxxx',
+  id: 'myapp',
+  "auth-key": 'a-xxxxxx-xxxxxxxxx',
+  "auth-token": 'xxxxx!xxxxxxxx',
+  "type" : "shared",
+  "instance-id" : "xxxxxxx",
+  "clean-session" : false
+};
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+
+//Add your code here
+});
+
+appClient.on("error", function (err) {
+    console.log("Error : "+err);
+});
+....
+```
+
 
 Handling errors
 ------------------
@@ -582,6 +613,412 @@ appClient.on("deviceEvent", function (deviceType, deviceId, eventType, format, p
 
     console.log("Device Event from :: "+deviceType+" : "+deviceId+" of event "+eventType+" with payload : "+payload);
 
+});
+
+....
+```
+
+Subscribing to device state events
+----------------------------
+
+Device State Events are a feature of the _Data Management_ capabilities of
+the Watson IoT platform.  They provide a mechanism for applications to be
+notifified when the state of a _Digital Twin_ is updated.  For more information
+on these concepts, including a detailed walk-through, please refer to the
+[Data Management](https://console.bluemix.net/docs/services/IoT/GA_information_management/ga_im_device_twin.html#device_twins)
+section of the Watson IoT platform documentation.
+
+By default, applications will subscribe to all state events from all
+_Logical Interfaces_, on all devices, of all types.  Use the `type`, `id`,
+and `interfaceId` parameters to control the scope of the subscription.
+A single client can support multiple subscriptions. The code samples below
+give examples of how to subscribe to device state events.
+
+### To subscribe to all state events from all devices
+
+``` {.sourceCode .javascript}
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToDeviceStateEvents();
+});
+
+....
+```
+
+#### To subscribe to all state events from all devices of a specific type
+
+``` {.sourceCode .javascript}
+
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToDeviceStateEvents("mydeviceType");
+});
+
+....
+```
+
+#### To subscribe to state events from a specific Logical Interface from all devices
+
+``` {.sourceCode .javascript}
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToDeviceStateEvents("+","+","5846cd7c6522050001db0e0d");
+});
+
+....
+```
+
+#### To subscribe to all state events from two or more different devices
+
+``` {.sourceCode .javascript}
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToDeviceStateEvents("myDeviceType","device01","+");
+    appClient.subscribeToDeviceStateEvents("myOtherDeviceType","device02","+");
+});
+
+....
+```
+
+Handling device state events
+----------------------------
+
+To process the state events received by your subscriptions you need to
+implement an device state event callback method. The ibmiotf application
+client emits the event *deviceState*. This function has the following
+properties
+
+- deviceType
+- deviceId
+- interfaceId
+- payload - Device state event payload
+- topic - Original topic
+
+``` {.sourceCode .javascript}
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToDeviceStateEvents();
+});
+
+appClient.on("deviceState", function (deviceType, deviceId, interfaceId, payload) {
+    console.log("Device State Event from :: "+deviceType+" : "+deviceId+" for interface "+interfaceId+" with payload : "+payload);
+});
+
+....
+```
+
+Subscribing to device state error events
+----------------------------
+
+Device State Error Events are a published when there are validation failures,
+or runtime errors while computing device state.  Examples of this include cases
+where a Device event does not conform to the schema for that Event Type in the
+_Device Twin_ configuration, or where the generated Device State does not conform
+to the schema for the Logical Interface.  For more information on these concepts,
+including a detailed walk-through, please refer to the
+[Data Management](https://console.bluemix.net/docs/services/IoT/GA_information_management/ga_im_device_twin.html#device_twins)
+section of the Watson IoT platform documentation.
+
+By default, applications will subscribe to all state error events from all
+devices, of all types.  Use the `type`, and `id`, parameters to control the
+scope of the subscription. A single client can support multiple subscriptions.
+The code samples below give examples of how to subscribe to device state error events.
+
+### To subscribe to all state error events from all devices
+
+``` {.sourceCode .javascript}
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToDeviceStateErrorEvents();
+});
+
+....
+```
+
+#### To subscribe to all state error events from all devices of a specific type
+
+``` {.sourceCode .javascript}
+
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToDeviceStateErrorEvents("mydeviceType");
+});
+
+....
+```
+
+#### To subscribe to state events from a specific device
+
+``` {.sourceCode .javascript}
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToDeviceStateErrorEvents("mydeviceType","device01");
+});
+
+....
+```
+
+#### To subscribe to all state events from two or more different devices
+
+``` {.sourceCode .javascript}
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToDeviceStateErrorEvents("myDeviceType","device01","+");
+    appClient.subscribeToDeviceStateErrorEvents("myOtherDeviceType","device02","+");
+});
+
+....
+```
+
+Handling device state error events
+----------------------------
+
+To process the state error events received by your subscriptions you need to
+implement an device state error event callback method. The ibmiotf application
+client emits the event *deviceStateError*. This function has the following
+properties
+
+- deviceType
+- deviceId
+- payload - state error event payload
+- topic - Original topic
+
+``` {.sourceCode .javascript}
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToDeviceStateErrorEvents();
+});
+
+appClient.on("deviceStateError", function (deviceType, deviceId, payload) {
+    console.log("Device State Error Event from :: "+deviceType+" : "+deviceId+" with payload : "+payload);
+});
+
+....
+```
+
+Subscribing to rule trigger events
+----------------------------
+
+Rule trigger events are published when a Logical Interface Rule expression
+evaluates to `true`.  These rules are evaluated during the processing of
+device events that can contribute to _Device State_.
+
+By default, applications will subscribe to all rule trigger events for all
+Logical Interfaces and all Rules.  Use the `interfaceId`, and `ruleId`, parameters
+to control the scope of the subscription. A single client can support multiple subscriptions.
+The code samples below give examples of how to subscribe to rule trigger events.
+
+### To subscribe to all rule trigger events for all logical interfaces
+
+``` {.sourceCode .javascript}
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToRuleTriggerEvents();
+});
+
+....
+```
+
+#### To subscribe to all rule trigger events for a specific logical interface
+
+``` {.sourceCode .javascript}
+
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToRuleTriggerEvents("5846cd7c6522050001db0e0d");
+});
+
+....
+```
+
+#### To subscribe to all rule trigger events for a specific rule on all logical interfaces
+
+``` {.sourceCode .javascript}
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToRuleTriggerEvents("+","3548c2846d21045501fd1d10");
+});
+
+....
+```
+
+#### To subscribe to specific rule trigger events from two or more different logical interfaces
+
+``` {.sourceCode .javascript}
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToRuleTriggerEvents("5846cd7c6522050001db0e0d","3548c2846d21045501fd1d10");
+    appClient.subscribeToRuleTriggerEvents("5847d1df6522050001db0e1a","3548c2846d21045501fd1d10");
+});
+
+....
+```
+
+Handling rule trigger events
+----------------------------
+
+To process the rule trigger events received by your subscriptions you need to
+implement an rule trigger event callback method. The ibmiotf application
+client emits the event *ruleTrigger*. This function has the following
+properties
+
+- interfaceId
+- ruleId
+- payload - rule trigger event payload
+- topic - Original topic
+
+``` {.sourceCode .javascript}
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToRuleTriggerEvents();
+});
+
+appClient.on("ruleTrigger", function(interfaceId, ruleId, payload) {
+    console.log("Rule Trigger Event on interface : "+interfaceId+" for rule: "+ruleId+" with payload : "+payload);
+});
+
+....
+```
+
+Subscribing to rule error events
+----------------------------
+
+Rule error events are published when a Logical Interface Rule expression
+evaluation results in an error.  These rules are evaluated during the processing of
+device events that can contribute to _Device State_.
+
+By default, applications will subscribe to all rule error events for all
+Logical Interfaces and all Rules.  Use the `interfaceId`, and `ruleId`, parameters
+to control the scope of the subscription. A single client can support multiple subscriptions.
+The code samples below give examples of how to subscribe to rule error events.
+
+### To subscribe to all rule error events for all logical interfaces
+
+``` {.sourceCode .javascript}
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToRuleErrorEvents();
+});
+
+....
+```
+
+#### To subscribe to all rule error events for a specific logical interface
+
+``` {.sourceCode .javascript}
+
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToRuleErrorEvents("5846cd7c6522050001db0e0d");
+});
+
+....
+```
+
+#### To subscribe to all rule error events for a specific rule on all logical interfaces
+
+``` {.sourceCode .javascript}
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToRuleErrorEvents("+","3548c2846d21045501fd1d10");
+});
+
+....
+```
+
+#### To subscribe to specific rule error events from two or more different logical interfaces
+
+``` {.sourceCode .javascript}
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToRuleErrorEvents("5846cd7c6522050001db0e0d","3548c2846d21045501fd1d10");
+    appClient.subscribeToRuleErrorEvents("5847d1df6522050001db0e1a","3548c2846d21045501fd1d10");
+});
+
+....
+```
+
+Handling rule error events
+----------------------------
+
+To process the rule error events received by your subscriptions you need to
+implement an rule error event callback method. The ibmiotf application
+client emits the event *ruleError*. This function has the following
+properties
+
+- interfaceId
+- ruleId
+- payload - rule error event payload
+- topic - Original topic
+
+``` {.sourceCode .javascript}
+var appClient = new Client.IotfApplication(appClientConfig);
+
+appClient.connect();
+
+appClient.on("connect", function () {
+    appClient.subscribeToRuleErrorEvents();
+});
+
+appClient.on("ruleError", function(interfaceId, ruleId, payload) {
+    console.log("Rule Error Event on interface : "+interfaceId+" for rule: "+ruleId+" with payload : "+payload);
 });
 
 ....

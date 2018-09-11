@@ -1,0 +1,118 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.ibm.watsoniot</groupId>
+  <artifactId>CommandTransmission</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>CommandTransmission</name>
+  <url>https://github.com/ibm-watson-iot/iot-cognitive-samples</url>
+	
+	<scm>
+        <url>git@github.com:ibm-watson-iot/iot-cognitive-samples.git</url>
+        <connection>scm:git:git@github.com:ibm-watson-iot/iot-cognitive-samples.git</connection>
+        <developerConnection>scm:git:git@github.com:ibm-watson-iot/iot-cognitive-samples.git</developerConnection>
+    </scm>
+
+    <issueManagement>
+        <url>https://github.com/ibm-watson-iot/iot-cognitive-samples/issues</url>
+        <system>Issues @ GitHub</system>
+    </issueManagement>
+
+    <licenses>
+        <license>
+            <name>Eclipse Public License - v 1.0</name>
+            <url>https://github.com/ibm-watson-iot/iot-cognitive-samples/blob/master/LICENSE</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Sathiskumar Palaniappan</name>
+            <email>sathipal@in.ibm.com</email>
+            <organization>IBM</organization>
+            <organizationUrl>http://www.ibm.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <properties>
+
+        <!-- General properties -->
+        <java.version>1.7</java.version>
+
+        <!-- maven-compiler-plugin configuration -->
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+		<dependency>
+	  		<groupId>com.ibm.messaging</groupId>
+	  		<artifactId>watson-iot</artifactId>
+	  		<version>0.1.3</version>
+		</dependency>
+		<dependency>
+            <groupId>com.ibm.watson.developer_cloud</groupId>
+            <artifactId>java-sdk</artifactId>
+            <version>3.0.2-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <delimiters>
+                        <delimiter>@</delimiter>
+                    </delimiters>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    <repositories>
+        <!-- Dependency of the Paho mqqt snapshot is here -->
+        <repository>
+            <id>Eclipse Paho Release Repo</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
+        
+    </repositories>
+</project>
