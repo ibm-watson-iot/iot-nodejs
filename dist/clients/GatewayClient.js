@@ -70,14 +70,6 @@
         throw new Error('[GatewayClient:constructor] Quickstart not supported in Gateways');
       }
 
-      if (!(0, _utilUtilJs.isDefined)(config['auth-method'])) {
-        throw new Error('[GatewayClient:constructor] config must contain auth-method');
-      } else if (!(0, _utilUtilJs.isString)(config['auth-method'])) {
-        throw new Error('[GatewayClient:constructor] auth-method must be a string');
-      } else if (config['auth-method'] !== 'token') {
-        throw new Error('[GatewayClient:constructor] unsupported authentication method' + config['auth-method']);
-      }
-
       this.mqttConfig.username = 'use-token-auth';
 
       this.org = config.org;

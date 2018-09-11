@@ -133,6 +133,10 @@
       if ((0, _utilUtilJs.isDefined)(config['with-proxy'])) {
         this.withProxy = config['with-proxy'];
       }
+      this.withHttps = true;
+      if ((0, _utilUtilJs.isDefined)(config['with-https'])) {
+        this.withHttps = config['with-https'];
+      }
 
       // draft setting for IM device state
       if ((0, _utilUtilJs.isDefined)(config['draftMode'])) {
@@ -514,7 +518,7 @@
 
         return new _Promise['default'](function (resolve, reject) {
           // const API_HOST = "https://%s.internetofthings.ibmcloud.com/api/v0002";
-          var uri = _this2.withProxy ? "/api/v0002" : (0, _format2['default'])("https://%s/api/v0002", _this2.httpServer);
+          var uri = _this2.withProxy ? "/api/v0002" : _this2.withHttps ? (0, _format2['default'])("https://%s/api/v0002", _this2.httpServer) : (0, _format2['default'])("http://%s/api/v0002", _this2.httpServer);
 
           if (Array.isArray(paths)) {
             for (var i = 0, l = paths.length; i < l; i++) {
@@ -1469,12 +1473,15 @@
       }
     }, {
       key: 'createLogicalInterface',
-      value: function createLogicalInterface(name, description, schemaId) {
+      value: function createLogicalInterface(name, description, schemaId, alias) {
         var body = {
           'name': name,
           'description': description,
           'schemaId': schemaId
         };
+        if (alias !== undefined) {
+          body.alias = alias;
+        }
 
         var base = this.draftMode ? ["draft", "logicalinterfaces"] : ["applicationinterfaces"];
         return this.callApi('POST', 201, true, base, body);
@@ -1498,13 +1505,16 @@
       }
     }, {
       key: 'updateLogicalInterface',
-      value: function updateLogicalInterface(logicalInterfaceId, name, description, schemaId) {
+      value: function updateLogicalInterface(logicalInterfaceId, name, description, schemaId, alias) {
         var body = {
           "id": logicalInterfaceId,
           "name": name,
           "description": description,
           "schemaId": schemaId
         };
+        if (alias !== undefined) {
+          body.alias = alias;
+        }
 
         var base = this.draftMode ? ["draft", "logicalinterfaces", logicalInterfaceId] : ["applicationinterfaces", logicalInterfaceId];
         return this.callApi('PUT', 200, true, base, body);
@@ -1835,7 +1845,7 @@
       }
     }, {
       key: 'createSchemaAndLogicalInterface',
-      value: function createSchemaAndLogicalInterface(schemaContents, schemaFileName, appInterfaceName, appInterfaceDescription) {
+      value: function createSchemaAndLogicalInterface(schemaContents, schemaFileName, appInterfaceName, appInterfaceDescription, appInterfaceAlias) {
         var _this6 = this;
 
         var body = {
@@ -1855,7 +1865,7 @@
 
         return createSchema.then(function (value) {
           var schemaId = value.id;
-          return _this6.createLogicalInterface(appInterfaceName, appInterfaceDescription, schemaId);
+          return _this6.createLogicalInterface(appInterfaceName, appInterfaceDescription, schemaId, appInterfaceAlias);
         });
       }
     }, {
