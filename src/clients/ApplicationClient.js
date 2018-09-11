@@ -1214,11 +1214,14 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('DELETE', 204, false, base);
   }
 
-  createLogicalInterface(name, description, schemaId) {
+  createLogicalInterface(name, description, schemaId, alias) {
     var body = {
       'name': name,
       'description': description,
       'schemaId': schemaId,
+    }
+    if (alias !== undefined) {
+      body.alias = alias;
     }
 
     var base = this.draftMode ? ["draft", "logicalinterfaces"] : ["applicationinterfaces"]
@@ -1239,12 +1242,15 @@ export default class ApplicationClient extends BaseClient {
     return this.callApi('DELETE', 204, false, base);
   }
 
-  updateLogicalInterface(logicalInterfaceId, name, description, schemaId) {
+  updateLogicalInterface(logicalInterfaceId, name, description, schemaId, alias) {
     var body = {
       "id": logicalInterfaceId,
       "name": name,
       "description": description,
       "schemaId": schemaId
+    }
+    if (alias !== undefined) {
+      body.alias = alias;
     }
 
     var base = this.draftMode ? ["draft", "logicalinterfaces", logicalInterfaceId] : ["applicationinterfaces", logicalInterfaceId]
@@ -1546,7 +1552,7 @@ export default class ApplicationClient extends BaseClient {
     })
   }
 
-  createSchemaAndLogicalInterface(schemaContents, schemaFileName, appInterfaceName, appInterfaceDescription) {
+  createSchemaAndLogicalInterface(schemaContents, schemaFileName, appInterfaceName, appInterfaceDescription, appInterfaceAlias) {
     var body = {
       'schemaFile': schemaContents,
       'schemaType': 'json-schema',
@@ -1564,7 +1570,7 @@ export default class ApplicationClient extends BaseClient {
 
     return createSchema.then(value => {
       var schemaId = value.id
-      return this.createLogicalInterface(appInterfaceName, appInterfaceDescription, schemaId)
+      return this.createLogicalInterface(appInterfaceName, appInterfaceDescription, schemaId, appInterfaceAlias)
     })
   }
 
