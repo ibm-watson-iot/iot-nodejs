@@ -1,16 +1,16 @@
 (function (global, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['exports', 'module', 'axios', 'bluebird', 'format', 'btoa', 'form-data', 'concat-stream', 'fs', '../util/util.js', './BaseClient.js', 'request'], factory);
+    define(['exports', 'module', 'axios', 'bluebird', 'format', 'btoa', 'form-data', 'concat-stream', 'fs', '../util/util.js', './BaseClient.js'], factory);
   } else if (typeof exports !== 'undefined' && typeof module !== 'undefined') {
-    factory(exports, module, require('axios'), require('bluebird'), require('format'), require('btoa'), require('form-data'), require('concat-stream'), require('fs'), require('../util/util.js'), require('./BaseClient.js'), require('request'));
+    factory(exports, module, require('axios'), require('bluebird'), require('format'), require('btoa'), require('form-data'), require('concat-stream'), require('fs'), require('../util/util.js'), require('./BaseClient.js'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod.exports, mod, global.xhr, global.Promise, global.format, global.nodeBtoa, global.FormData, global.concat, global.fs, global.util, global.BaseClient, global.request);
+    factory(mod.exports, mod, global.xhr, global.Promise, global.format, global.nodeBtoa, global.FormData, global.concat, global.fs, global.util, global.BaseClient);
     global.ApplicationClient = mod.exports;
   }
-})(this, function (exports, module, _axios, _bluebird, _format, _btoa, _formData, _concatStream, _fs, _utilUtilJs, _BaseClientJs, _request) {
+})(this, function (exports, module, _axios, _bluebird, _format, _btoa, _formData, _concatStream, _fs, _utilUtilJs, _BaseClientJs) {
   /**
    *****************************************************************************
    Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
@@ -52,7 +52,7 @@
 
   var _BaseClient2 = _interopRequireDefault(_BaseClientJs);
 
-  var _request2 = _interopRequireDefault(_request);
+  // import request from 'request'
 
   var btoa = btoa || _nodeBtoa['default']; // if browser btoa is available use it otherwise use node module
 
@@ -1315,7 +1315,7 @@
               };
               config.formData = formData;
             }
-            (0, _request2['default'])(config, function optionalCallback(err, response, body) {
+            request(config, function optionalCallback(err, response, body) {
               if (response.statusCode === expectedHttpCode) {
                 if (expectJsonContent && !(typeof response.data === 'object')) {
                   try {

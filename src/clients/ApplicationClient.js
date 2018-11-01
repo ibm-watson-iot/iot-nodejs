@@ -22,7 +22,7 @@ const btoa = btoa || nodeBtoa; // if browser btoa is available use it otherwise 
 
 import { isDefined, isString, isNode, isBrowser } from '../util/util.js';
 import { default as BaseClient } from './BaseClient.js';
-import request from 'request'
+// import request from 'request'
 
 const QUICKSTART_ORG_ID = "quickstart";
 
