@@ -309,16 +309,16 @@ var deviceClient = new Client.IotfDevice(config);
 
 deviceClient.connect();
 
-client.on("connect", function () {
+deviceClient.on("connect", function () {
     //publishing event using the default quality of service
-    client.publish("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}');
+    deviceClient.publish("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}');
 
     //publishing event using the user-defined quality of service
     var myQosLevel=2
-    client.publish("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel);
+    deviceClient.publish("status","json",'{"d" : { "cpu" : 60, "mem" : 50 }}', myQosLevel);
 
     //disconnect the client
-    client.disconnect();
+    deviceClient.disconnect();
 });
 
 ....
