@@ -881,6 +881,32 @@
         });
       }
 
+      //client connectivity status
+    }, {
+      key: 'getConnectionStates',
+      value: function getConnectionStates() {
+        this.log.debug("[ApplicationClient] getConnectionStates() - client connectivity");
+        return this.callApi('GET', 200, true, ["clientconnectionstates"], null);
+      }
+    }, {
+      key: 'getConnectionState',
+      value: function getConnectionState(id) {
+        this.log.debug("[ApplicationClient] getConnectionState() - client connectivity");
+        return this.callApi('GET', 200, true, ["clientconnectionstates/" + id], null);
+      }
+    }, {
+      key: 'getConnectedClientsConnectionStates',
+      value: function getConnectedClientsConnectionStates() {
+        this.log.debug("[ApplicationClient] getConnectedClientsConnectionStates() - client connectivity");
+        return this.callApi('GET', 200, true, ["clientconnectionstates?connectionStatus=connected"], null);
+      }
+    }, {
+      key: 'getRecentConnectionStates',
+      value: function getRecentConnectionStates(date) {
+        this.log.debug("[ApplicationClient] getRecentConnectionStates() - client connectivity");
+        return this.callApi('GET', 200, true, ["clientconnectionstates?connectedAfter=" + date], null);
+      }
+
       //event cache
     }, {
       key: 'getLastEvents',

@@ -834,6 +834,27 @@ export default class ApplicationClient extends BaseClient {
       xhr(xhrConfig).then(resolve, reject);
     });
   }
+  
+  //client connectivity status
+  getConnectionStates(){
+	  this.log.debug("[ApplicationClient] getConnectionStates() - client connectivity");
+	  return this.callApi('GET', 200, true, ["clientconnectionstates"], null)
+  }
+  
+  getConnectionState(id){
+	  this.log.debug("[ApplicationClient] getConnectionState() - client connectivity");
+	  return this.callApi('GET', 200, true, ["clientconnectionstates/" + id], null)
+  }
+  
+  getConnectedClientsConnectionStates(){
+	  this.log.debug("[ApplicationClient] getConnectedClientsConnectionStates() - client connectivity");
+	  return this.callApi('GET', 200, true, ["clientconnectionstates?connectionStatus=connected"], null)
+  }
+  
+  getRecentConnectionStates(date){
+	  this.log.debug("[ApplicationClient] getRecentConnectionStates() - client connectivity");
+	  return this.callApi('GET', 200, true, ["clientconnectionstates?connectedAfter=" + date], null)
+  }
 
   //event cache
   getLastEvents(type, id){
