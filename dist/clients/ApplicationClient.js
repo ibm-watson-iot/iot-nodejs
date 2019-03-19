@@ -906,6 +906,12 @@
         this.log.debug("[ApplicationClient] getRecentConnectionStates() - client connectivity");
         return this.callApi('GET', 200, true, ["clientconnectionstates?connectedAfter=" + date], null);
       }
+    }, {
+      key: 'getCustomConnectionState',
+      value: function getCustomConnectionState(query) {
+        this.log.debug("[ApplicationClient] getCustomConnectionStates() - client connectivity");
+        return this.callApi('GET', 200, true, ["clientconnectionstates" + query], null);
+      }
 
       //event cache
     }, {

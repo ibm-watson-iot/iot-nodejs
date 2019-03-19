@@ -4,8 +4,8 @@ var appClientConfig = {
   org: 'xxxxx',
   id: 'myapp',
   "domain": "internetofthings.ibmcloud.com",
-  "auth-key": 'a-xxxxxxx-zenkqyfiea',
-  "auth-token": 'xxxxxxxxxx'
+  "auth-key": 'a-xxxx-xxxxxxxxx',
+  "auth-token": 'xxxxxxxxxxxxxx'
 };
 
 var appClient = new iotf.IotfApplication(appClientConfig);
@@ -56,6 +56,17 @@ date = date.toISOString();
 //gets connection state for all devices active within the past two days
 appClient.
 getRecentConnectionStates(date). then (function onSuccess (argument){
+	console.log("Success");
+	console.log(argument);
+}, function onError (argument) {
+	
+	console.log("Fail");
+	console.log(argument);
+});
+
+//performs custom user query client state query, defaults to {orgId}.internetofthings.ibmcloud.com/api/v0002/clientconnectionstates with no argument
+appClient.
+getCustomConnectionState('?connectionStatus=disconnected'). then (function onSuccess (argument){
 	console.log("Success");
 	console.log(argument);
 }, function onError (argument) {

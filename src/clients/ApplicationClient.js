@@ -838,22 +838,27 @@ export default class ApplicationClient extends BaseClient {
   //client connectivity status
   getConnectionStates(){
 	  this.log.debug("[ApplicationClient] getConnectionStates() - client connectivity");
-	  return this.callApi('GET', 200, true, ["clientconnectionstates"], null)
+	  return this.callApi('GET', 200, true, ["clientconnectionstates"], null);
   }
   
   getConnectionState(id){
 	  this.log.debug("[ApplicationClient] getConnectionState() - client connectivity");
-	  return this.callApi('GET', 200, true, ["clientconnectionstates/" + id], null)
+	  return this.callApi('GET', 200, true, ["clientconnectionstates/" + id], null);
   }
   
   getConnectedClientsConnectionStates(){
 	  this.log.debug("[ApplicationClient] getConnectedClientsConnectionStates() - client connectivity");
-	  return this.callApi('GET', 200, true, ["clientconnectionstates?connectionStatus=connected"], null)
+	  return this.callApi('GET', 200, true, ["clientconnectionstates?connectionStatus=connected"], null);
   }
   
   getRecentConnectionStates(date){
 	  this.log.debug("[ApplicationClient] getRecentConnectionStates() - client connectivity");
-	  return this.callApi('GET', 200, true, ["clientconnectionstates?connectedAfter=" + date], null)
+	  return this.callApi('GET', 200, true, ["clientconnectionstates?connectedAfter=" + date], null);
+  }
+  
+  getCustomConnectionState(query){
+	  this.log.debug("[ApplicationClient] getCustomConnectionStates() - client connectivity");
+	  return this.callApi('GET', 200, true, ["clientconnectionstates" + query], null);
   }
 
   //event cache
