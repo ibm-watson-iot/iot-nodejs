@@ -1,13 +1,10 @@
 /**
  *****************************************************************************
- Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
+ Copyright (c) 2014, 2019 IBM Corporation and other Contributors.
  All rights reserved. This program and the accompanying materials
  are made available under the terms of the Eclipse Public License v1.0
  which accompanies this distribution, and is available at
  http://www.eclipse.org/legal/epl-v10.html
- Contributors:
- Tim-Daniel Jacobi - Initial Contribution
- Jeffrey Dare
  *****************************************************************************
  *
  */
@@ -16,12 +13,10 @@ import Promise from 'bluebird';
 import format from 'format';
 import nodeBtoa from 'btoa';
 import FormData from 'form-data';
-import concat from 'concat-stream';
-import fs from 'fs';
 const btoa = btoa || nodeBtoa; // if browser btoa is available use it otherwise use node module
 
-import { isDefined, isString, isNode, isBrowser } from '../util/util.js';
-import { default as BaseClient } from './BaseClient.js';
+import { isDefined, isString, isNode, isBrowser } from '../util.js';
+import { default as BaseClient } from '../BaseClient.js';
 // import request from 'request'
 
 const QUICKSTART_ORG_ID = "quickstart";
@@ -150,101 +145,50 @@ export default class ApplicationClient extends BaseClient {
 
       var match = DEVICE_EVT_RE.exec(topic);
       if (match) {
-        this.emit('deviceEvent',
-          match[1],
-          match[2],
-          match[3],
-          match[4],
-          payload,
-          topic
-        );
-
+        this.emit('deviceEvent', match[1], match[2], match[3], match[4], payload, topic);
         return;
       }
 
 
       var match = DEVICE_CMD_RE.exec(topic);
       if (match) {
-        this.emit('deviceCommand',
-          match[1],
-          match[2],
-          match[3],
-          match[4],
-          payload,
-          topic
-        );
-
+        this.emit('deviceCommand', match[1], match[2], match[3], match[4], payload, topic);
         return;
       }
 
       var match = DEVICE_STATE_RE.exec(topic);
       if(match){
-        this.emit('deviceState',
-          match[1],
-          match[2],
-          match[3],
-          payload,
-          topic
-        );
-
+        this.emit('deviceState', match[1], match[2], match[3], payload, topic);
         return;
       }
 
       var match = DEVICE_STATE_ERROR_RE.exec(topic);
       if(match){
-        this.emit('deviceStateError',
-          match[1],
-          match[2],
-          payload,
-          topic
-        );
-
+        this.emit('deviceStateError', match[1], match[2], payload, topic);
         return;
       }
 
       var match = RULE_TRIGGER_RE.exec(topic);
       if(match){
-        this.emit('ruleTrigger',
-          match[1],
-          match[2],
-          payload,
-          topic
-        );
-
+        this.emit('ruleTrigger', match[1], match[2], payload, topic);
         return;
       }
 
       var match = RULE_ERROR_RE.exec(topic);
       if(match){
-        this.emit('ruleError',
-          match[1],
-          match[2],
-          payload,
-          topic
-        );
-
+        this.emit('ruleError', match[1], match[2], payload, topic);
         return;
       }
 
       var match = DEVICE_MON_RE.exec(topic);
       if (match) {
-        this.emit('deviceStatus',
-          match[1],
-          match[2],
-          payload,
-          topic
-        );
-
+        this.emit('deviceStatus', match[1], match[2], payload, topic);
         return;
       }
 
       var match = APP_MON_RE.exec(topic);
       if (match) {
-        this.emit('appStatus',
-          match[1],
-          payload,
-          topic
-        );
+        this.emit('appStatus', match[1], payload, topic);
         return;
       }
 

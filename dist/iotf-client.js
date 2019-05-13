@@ -1,26 +1,23 @@
 (function (global, factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['exports', 'module', './clients/DeviceClient.js', './clients/ManagedDeviceClient.js', './clients/GatewayClient.js', './clients/ManagedGatewayClient.js', './clients/ApplicationClient.js'], factory);
+    define(['exports', 'module', './wiotp/device/DeviceClient.js', './wiotp/device/ManagedDeviceClient.js', './wiotp/gateway/GatewayClient.js', './wiotp/gateway/ManagedGatewayClient.js', './wiotp/application/client.js'], factory);
   } else if (typeof exports !== 'undefined' && typeof module !== 'undefined') {
-    factory(exports, module, require('./clients/DeviceClient.js'), require('./clients/ManagedDeviceClient.js'), require('./clients/GatewayClient.js'), require('./clients/ManagedGatewayClient.js'), require('./clients/ApplicationClient.js'));
+    factory(exports, module, require('./wiotp/device/DeviceClient.js'), require('./wiotp/device/ManagedDeviceClient.js'), require('./wiotp/gateway/GatewayClient.js'), require('./wiotp/gateway/ManagedGatewayClient.js'), require('./wiotp/application/client.js'));
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod.exports, mod, global.DeviceClient, global.ManagedDeviceClient, global.GatewayClient, global.ManagedGatewayClient, global.ApplicationClient);
+    factory(mod.exports, mod, global.DeviceClient, global.ManagedDeviceClient, global.GatewayClient, global.ManagedGatewayClient, global.client);
     global.iotfClient = mod.exports;
   }
-})(this, function (exports, module, _clientsDeviceClientJs, _clientsManagedDeviceClientJs, _clientsGatewayClientJs, _clientsManagedGatewayClientJs, _clientsApplicationClientJs) {
+})(this, function (exports, module, _wiotpDeviceDeviceClientJs, _wiotpDeviceManagedDeviceClientJs, _wiotpGatewayGatewayClientJs, _wiotpGatewayManagedGatewayClientJs, _wiotpApplicationClientJs) {
   /**
    *****************************************************************************
-   Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
+   Copyright (c) 2014, 2019 IBM Corporation and other Contributors.
    All rights reserved. This program and the accompanying materials
    are made available under the terms of the Eclipse Public License v1.0
    which accompanies this distribution, and is available at
    http://www.eclipse.org/legal/epl-v10.html
-   Contributors:
-   Tim-Daniel Jacobi - Initial Contribution
-   Jeffrey Dare
    *****************************************************************************
    *
    */
@@ -28,15 +25,15 @@
 
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-  var _IotfDevice = _interopRequireDefault(_clientsDeviceClientJs);
+  var _IotfDevice = _interopRequireDefault(_wiotpDeviceDeviceClientJs);
 
-  var _IotfManagedDevice = _interopRequireDefault(_clientsManagedDeviceClientJs);
+  var _IotfManagedDevice = _interopRequireDefault(_wiotpDeviceManagedDeviceClientJs);
 
-  var _IotfGateway = _interopRequireDefault(_clientsGatewayClientJs);
+  var _IotfGateway = _interopRequireDefault(_wiotpGatewayGatewayClientJs);
 
-  var _IotfManagedGateway = _interopRequireDefault(_clientsManagedGatewayClientJs);
+  var _IotfManagedGateway = _interopRequireDefault(_wiotpGatewayManagedGatewayClientJs);
 
-  var _IotfApplication = _interopRequireDefault(_clientsApplicationClientJs);
+  var _IotfApplication = _interopRequireDefault(_wiotpApplicationClientJs);
 
   module.exports = {
     IotfDevice: _IotfDevice['default'],

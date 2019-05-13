@@ -1,25 +1,19 @@
 /**
  *****************************************************************************
- Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
+ Copyright (c) 2014, 2019 IBM Corporation and other Contributors.
  All rights reserved. This program and the accompanying materials
  are made available under the terms of the Eclipse Public License v1.0
  which accompanies this distribution, and is available at
  http://www.eclipse.org/legal/epl-v10.html
- Contributors:
- Tim-Daniel Jacobi - Initial Contribution
- Jeffrey Dare
- Lokesh Haralakatta - Added Client Side Certificates Support
  *****************************************************************************
  *
  */
 import format from 'format';
-import xhr from 'axios';
-import Promise from 'bluebird';
 import nodeBtoa from 'btoa';
 const btoa = btoa || nodeBtoa; // if browser btoa is available use it otherwise use node module
 
-import { isDefined, isString, isNode } from '../util/util.js';
-import { default as BaseClient } from './BaseClient.js';
+import { isDefined, isString, isNode } from '../util.js';
+import { default as BaseClient } from '../BaseClient.js';
 
 const WILDCARD_TOPIC = 'iot-2/cmd/+/fmt/+';
 const CMD_RE = /^iot-2\/cmd\/(.+)\/fmt\/(.+)$/;
@@ -114,34 +108,5 @@ export default class DeviceClient extends BaseClient {
     this.mqtt.publish(topic,payload,{qos: parseInt(QOS)}, callback);
 
     return this;
-  }
-
-  publishHTTPS(eventType, eventFormat, payload){
-    this.log.debug("[DeviceClient:publishHTTPS] Publishing event of Type: "+ eventType + " with payload : "+payload);
-    return new Promise((resolve, reject) => {
-      let uri = format("https://%s/api/v0002/device/types/%s/devices/%s/events/%s", this.mqttServer, this.typeId, this.deviceId, eventType);
-
-      let xhrConfig = {
-        url: uri,
-        method: 'POST',
-        data : payload,
-        headers : {
-
-        }
-      };
-
-      if(eventFormat === 'json') {
-        xhrConfig.headers['Content-Type'] = 'application/json';
-      } else if(eventFormat === 'xml') {
-        xhrConfig.headers['Content-Type'] = 'application/xml';
-      }
-
-      if(this.org !== QUICKSTART_ORG_ID) {
-        xhrConfig.headers['Authorization'] = 'Basic ' + btoa('use-token-auth' + ':' + this.deviceToken);
-      }
-      this.log.debug("[DeviceClient:publishHTTPS] "+ xhrConfig);
-
-      xhr(xhrConfig).then(resolve, reject);
-    });
   }
 }
