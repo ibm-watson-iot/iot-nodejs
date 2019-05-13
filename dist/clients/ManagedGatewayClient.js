@@ -109,8 +109,6 @@
         });
 
         this.mqtt.on('message', function (topic, payload) {
-          console.log("Message [%s] : %s", topic, payload);
-
           var match = DM_RESPONSE_TOPIC_RE.exec(topic);
 
           if (match) {

@@ -78,6 +78,7 @@
       this.domainName = "internetofthings.ibmcloud.com";
       this.mqttServer = "";
       this.enforceWs = false;
+      this.noSSL = false;
       // Parse mqtt-server & domain property. mqtt-server takes precedence over domain
       if ((0, _utilUtilJs.isDefined)(config['mqtt-server'])) {
         if (!(0, _utilUtilJs.isString)(config['mqtt-server'])) {
@@ -112,6 +113,21 @@
         this.enforceWs = config['enforce-ws'];
       }
 
+      //property to connect to unsecured endpoint
+      // CAUTION : This is deprecated and may be removed in future
+
+      // Parse enforce-ws property
+
+      if ((0, _utilUtilJs.isDefined)(config['no-ssl'])) {
+
+        if (!(0, _utilUtilJs.isBoolean)(config['no-ssl'])) {
+
+          throw new Error('no-ssl must be a boolean');
+        }
+
+        this.noSSL = config['no-ssl'];
+      }
+
       if (config.org === QUICKSTART_ORG_ID) {
         if ((0, _utilUtilJs.isNode)() && !this.enforceWs) {
 
@@ -132,9 +148,9 @@
 
         if ((0, _utilUtilJs.isNode)() && !this.enforceWs) {
 
-          this.host = "ssl://" + this.mqttServer + ":8883";
+          this.host = this.noSSL ? "tcp://" + this.mqttServer + ":1883" : "ssl://" + this.mqttServer + ":8883";
         } else {
-          this.host = "wss://" + this.mqttServer + ":8883";
+          this.host = this.noSSL ? "ws://" + this.mqttServer + ":1883" : "wss://" + this.mqttServer + ":8883";
         }
 
         this.isQuickstart = false;

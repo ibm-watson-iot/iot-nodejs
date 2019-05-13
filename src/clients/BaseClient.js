@@ -50,6 +50,7 @@ export default class BaseClient extends events.EventEmitter {
     this.domainName = "internetofthings.ibmcloud.com";
     this.mqttServer = "";
     this.enforceWs = false;
+    this.noSSL = false;
     // Parse mqtt-server & domain property. mqtt-server takes precedence over domain
     if(isDefined(config['mqtt-server'])) {
         if(!isString(config['mqtt-server'])){
@@ -79,6 +80,16 @@ export default class BaseClient extends events.EventEmitter {
       this.enforceWs = config['enforce-ws']; 
     }
 
+    //property to connect to unsecured endpoint
+    // CAUTION : This is deprecated and may be removed in future 
+    // Parse enforce-ws property 
+    if(isDefined(config['no-ssl'])) { 
+      if(!isBoolean(config['no-ssl'])){ 
+        throw new Error('no-ssl must be a boolean'); 
+      } 
+      this.noSSL = config['no-ssl']; 
+    }
+
     if(config.org === QUICKSTART_ORG_ID){
       if(isNode() && !this.enforceWs) { 
         this.host = "tcp://quickstart.messaging.internetofthings.ibmcloud.com:1883"; 
@@ -97,9 +108,9 @@ export default class BaseClient extends events.EventEmitter {
       }
 
       if(isNode() && !this.enforceWs) { 
-        this.host = "ssl://" + this.mqttServer + ":8883"; 
+        this.host = this.noSSL ? "tcp://" + this.mqttServer + ":1883" : "ssl://" + this.mqttServer + ":8883"; 
       } else {
-        this.host = "wss://" + this.mqttServer + ":8883";
+        this.host = this.noSSL ? "ws://" + this.mqttServer + ":1883" : "wss://" + this.mqttServer + ":8883"; 
       }
 
       this.isQuickstart = false;

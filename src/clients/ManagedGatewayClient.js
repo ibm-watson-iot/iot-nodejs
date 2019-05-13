@@ -78,8 +78,6 @@ export default class ManagedGatewayClient extends GatewayClient {
     });
 
     this.mqtt.on('message', (topic, payload) => {
-      console.log("Message [%s] : %s",topic,payload);
-
       let match = DM_RESPONSE_TOPIC_RE.exec(topic);
 
       if(match) {
