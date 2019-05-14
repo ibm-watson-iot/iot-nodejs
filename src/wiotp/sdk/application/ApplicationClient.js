@@ -8,17 +8,12 @@
  *****************************************************************************
  *
  */
-import xhr from 'axios';
-import Promise from 'bluebird';
-import format from 'format';
 import nodeBtoa from 'btoa';
-import FormData from 'form-data';
 const btoa = btoa || nodeBtoa; // if browser btoa is available use it otherwise use node module
 
-import { isDefined, isString, isNode, isBrowser } from '../util';
+import { isDefined, isString } from '../util';
 import { default as BaseClient } from '../BaseClient';
 import { default as ApiClient } from '../api/ApiClient';
-// import request from 'request'
 
 const QUICKSTART_ORG_ID = "quickstart";
 
