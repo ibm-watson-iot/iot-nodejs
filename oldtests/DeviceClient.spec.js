@@ -10,7 +10,7 @@
  *****************************************************************************
  *
  */
-import { default as IBMIoTF } from '../src/iotf-client.js';
+import { default as IBMIoTF } from '../src/wiotp/sdk/iotf-client.js/index.js';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import mqtt from 'mqtt';

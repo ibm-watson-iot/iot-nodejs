@@ -8,7 +8,7 @@
  *****************************************************************************
  *
  */
-import ApplicationClient from '../src/wiotp/sdk/application';
+import { ApplicationClient } from '../src/wiotp/sdk/application';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import mqtt from 'mqtt';
@@ -16,76 +16,7 @@ import events from 'events';
 
 console.info = () => {};
 
-describe('IotfApplication', () => {
-
-  describe('Constructor', () => {
-
-    it('should throw an error if instantiated without config', () => {
-      expect(() => {
-        let client = new ApplicationClient();
-      }).to.throw(/missing properties/);
-    });
-
-    it('should throw an error if org is not present', () => {
-      expect(() => {
-        let client = new ApplicationClient({});
-      }).to.throw(/config must contain org/);
-    });
-
-    it('should throw an error if org is not a string', () => {
-      expect(() => {
-        let client = new ApplicationClient({org: false});
-      }).to.throw(/org must be a string/);
-    });
-
-    describe('Quickstart mode', () => {
-      it('should throw an error if id is not present', () => {
-        expect(() => {
-          let client = new ApplicationClient({org:'quickstart'});
-        }).to.throw(/config must contain id/);
-      });
-
-      it('should return an instance if org, id and type are specified', () => {
-        let client;
-        expect(() => {
-          client = new ApplicationClient({org:'quickstart', id:'123', type:'123'});
-        }).not.to.throw();
-        expect(client).to.be.instanceof(ApplicationClient);
-      });
-
-      it('should run in quickstart mode if org is set to "quickstart"', () => {
-        let client = new ApplicationClient({org: 'quickstart', type: 'mytype', id: '3215'});
-        expect(client.isQuickstart).to.equal(true);
-        expect(client.mqttConfig.username).to.be.undefined;
-        expect(client.mqttConfig.password).to.be.undefined;
-      });
-    });
-
-    describe('Registered mode', () => {
-      it('should throw an error if id is not present', () => {
-        expect(() => {
-          let client = new ApplicationClient({org:'regorg'});
-        }).to.throw(/config must contain id/);
-      });
-
-      it('should throw an error if auth-token is not present', () => {
-        expect(() => {
-          let client = new ApplicationClient({org:'regorg', id:'123'});
-        }).to.throw(/config must contain auth-token/);
-      });
-
-      it('should throw an error if auth-key is not present', () => {
-        expect(() => {
-          let client = new ApplicationClient({org:'regorg', id:'123', 'auth-token': '123'});
-        }).to.throw(/config must contain auth-key/);
-      });
-
-      it('should run in registered mode if org is not set to "quickstart"', () => {
-        let client = new ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
-        expect(client.isQuickstart).to.equal(false);
-      });
-    });
-  });
+describe('WIoTP Application MQTT Support', () => {
 
   describe('.connect()', () => {
     afterEach(() => {
