@@ -11,7 +11,7 @@
 import format from 'format';
 
 import { isDefined, isString, isNumber, isBoolean, isNode, generateUUID } from '../util.js';
-import { default as DeviceClient } from './DeviceClient.js.js';
+import { default as DeviceClient } from './DeviceClient';
 
 const QUICKSTART_ORG_ID = 'quickstart';
 const QOS = 1;

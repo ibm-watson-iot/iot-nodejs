@@ -11,7 +11,7 @@
 import format from 'format';
 
 import { isDefined, isString, isNumber, isBoolean, isNode, generateUUID } from '../util.js';
-import { default as GatewayClient } from './GatewayClient.js.js';
+import { default as GatewayClient } from './GatewayClient';
 
 const QUICKSTART_ORG_ID = 'quickstart';
 const QOS = 1;

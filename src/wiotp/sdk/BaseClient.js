@@ -11,7 +11,7 @@
 import events from 'events';
 import mqtt from 'mqtt';
 import log from 'loglevel';
-import { isDefined, isString, isNode, isBoolean, initializeMqttConfig } from './util.js';
+import { isDefined, isString, isNode, isBoolean, initializeMqttConfig } from './util';
 
 const QUICKSTART_ORG_ID = "quickstart";
 

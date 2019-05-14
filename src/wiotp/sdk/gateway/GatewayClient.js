@@ -12,8 +12,8 @@ import format from 'format';
 import nodeBtoa from 'btoa';
 const btoa = btoa || nodeBtoa; // if browser btoa is available use it otherwise use node module
 
-import { isDefined, isString, isNode } from '../util.js';
-import { default as BaseClient } from '../sdk/BaseClient.js/index.js';
+import { isDefined, isString, isNode } from '../util';
+import { default as BaseClient } from '../BaseClient';
 
 const CMD_RE = /^iot-2\/type\/(.+)\/id\/(.+)\/cmd\/(.+)\/fmt\/(.+)$/;
 const QUICKSTART_ORG_ID = "quickstart";

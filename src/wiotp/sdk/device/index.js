@@ -1,5 +1,5 @@
-import { default as DeviceClient } from './DeviceClient.js';
-import { default as ManagedDeviceClient } from './ManagedDeviceClient.js';
+import { default as DeviceClient } from './DeviceClient';
+import { default as ManagedDeviceClient } from './ManagedDeviceClient';
 
 export default {
   DeviceClient, 
