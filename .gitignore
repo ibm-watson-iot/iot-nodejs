@@ -9,3 +9,6 @@ package-lock.json
 IoTFoundation.pem
 src/util/IoTFoundation.pem
 dist
+.nyc_output
+instrumented-src
+npm-debug.log

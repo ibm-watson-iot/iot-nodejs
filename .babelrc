@@ -1,0 +1,8 @@
+{
+    "presets": ["env"],
+    "env": {
+      "nyc": {
+        "plugins": ["istanbul"]
+      }
+    }
+  }

@@ -1,0 +1,8 @@
+{
+  "reporter"   : ["text", "text-summary", "lcov", "html"],
+  "include"    : ["src/**/*.js"],
+  "require"    : ["babel-polyfill", "babel-core/register"],
+  "sourceMap"  : false,
+  "instrument" : false,
+  "all"        : true
+}
