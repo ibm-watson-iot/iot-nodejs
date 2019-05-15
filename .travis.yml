@@ -11,7 +11,9 @@ matrix:
       env: RUN_COVERAGE=true 
 
 install:
+  - ls ./node_modules
   - npm install
+  - ls ./node_modules
 
 script:
   - |
