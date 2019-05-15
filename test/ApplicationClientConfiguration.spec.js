@@ -8,7 +8,7 @@
  *****************************************************************************
  *
  */
-import { ApplicationClient } from '../src/wiotp/sdk/application';
+import ApplicationClient from '../src/wiotp/sdk/application/ApplicationClient';
 import { expect } from 'chai';
 
 console.info = () => {};

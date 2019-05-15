@@ -18,6 +18,8 @@
     "@babel/core": "7.4.4",
     "@babel/preset-env": "7.4.4",
     "@babel/register": "7.4.4",
+    "@istanbuljs/nyc-config-babel": "^2.1.1",
+    "babel-plugin-istanbul": "^5.1.4",
     "babelify": "^10.0.0",
     "browserify": "^16.2.3",
     "chai": "4.2.0",
@@ -46,6 +48,7 @@
     "prepublish": "npm run build",
     "pretest": "cpx src/clients/IoTFoundation.pem . && cpx src/clients/IoTFoundation.pem src/util",
     "test": "mocha --require @babel/register --timeout 5000",
+    "test-cov": "nyc --reporter=lcov --reporter=text-summary mocha --timeout 5000",
     "test:watch": "mocha --require @babel/register --timeout 5000 --watch"
   },
   "author": {

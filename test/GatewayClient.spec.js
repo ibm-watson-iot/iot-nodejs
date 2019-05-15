@@ -10,7 +10,7 @@
  *****************************************************************************
  *
  */
-import { default as IBMIoTF } from '../src/iotf-client.js';
+import GatewayClient from '../src/wiotp/sdk/gateway/GatewayClient';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import mqtt from 'mqtt';
@@ -23,63 +23,63 @@ describe('IotfGateway', () => {
 
     it('should throw an error if instantiated without config', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfGateway();
+        let client = new GatewayClient();
       }).to.throw(/missing properties/);
     });
 
     it('should throw an error if org is not present', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfGateway({});
+        let client = new GatewayClient({});
       }).to.throw(/config must contain org/);
     });
 
     it('should throw an error if org is not a string', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfGateway({org: false});
+        let client = new GatewayClient({org: false});
       }).to.throw(/org must be a string/);
     });
 
     describe('Registered mode', () => {
       it('should throw an error if id is not present', () => {
         expect(() => {
-          let client = new IBMIoTF.IotfGateway({org:'regorg'});
+          let client = new GatewayClient({org:'regorg'});
         }).to.throw(/config must contain id/);
       });
 
       it('should throw an error if auth-token is not present', () => {
         expect(() => {
-          let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123'});
+          let client = new GatewayClient({org:'regorg', id:'123'});
         }).to.throw(/config must contain auth-token/);
       });
 
       it('should throw an error if type is not present', () => {
         expect(() => {
-          let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123'});
+          let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123'});
         }).to.throw(/config must contain type/);
       });
 
       it('should throw an error if type is not string', () => {
         expect(() => {
-          let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'type': 123, 'auth-token': '123'});
+          let client = new GatewayClient({org:'regorg', id:'123', 'type': 123, 'auth-token': '123'});
         }).to.throw(/type must be a string/);
       });
 
       it('should throw an error if org is set to quickstart', () => {
         expect(() => {
-          let client = new IBMIoTF.IotfGateway({org:'quickstart', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'abc'});
+          let client = new GatewayClient({org:'quickstart', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'abc'});
         }).to.throw(/Quickstart not supported in Gateways/);
       });
 
       it('should throw an error if auth-method is not "token"', () => {
         let client;
         expect(() => {
-          client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+          client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
         }).not.to.throw();
-        expect(client).to.be.instanceof(IBMIoTF.IotfGateway);
+        expect(client).to.be.instanceof(GatewayClient);
       });
 
       it('should run in registered mode if org is not set to "quickstart"', () => {
-        let client = new IBMIoTF.IotfGateway({org: 'qs', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new GatewayClient({org: 'qs', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         expect(client.isQuickstart).to.equal(false);
       });
     });
@@ -97,7 +97,7 @@ describe('IotfGateway', () => {
         on: function(){}
       });
 
-      let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
       client.log.setLevel('silent');
     });
@@ -107,7 +107,7 @@ describe('IotfGateway', () => {
         on: function(){}
       });
 
-      let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123',
+      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123',
       'auth-method': 'token','use-client-certs':true, 'client-ca':'./IoTFoundation.pem',
       'client-cert':'./IoTFoundation.pem', 'client-key':'./IoTFoundation.pem'});
       client.connect();
@@ -120,7 +120,7 @@ describe('IotfGateway', () => {
         on: on
       });
 
-      let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
       client.log.setLevel('silent');
 
@@ -133,7 +133,7 @@ describe('IotfGateway', () => {
         on: on
       });
 
-      let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
       client.log.setLevel('silent');
 
@@ -146,7 +146,7 @@ describe('IotfGateway', () => {
         on: on
       });
 
-      let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
       client.log.setLevel('silent');
 
@@ -159,7 +159,7 @@ describe('IotfGateway', () => {
         on: on
       });
 
-      let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
       client.log.setLevel('silent');
 
@@ -172,7 +172,7 @@ describe('IotfGateway', () => {
         on: on
       });
 
-      let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
       client.log.setLevel('silent');
 
@@ -185,7 +185,7 @@ describe('IotfGateway', () => {
 
     it('should publish gateway message', () => {
 
-      let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
 
       client.connect();
       client.log.setLevel('silent');
@@ -205,7 +205,7 @@ describe('IotfGateway', () => {
     it('should throw exception when client is not connected', () => {
 
       expect(() => {
-          let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+          let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
           client.publishGatewayEvent('stat','json','test',0);
 
       }).to.throw(/Client is not connected/);
@@ -213,7 +213,7 @@ describe('IotfGateway', () => {
 
     it('should publish with empty string if payload is not provided', () => {
 
-      let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
 
       client.connect();
       client.log.setLevel('silent');
@@ -232,7 +232,7 @@ describe('IotfGateway', () => {
 
     it('should publish device event', () => {
 
-      let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
 
       client.connect();
       client.log.setLevel('silent');
@@ -254,7 +254,7 @@ describe('IotfGateway', () => {
   describe('.subscribe()', () => {
 
     it('should subscribe device command', () => {
-      let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
 
       client.connect();
       client.log.setLevel('silent');
@@ -270,7 +270,7 @@ describe('IotfGateway', () => {
     });
 
     it('should subscribe gateway command', () => {
-      let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
 
       client.connect();
       client.log.setLevel('silent');
@@ -289,7 +289,7 @@ describe('IotfGateway', () => {
 
     it('should throw exception when client is not connected', () => {
       expect(() => {
-          let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+          let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
           client.subscribeToGatewayCommand('blink','json');
 
       }).to.throw(/Client is not connected/);
@@ -300,7 +300,7 @@ describe('IotfGateway', () => {
   describe('.unsubscribe()', () => {
 
     it('should unsubscribe device command', () => {
-      let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
 
       client.connect();
       client.log.setLevel('silent');
@@ -316,7 +316,7 @@ describe('IotfGateway', () => {
     });
 
     it('should subscribe gateway command', () => {
-      let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
 
       client.connect();
       client.log.setLevel('silent');
@@ -335,7 +335,7 @@ describe('IotfGateway', () => {
 
     it('should throw exception when client is not connected', () => {
       expect(() => {
-          let client = new IBMIoTF.IotfGateway({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+          let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
           client.unsubscribeToGatewayCommand('blink','json');
 
       }).to.throw(/Client is not connected/);

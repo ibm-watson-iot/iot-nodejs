@@ -1,3 +1,14 @@
 language: node_js
 node_js:
-- '6.2'
+  - '10'
+  - '9'
+  - '8'
+  - '7'
+  - '6'
+
+install:
+  - npm install
+
+script:
+  - npm run test-cov
+  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js

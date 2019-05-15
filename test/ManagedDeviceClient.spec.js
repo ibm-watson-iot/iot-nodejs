@@ -1,4 +1,4 @@
-import { default as IBMIoTF } from '../src/iotf-client.js';
+import ManagedDeviceClient from '../src/wiotp/sdk/device/ManagedDeviceClient';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import mqtt from 'mqtt';
@@ -11,26 +11,26 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if instantiated without config', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice();
+        let client = new ManagedDeviceClient();
       }).to.throw(/missing properties/);
     });
 
     it('should throw an error if org is not present', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({});
+        let client = new ManagedDeviceClient({});
       }).to.throw(/config must contain org/);
     });
 
     it('should throw an error if org is not a string', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: false});
+        let client = new ManagedDeviceClient({org: false});
       }).to.throw(/org must be a string/);
     });
 
     describe('Quickstart mode', () => {
       it('should throw an error if managed device attemps to run in quickstart mode', () => {
        expect(() => {
-          let client = new IBMIoTF.IotfManagedDevice({org:'quickstart', id:'123', 'type': '123'});
+          let client = new ManagedDeviceClient({org:'quickstart', id:'123', 'type': '123'});
         }).to.throw(/cannot use quickstart for a managed device/);
       });
     });
@@ -38,32 +38,32 @@ describe('IotfManagedDevice', () => {
     describe('Registered mode', () => {
       it('should throw an error if id is not present', () => {
         expect(() => {
-          let client = new IBMIoTF.IotfManagedDevice({org:'regorg'});
+          let client = new ManagedDeviceClient({org:'regorg'});
         }).to.throw(/config must contain id/);
       });
 
       it('should throw an error if auth-token is not present', () => {
         expect(() => {
-          let client = new IBMIoTF.IotfManagedDevice({org:'regorg', id:'123'});
+          let client = new ManagedDeviceClient({org:'regorg', id:'123'});
         }).to.throw(/config must contain auth-token/);
       });
 
       it('should throw an error if type is not present', () => {
         expect(() => {
-          let client = new IBMIoTF.IotfManagedDevice({org:'regorg', id:'123', 'auth-token': '123'});
+          let client = new ManagedDeviceClient({org:'regorg', id:'123', 'auth-token': '123'});
         }).to.throw(/config must contain type/);
       });
 
       it('should return an instance if org, id and type are specified', () => {
         let client;
         expect(() => {
-          client = new IBMIoTF.IotfManagedDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+          client = new ManagedDeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
         }).not.to.throw();
-        expect(client).to.be.instanceof(IBMIoTF.IotfManagedDevice);
+        expect(client).to.be.instanceof(ManagedDeviceClient);
       });
 
       it('should run in registered mode if org is not set to "quickstart"', () => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'qs', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'qs', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         expect(client.isQuickstart).to.equal(false);
       });
     });
@@ -81,7 +81,7 @@ describe('IotfManagedDevice', () => {
         on: function(){}
       });
 
-      let client = new IBMIoTF.IotfManagedDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new ManagedDeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
       client.log.setLevel('silent');
     });
@@ -92,7 +92,7 @@ describe('IotfManagedDevice', () => {
         on: on
       });
 
-      let client = new IBMIoTF.IotfManagedDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new ManagedDeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
       client.log.setLevel('silent');
 
@@ -105,7 +105,7 @@ describe('IotfManagedDevice', () => {
         on: on
       });
 
-      let client = new IBMIoTF.IotfManagedDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new ManagedDeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
       client.log.setLevel('silent');
 
@@ -118,7 +118,7 @@ describe('IotfManagedDevice', () => {
         on: on
       });
 
-      let client = new IBMIoTF.IotfManagedDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new ManagedDeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
       client.log.setLevel('silent');
 
@@ -131,7 +131,7 @@ describe('IotfManagedDevice', () => {
         on: on
       });
 
-      let client = new IBMIoTF.IotfManagedDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new ManagedDeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
       client.log.setLevel('silent');
 
@@ -144,7 +144,7 @@ describe('IotfManagedDevice', () => {
         on: on
       });
 
-      let client = new IBMIoTF.IotfManagedDevice({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let client = new ManagedDeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
       client.log.setLevel('silent');
 
@@ -155,14 +155,14 @@ describe('IotfManagedDevice', () => {
   describe('.manage()', () => {
     it('should throw an error if client is not connected', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.manage();
       }).to.throw(/Client is not connected/);
     });
 
     it('should throw an error if lifetime is not a number', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.manage("3600");
       }).to.throw(/lifetime must be a number/);
@@ -170,7 +170,7 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if lifetime is less than 3600', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.manage(10);
       }).to.throw(/lifetime cannot be less than 3600/);
@@ -178,7 +178,7 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if supportDeviceActions is not a boolean', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.manage(3600, "false");
       }).to.throw(/supportDeviceActions must be a boolean/);
@@ -186,7 +186,7 @@ describe('IotfManagedDevice', () => {
 
   it('should throw an error if supportFirmwareActions is not a boolean', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.manage(3600, false, "false");
       }).to.throw(/supportFirmwareActions must be a boolean/);
@@ -194,7 +194,7 @@ describe('IotfManagedDevice', () => {
 
   it('should successfully finish manage request', () => {
 
-      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+      let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
 
       client.connect();
       client.log.setLevel('silent');
@@ -225,14 +225,14 @@ describe('IotfManagedDevice', () => {
   describe('.unmanage()', () => {
     it('should throw an error if client is not connected', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.unmanage();
       }).to.throw(/Client is not connected/);
     });
 
   it('should successfully finish unmanage request', () => {
 
-      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+      let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
 
       client.connect();
       client.log.setLevel('silent');
@@ -256,14 +256,14 @@ describe('IotfManagedDevice', () => {
   describe('.updateLocation()', () => {
     it('should throw an error if client is not connected', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.updateLocation();
       }).to.throw(/Client is not connected/);
     });
 
     it('should throw an error if latitude or longitude are not provided', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.updateLocation(20);
       }).to.throw(/longitude and latitude are required for updating location/);
@@ -271,7 +271,7 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if longitude and latitude are not numbers', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.updateLocation("20", "40");
       }).to.throw(/longitude and latitude must be numbers/);
@@ -279,7 +279,7 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if longitude is less than -180', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.updateLocation(20, -190);
       }).to.throw(/longitude cannot be less than -180 or greater than 180/);
@@ -287,7 +287,7 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if longitude is greater than 180', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.updateLocation(20, 190);
       }).to.throw(/longitude cannot be less than -180 or greater than 180/);
@@ -296,7 +296,7 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if latitude is less than -90', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.updateLocation(-100, 20);
       }).to.throw(/latitude cannot be less than -90 or greater than 90/);
@@ -304,7 +304,7 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if latitude is greater than 90', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.updateLocation(100, 20);
       }).to.throw(/latitude cannot be less than -90 or greater than 90/);
@@ -312,7 +312,7 @@ describe('IotfManagedDevice', () => {
 
    it('should throw an error if elevation is not a number', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.updateLocation(20, 40, "5");
       }).to.throw(/elevation must be a number/);
@@ -320,14 +320,14 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if accuracy is not a number', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.updateLocation(20, 40, 5, "1");
       }).to.throw(/accuracy must be a number/);
     });
 
     it('should successfully complete', () => {
-      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+      let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
 
       client.connect();
       client.log.setLevel('silent');
@@ -360,14 +360,14 @@ describe('IotfManagedDevice', () => {
   describe('.addErrorCode()', () => {
     it('should throw an error if client is not connected', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.addErrorCode();
       }).to.throw(/Client is not connected/);
     });
 
     it('should throw an error if error code is not provided', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.addErrorCode();
       }).to.throw(/error code is required for adding an error code/);
@@ -375,14 +375,14 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if error code is not a number', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.addErrorCode("20");
       }).to.throw(/error code must be a number/);
     });
 
     it('should successfully complete', () => {
-      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+      let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
 
       client.connect();
       client.log.setLevel('silent');
@@ -411,13 +411,13 @@ describe('IotfManagedDevice', () => {
   describe('.clearErrorCodes()', () => {
     it('should throw an error if client is not connected', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.clearErrorCodes();
       }).to.throw(/Client is not connected/);
     });
 
     it('should successfully complete', () => {
-      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+      let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
 
       client.connect();
       client.log.setLevel('silent');
@@ -443,14 +443,14 @@ describe('IotfManagedDevice', () => {
   describe('.addLog()', () => {
     it('should throw an error if client is not connected', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.addLog();
       }).to.throw(/Client is not connected/);
     });
 
     it('should throw an error if message and severity are not provided', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.addLog();
       }).to.throw(/message and severity are required for adding a log/);
@@ -458,7 +458,7 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if message is not a string', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.addLog(43, 0);
       }).to.throw(/message must be a string/);
@@ -466,7 +466,7 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if severity is not a number', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.addLog("blah", "0");
       }).to.throw(/severity must be a number/);
@@ -474,7 +474,7 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if severity is not a 0, 1, or 2', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.addLog("blah", 5);
       }).to.throw(/severity can only equal 0, 1, or 2/);
@@ -482,14 +482,14 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if data is not a string', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.addLog("blah", 0, 0);
       }).to.throw(/data must be a string/);
     });
 
     it('should successfully complete', () => {
-      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+      let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
 
       client.connect();
       client.log.setLevel('silent');
@@ -511,13 +511,13 @@ describe('IotfManagedDevice', () => {
   describe('.clearLogs()', () => {
     it('should throw error if client is not connected', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.clearLogs();
       }).to.throw(/Client is not connected/);
     });
 
     it('should successfully complete', () => {
-      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+      let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
 
       client.connect();
       client.log.setLevel('silent');
@@ -543,7 +543,7 @@ describe('IotfManagedDevice', () => {
   describe('.respondDeviceAction()', () => {
     it('should throw an error if client is not connected', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         let request = {};
         request.reqId = "43";
         client.respondDeviceAction(request);
@@ -552,7 +552,7 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if request and rc not provided', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         client.respondDeviceAction();
       }).to.throw(/Request and rc/);
@@ -560,7 +560,7 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if reqId not provided', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         let request = {};
         client.respondDeviceAction(request,1);
@@ -569,7 +569,7 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if request id is not a string', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         let request = {};
         request.reqId = 43;
@@ -579,7 +579,7 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if rc is not a number', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         let request = {};
         request.reqId = "43";
@@ -589,7 +589,7 @@ describe('IotfManagedDevice', () => {
 
     it('should throw an error if reqId is invalid', () => {
       expect(() => {
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
         client.isConnected = true;
         let request = {};
         request.reqId = "43";
@@ -598,7 +598,7 @@ describe('IotfManagedDevice', () => {
     });
 
     it('should successfully complete', () => {
-      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+      let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
 
       client.connect();
       client.log.setLevel('silent');
@@ -631,7 +631,7 @@ describe('IotfManagedDevice', () => {
   describe('.isRebootAction(), isFactoryResetAction()', () => {
     it('should return false if reboot action is not present in request', () => {
 
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
 
         let request = {
           action : "reboot1"
@@ -640,7 +640,7 @@ describe('IotfManagedDevice', () => {
     });
     it('should return true if reboot action is present in request', () => {
 
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
 
         let request = {
           action : "reboot"
@@ -650,7 +650,7 @@ describe('IotfManagedDevice', () => {
 
     it('should return false if factory_reset action is not present in request', () => {
 
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
 
         let request = {
           action : "somethingelse"
@@ -659,7 +659,7 @@ describe('IotfManagedDevice', () => {
     });
     it('should return true if factory_reset action is present in request', () => {
 
-        let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+        let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
 
         let request = {
           action : "factory_reset"
@@ -670,7 +670,7 @@ describe('IotfManagedDevice', () => {
 
   describe('.changeState() and notify', () => {
     it('should change state only if its on observe state', () => {
-      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+      let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
 
       client.connect();
       client.log.setLevel('silent');
@@ -700,7 +700,7 @@ describe('IotfManagedDevice', () => {
     });
 
     it('should not change state only if its not on observe state', () => {
-      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+      let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
 
       client.connect();
       client.log.setLevel('silent');
@@ -730,7 +730,7 @@ describe('IotfManagedDevice', () => {
     });
 
     it('should change updatestate only if its on observe state', () => {
-      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+      let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
 
       client.connect();
       client.log.setLevel('silent');
@@ -759,7 +759,7 @@ describe('IotfManagedDevice', () => {
     });
 
     it('should not change updatestate only if its not on observe state', () => {
-      let client = new IBMIoTF.IotfManagedDevice({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
+      let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
 
       client.connect();
       client.log.setLevel('silent');
