@@ -10,7 +10,7 @@
  *****************************************************************************
  *
  */
-import DeviceClient from '../src/wiotp/sdk/device/DeviceClient';
+import { DeviceClient } from '../src/wiotp/sdk/device';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import mqtt from 'mqtt';

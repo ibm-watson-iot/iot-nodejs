@@ -1,5 +1,1 @@
-import { default as ApplicationClient } from './ApplicationClient';
-
-export default {
-  ApplicationClient
-}
+export { default as ApplicationClient } from './ApplicationClient';

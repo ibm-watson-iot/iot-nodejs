@@ -8,7 +8,7 @@
  *****************************************************************************
  *
  */
-import ApplicationClient from '../src/wiotp/sdk/application/ApplicationClient';
+import { ApplicationClient } from '../src/wiotp/sdk/application';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import mqtt from 'mqtt';
@@ -392,6 +392,7 @@ describe('WIoTP Application MQTT Support', () => {
 
       let client = new ApplicationClient({org:'regorg', id:'123', 'auth-token': '123', 'auth-key': 'abc'});
       client.connect();
+
       client.log.setLevel('silent');
       //simulate connect
       client.isConnected = true;

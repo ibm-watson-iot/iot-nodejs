@@ -1,4 +1,4 @@
-import ManagedGatewayClient from '../src/wiotp/sdk/gateway/ManagedGatewayClient';
+import { ManagedGatewayClient } from '../src/wiotp/sdk/gateway';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import mqtt from 'mqtt';

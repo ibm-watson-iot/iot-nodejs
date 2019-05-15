@@ -1,4 +1,4 @@
-import ManagedDeviceClient from '../src/wiotp/sdk/device/ManagedDeviceClient';
+import { ManagedDeviceClient } from '../src/wiotp/sdk/device';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import mqtt from 'mqtt';
