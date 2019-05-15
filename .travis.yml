@@ -1,19 +1,20 @@
 language: node_js
 
-
 matrix:
   include:
-    - node_js: "10"
-    - node_js: "9"
-    - node_js: "8"
+#    - node_js: "10"
+#    - node_js: "9"
+#    - node_js: "8"
     - node_js: "7"
     - node_js: "6"
       env: RUN_COVERAGE=true 
 
 install:
-  - npm install
+  - echo "hi dave"
 
 script:
+  - npm install
+  - ls ./node_modules
   - |
       if [ -n "$RUN_COVERAGE" ]; then
         npm run test-cov
