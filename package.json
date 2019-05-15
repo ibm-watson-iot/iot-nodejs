@@ -16,9 +16,10 @@
   "devDependencies": {
     "@babel/cli": "7.4.4",
     "@babel/core": "7.4.4",
+    "@babel/polyfill": "7.4.4",
     "@babel/preset-env": "7.4.4",
     "@babel/register": "7.4.4",
-    "@babel/polyfill": "7.4.4",
+    "@istanbuljs/nyc-config-babel": "2.1.1",
     "babel-plugin-istanbul": "5.1.4",
     "babelify": "10.0.0",
     "browserify": "16.2.3",
@@ -47,7 +48,7 @@
     "postbuild": "cpx src/clients/IoTFoundation.pem dist/util",
     "prepublish": "npm run build",
     "pretest": "cpx src/clients/IoTFoundation.pem . && cpx src/clients/IoTFoundation.pem src/util",
-    "test": "cross-env NODE_ENV=test nyc mocha --require @babel/polyfill --require @babel/register",
+    "test": "cross-env NODE_ENV=test nyc mocha",
     "test:watch": "mocha --compilers js:babel/register --watch"
   },
   "author": {
