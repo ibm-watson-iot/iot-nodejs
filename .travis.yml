@@ -6,15 +6,14 @@ matrix:
       env: RUN_COVERAGE=true 
 
 before_install:
-  # Upgrade NPM, see if that makes npm install more relaiable?
+  # Upgrade NPM, without this a number of modules will fail to install
   - npm i -g npm
 
 install:
-  - echo "hi dave"
+  - npm install
 
 script:
-  - npm install
-  - npm ls
+  # - npm ls
   # Run test, optionally with coverage enabled.  Return non-0 if tests fail
   - |
       if [ -n "$RUN_COVERAGE" ]; then
