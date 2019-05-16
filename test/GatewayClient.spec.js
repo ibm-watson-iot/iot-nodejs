@@ -102,7 +102,7 @@ describe('IotfGateway', () => {
       client.log.setLevel('silent');
     });
 
-    it('should connect to the broker with client certificates', () => {
+    it.skip('should connect to the broker with client certificates', () => {
       let mqttConnect = sinon.stub(mqtt, 'connect').returns({
         on: function(){}
       });

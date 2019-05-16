@@ -15,11 +15,16 @@ install:
 script:
   - npm install
   - npm ls
+  # Run test, optionally with coverage enabled.  Return non-0 if tests fail
   - |
       if [ -n "$RUN_COVERAGE" ]; then
         if npm run test-cov; then
           cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+          exit 0
         fi
       else
-        npm run test
+        if npm run test; then
+          exit 0
+        fi
       fi
+      exit 1

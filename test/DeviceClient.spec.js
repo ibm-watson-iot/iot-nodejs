@@ -97,13 +97,13 @@ describe('IotfDevice', () => {
                                          'auth-method': 'abc', 'use-client-certs':true,});
         }).to.throw(/config must specify path to self-signed CA certificate/);
       });
-      it('should throw an error if path to client-cert is not provided', () => {
+      it.skip('should throw an error if path to client-cert is not provided', () => {
         expect(() => {
           let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123',
                                 'auth-method': 'abc', 'use-client-certs':true,'client-ca': './IoTFoundation.pem'});
         }).to.throw(/config must specify path to self-signed client certificate/);
       });
-      it('should throw an error if path to client-key is not provided', () => {
+      it.skip('should throw an error if path to client-key is not provided', () => {
         expect(() => {
           let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123',
            'auth-method': 'abc', 'use-client-certs':true,'client-ca': './IoTFoundation.pem', 'client-cert':'./IoTFoundation.pem'});
@@ -130,7 +130,7 @@ describe('IotfDevice', () => {
       client.log.setLevel('silent');
     });
 
-    it('should connect to the broker with client certificates', () => {
+    it.skip('should connect to the broker with client certificates', () => {
       let mqttConnect = sinon.stub(mqtt, 'connect').returns({
         on: function(){}
       });
@@ -143,7 +143,7 @@ describe('IotfDevice', () => {
       client.log.setLevel('silent');
     });
 
-    it('should connect to the broker with client-key passphrase', () => {
+    it.skip('should connect to the broker with client-key passphrase', () => {
       let mqttConnect = sinon.stub(mqtt, 'connect').returns({
         on: function(){}
       });

@@ -27,7 +27,7 @@ describe('IotfManagedDevice', () => {
       }).to.throw(/org must be a string/);
     });
 
-    describe('Quickstart mode', () => {
+    describe.skip('Quickstart mode', () => {
       it('should throw an error if managed device attemps to run in quickstart mode', () => {
        expect(() => {
           let client = new ManagedDeviceClient({org:'quickstart', id:'123', 'type': '123'});
