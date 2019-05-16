@@ -5,11 +5,16 @@ matrix:
     - node_js: "10"
       env: RUN_COVERAGE=true 
 
+before_install:
+  # Upgrade NPM, see if that makes npm install more relaiable?
+  - npm i -g npm
+
 install:
   - echo "hi dave"
 
 script:
   - rm -rf ./node_modules
+  - npm ls
   - npm install
   - npm ls
   - |
