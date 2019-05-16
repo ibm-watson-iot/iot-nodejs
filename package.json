@@ -30,7 +30,8 @@
     "nyc": "14.1.1",
     "rimraf": "2.6.3",
     "sinon": "7.3.2",
-    "uglify-js": "3.5.12"
+    "uglify-js": "3.5.12",
+    "coveralls": "3.0.3"
   },
   "scripts": {
     "clean": "rimraf dist/*",

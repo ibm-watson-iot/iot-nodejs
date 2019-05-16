@@ -13,8 +13,6 @@ install:
   - echo "hi dave"
 
 script:
-  - rm -rf ./node_modules
-  - npm ls
   - npm install
   - npm ls
   - |
