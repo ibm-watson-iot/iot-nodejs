@@ -19,12 +19,8 @@ export default class BaseClient extends events.EventEmitter {
   constructor(config){
     super();
     this.log = log;
-    this.log.setDefaultLevel("warn");
-    //removed as now we have support of domain name in config.
-/*    this.staging = false;
-    if(process.env.STAGING === '1') {
-      this.staging = true;
-    }*/
+    this.log.setDefaultLevel("debug");
+
     if(!config){
       throw new Error('[BaseClient:constructor] Client instantiated with missing properties');
     }
@@ -142,6 +138,11 @@ export default class BaseClient extends events.EventEmitter {
   }
 
   connect(){
+    if(this.isConnected){
+      this.log.info("[BaseClient:connect] Client is already connected");
+      return;
+    }
+
     this.log.info("[BaseClient:connect] Connecting to IoTF with host : "+this.host + " and with client id : "+this.mqttConfig.clientId);
 
     this.mqtt = mqtt.connect(this.host, this.mqttConfig);

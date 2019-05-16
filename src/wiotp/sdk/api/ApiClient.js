@@ -15,9 +15,9 @@ import nodeBtoa from 'btoa';
 import FormData from 'form-data';
 import log from 'loglevel';
 
-const btoa = btoa || nodeBtoa; // if browser btoa is available use it otherwise use node module
+const myBtoa = btoa || nodeBtoa; // if browser btoa is available use it otherwise use node module
 
-import { isDefined, isString, isNode, isBrowser } from '../util';
+import { isBrowser } from '../util';
 import { default as RegistryClient } from './RegistryClient';
 import { default as MgmtClient } from './MgmtClient';
 import { default as LecClient } from './LecClient';
@@ -28,7 +28,6 @@ import { default as StateClient } from './StateClient';
 export default class ApiClient {
   constructor(orgId, domain, apiKey, apiToken, withProxy, useLtpa, draftMode) {
     this.log = log;
-    this.log.setDefaultLevel("warn");
 
     this.orgId = orgId;
     this.apiKey = apiKey;
@@ -79,7 +78,7 @@ export default class ApiClient {
         xhrConfig.withCredentials = true;
       }
       else {
-        xhrConfig.headers['Authorization'] = 'Basic ' + btoa(this.apiKey + ':' + this.apiToken);
+        xhrConfig.headers['Authorization'] = 'Basic ' + myBtoa(this.apiKey + ':' + this.apiToken);
       }
 
       if (body) {
@@ -348,7 +347,7 @@ export default class ApiClient {
         xhrConfig.withCredentials = true;
       }
       else {
-        xhrConfig.headers['Authorization'] = 'Basic ' + btoa(this.apiKey + ':' + this.apiToken);
+        xhrConfig.headers['Authorization'] = 'Basic ' + myBtoa(this.apiKey + ':' + this.apiToken);
       }
 
       if (body) {

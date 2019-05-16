@@ -8,9 +8,6 @@
  *****************************************************************************
  *
  */
-import nodeBtoa from 'btoa';
-const btoa = btoa || nodeBtoa; // if browser btoa is available use it otherwise use node module
-
 import { isDefined, isString } from '../util';
 import { default as BaseClient } from '../BaseClient';
 import { default as ApiClient } from '../api/ApiClient';

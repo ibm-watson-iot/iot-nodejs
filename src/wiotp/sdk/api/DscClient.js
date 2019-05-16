@@ -8,15 +8,11 @@
  *****************************************************************************
  *
  */
-import nodeBtoa from 'btoa';
 import log from 'loglevel';
-
-const btoa = btoa || nodeBtoa; // if browser btoa is available use it otherwise use node module
 
 export default class DscClient {
   constructor(apiClient) {
     this.log = log;
-    this.log.setDefaultLevel("warn");
     
     this.apiClient = apiClient;
   }
