@@ -17,8 +17,9 @@ script:
   - npm ls
   - |
       if [ -n "$RUN_COVERAGE" ]; then
-        npm run test-cov
-        cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+        if npm run test-cov; then
+          cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+        fi
       else
         npm run test
       fi

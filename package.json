@@ -49,9 +49,9 @@
     "postbuild": "cpx src/clients/IoTFoundation.pem dist/util",
     "prepublish": "npm run build",
     "pretest": "cpx src/clients/IoTFoundation.pem . && cpx src/clients/IoTFoundation.pem src/util",
-    "test": "mocha --require @babel/register --timeout 5000",
-    "test-cov": "nyc --reporter=lcov --reporter=text-summary mocha --timeout 5000",
-    "test:watch": "mocha --require @babel/register --timeout 5000 --watch"
+    "test": "mocha --require @babel/register --timeout 3000",
+    "test-cov": "nyc --reporter=lcov --reporter=text-summary mocha --timeout 3000",
+    "test:watch": "mocha --require @babel/register --timeout 3000 --watch"
   },
   "author": {
     "name": "David Parker",
