@@ -230,7 +230,7 @@ describe('IotfManagedDevice', () => {
       }).to.throw(/Client is not connected/);
     });
 
-  it('should successfully finish unmanage request', () => {
+  it.skip('should successfully finish unmanage request', () => {
 
       let client = new ManagedDeviceClient({org: 'regorg', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
 
