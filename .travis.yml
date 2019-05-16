@@ -13,8 +13,9 @@ install:
   - echo "hi dave"
 
 script:
+  - npm ls
   - npm install
-  - ls ./node_modules
+  - npm ls
   - |
       if [ -n "$RUN_COVERAGE" ]; then
         npm run test-cov
