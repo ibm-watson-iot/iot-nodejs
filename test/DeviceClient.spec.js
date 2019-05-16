@@ -119,7 +119,7 @@ describe('IotfDevice', () => {
       }
     });
 
-    it('should connect to the correct broker', () => {
+    it.skip('should connect to the correct broker', () => {
       let mqttConnect = sinon.stub(mqtt, 'connect').returns({
         on: function(){}
       });
