@@ -9,7 +9,7 @@ install:
   - echo "hi dave"
 
 script:
-  - npm ls
+  - rm -rf ./node_modules
   - npm install
   - npm ls
   - |
