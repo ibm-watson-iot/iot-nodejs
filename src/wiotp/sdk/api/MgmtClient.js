@@ -9,7 +9,7 @@
  *
  */
 import nodeBtoa from 'btoa';
-import log from 'logLevel';
+import log from 'loglevel';
 
 const btoa = btoa || nodeBtoa; // if browser btoa is available use it otherwise use node module
 

@@ -13,7 +13,7 @@ import Promise from 'bluebird';
 import format from 'format';
 import nodeBtoa from 'btoa';
 import FormData from 'form-data';
-import log from 'logLevel';
+import log from 'loglevel';
 
 const btoa = btoa || nodeBtoa; // if browser btoa is available use it otherwise use node module
 
