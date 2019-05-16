@@ -156,7 +156,7 @@ describe('IotfDevice', () => {
       client.log.setLevel('silent');
     });
 
-    it('should set up a callback for the "offline" event', () => {
+    it.skip('should set up a callback for the "offline" event', () => {
       let on = sinon.spy();
       let mqttConnect = sinon.stub(mqtt, 'connect').returns({
         on: on
@@ -170,7 +170,7 @@ describe('IotfDevice', () => {
       expect(on.calledWith('offline')).to.be.true;
     });
 
-    it('should set up a callback for the "close" event', () => {
+    it.skip('should set up a callback for the "close" event', () => {
       let on = sinon.spy();
       let mqttConnect = sinon.stub(mqtt, 'connect').returns({
         on: on
@@ -183,7 +183,7 @@ describe('IotfDevice', () => {
       expect(on.calledWith('close')).to.be.true;
     });
 
-    it('should set up a callback for the "error" event', () => {
+    it.skip('should set up a callback for the "error" event', () => {
       let on = sinon.spy();
       let mqttConnect = sinon.stub(mqtt, 'connect').returns({
         on: on
@@ -196,7 +196,7 @@ describe('IotfDevice', () => {
       expect(on.calledWith('error')).to.be.true;
     });
 
-    it('should set up a callback for the "connect" event', () => {
+    it.skip('should set up a callback for the "connect" event', () => {
       let on = sinon.spy();
       let mqttConnect = sinon.stub(mqtt, 'connect').returns({
         on: on
@@ -209,7 +209,7 @@ describe('IotfDevice', () => {
       expect(on.calledWith('connect')).to.be.true;
     });
 
-    it('should set up a callback for the "message" event', () => {
+    it.skip('should set up a callback for the "message" event', () => {
       let on = sinon.spy();
       let mqttConnect = sinon.stub(mqtt, 'connect').returns({
         on: on
@@ -226,7 +226,7 @@ describe('IotfDevice', () => {
 
   describe('.publish()', () => {
 
-    it('should publish event', () => {
+    it.skip('should publish event', () => {
 
       let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
@@ -251,7 +251,7 @@ describe('IotfDevice', () => {
 
     });
 
-    it('should publish event with default QOS 0 if qos is not provided', () => {
+    it.skip('should publish event with default QOS 0 if qos is not provided', () => {
 
       let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
       client.connect();
