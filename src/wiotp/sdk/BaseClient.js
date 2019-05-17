@@ -69,6 +69,10 @@ export default class BaseClient extends events.EventEmitter {
       let reconnectPeriod = 1000;
       if (connectionLostCount >= 9) {
         reconnectPeriod = 20000;
+        
+        // Log this and raise the error EVERY time we reconnect under these conditions.
+        this.log.warn("[BaseClient:onOffline] This client is likely suffering from clientId stealing (where two connections try to use the same client Id).");
+        this.emit("error", "Exceeded 9 connection losses in a 5 minute period.  Check for clientId conflict with another connection.")
       }
       else if (connectionLostCount >= 6) {
         reconnectPeriod = 5000;
@@ -79,10 +83,6 @@ export default class BaseClient extends events.EventEmitter {
 
       if (reconnectPeriod != this.mqtt.options.reconnectPeriod) {
         this.log.info("[BaseClient:onOffline] Client has lost connection " + connectionLostCount + " times during the last 5 minutes, reconnect delay adjusted to " + reconnectPeriod + " ms");
-        if (connectionLostCount >= 9) {
-          this.log.warn("[BaseClient:onOffline] This client is likely suffering from clientId stealing (where two connections try to use the same client Id).");
-          this.emit("error", "Exceeded 9 connection losses in a 5 minute period.  Check for clientId conflict with another connection.")
-        }
         this.mqtt.options.reconnectPeriod = reconnectPeriod;
       }
   
