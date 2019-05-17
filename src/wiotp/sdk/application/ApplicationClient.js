@@ -8,9 +8,10 @@
  *****************************************************************************
  *
  */
-import { isDefined, isString } from '../util';
+import { isDefined } from '../util';
 import { default as BaseClient } from '../BaseClient';
 import { default as ApiClient } from '../api/ApiClient';
+import { default as ApplicationConfig } from './ApplicationConfig';
 
 const QUICKSTART_ORG_ID = "quickstart";
 
@@ -24,84 +25,21 @@ const DEVICE_MON_RE         = /^iot-2\/type\/(.+)\/id\/(.+)\/mon$/;
 const APP_MON_RE            = /^iot-2\/app\/(.+)\/mon$/;
 
 export default class ApplicationClient extends BaseClient {
-  constructor(config) {
+  constructor(config, useLtpa, withProxy, draftMode) {
+    if (!config instanceof ApplicationConfig) {
+      throw new Error("Config must be an instance of ApplicationConfig");
+    }
     super(config);
 
-    if (config.org !== QUICKSTART_ORG_ID) {
-      if (config.useLtpa) {
-        this.useLtpa = true;
-      } else {
-        if (!isDefined(config['auth-key'])) {
-          throw new Error('[ApplicationClient:constructor] config must contain auth-key');
-        }
-        else if (!isString(config['auth-key'])) {
-          throw new Error('[ApplicationClient:constructor] auth-key must be a string');
-        }
-
-        this.mqttConfig.username = config['auth-key'];
-      }
-    }
-
-    this.org = config.org;
-    this.apiKey = config['auth-key'];
-    this.apiToken = config['auth-token'];
-    //support for shared subscription
-    this.shared = ((config['type']+'').toLowerCase() === "shared") || false;
-
-    //Support for mixed durable subscription
-    if(isDefined(config['instance-id'])){
-      if(!isString(config['instance-id'])){
-        throw new Error('[ApplicationClient:constructor] instance-id must be a string');
-      }
-      this.instanceId = config['instance-id'];
-    }
-
-    if(this.shared && this.instanceId) {
-      this.mqttConfig.clientId = "A:" + config.org + ":" + config.id + ":" + this.instanceId;
-    } else if(this.shared) {
-      this.mqttConfig.clientId = "A:" + config.org + ":" + config.id;
-    } else {
-      this.mqttConfig.clientId = "a:" + config.org + ":" + config.id;
-    }
+    this.useLtpa = useLtpa;
     this.subscriptions = [];
 
-    this.httpServer = "";
-    // Parse http-server & domain property. http-server takes precedence over domain
-    if (isDefined(config['http-server'])) {
-      if (!isString(config['http-server'])) {
-        throw new Error('[BaseClient:constructor] http-server must be a string, ' +
-          'see Bluemix Watson IoT service credentials for more information');
-      }
-      this.httpServer = config['http-server'];
-    } else if (isDefined(config.domain)) {
-      if (!isString(config.domain)) {
-        throw new Error('[BaseClient:constructor] domain must be a string');
-      }
-      this.httpServer = config.org + "." + config.domain;
-      this.domainName = config.domain;
-    } else {
-      this.httpServer = config.org + ".internetofthings.ibmcloud.com";
-    }
-
-    this.withProxy = false;
-    if (isDefined(config['with-proxy'])) {
-      this.withProxy = config['with-proxy'];
-    }
-    this.withHttps = true;
-    if (isDefined(config['with-https'])) {
-      this.withHttps = config['with-https'];
-    }
-	  
-    // draft setting for IM device state
-    if (isDefined(config['draftMode'])) {
-       this.draftMode = config.draftMode;
-    } else {
-      this.draftMode = false
-    }
+    this.withProxy = withProxy;
+    this.draftMode = draftMode
     
     this.apiClient = new ApiClient(this.org, this.domain, this.apiKey, this.apiToken, this.withProxy, this.useLtpa, this.draftMode)
 
-    this.log.info("[ApplicationClient:constructor] ApplicationClient initialized for organization : " + config.org);
+    this.log.info("[ApplicationClient:constructor] ApplicationClient initialized for organization : " + config.getOrgId());
   }
 
   connect(QoS) {

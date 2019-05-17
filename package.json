@@ -12,7 +12,8 @@
     "form-data": "^2.3.3",
     "format": "^0.2.2",
     "loglevel": "^1.6.1",
-    "mqtt": "^2.18.8"
+    "mqtt": "^2.18.8",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "@babel/cli": "7.4.4",

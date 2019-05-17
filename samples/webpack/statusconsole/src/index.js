@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { ApplicationClient } from '../../../../src/wiotp/sdk/'
+import { ApplicationClient, ApplicationConfig } from '../../../../src/wiotp/sdk/'
 
 
 let appClient = null;
@@ -12,7 +12,10 @@ window.initialize = function() {
     let orgId = document.getElementById("orgId").value;
     let apikey = document.getElementById("apikey").value;
     let token = document.getElementById("token").value;
-    appClient = new ApplicationClient({org:orgId, id:'sample', 'auth-token': token, 'auth-key': apikey});
+    let portNumber = document.getElementById("port").value;
+
+    let appConfig = new ApplicationConfig(null, {key: apikey, token: token}, {logLevel:"debug", mqtt: {transport:"websockets", port: parseInt(portNumber)}});
+    appClient = new ApplicationClient(appConfig);
 
     appClient.on("deviceEvent", function (typeId, deviceId, eventId, format, payload) {
       console.log("Device Event from :: " + typeId + " : " + deviceId + " of event " + eventId + " with format " + format + " - payload = " + payload);
