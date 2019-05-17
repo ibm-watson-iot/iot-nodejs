@@ -13,80 +13,104 @@ import mqtt from 'mqtt';
 import log from 'loglevel';
 
 export default class BaseClient extends events.EventEmitter {
-  constructor(configuration){
+  constructor(config){
     super();
     this.log = log;
-    this.log.setDefaultLevel(configuration.options.logLevel);
+    this.log.setDefaultLevel(config.options.logLevel);
 
-    this.mqttConfig = configuration.getMqttConfig();
-    this.mqttHost = configuration.getMqttHost();
+    this.config = config;
 
     this.retryCount = 0;
     this.isConnected = false;
   }
 
   connect(){
-    if(this.isConnected){
-      this.log.info("[BaseClient:connect] Client is already connected");
+    if(this.mqtt) {
+      this.log.info("[BaseClient:connect] Reconnecting to " + this.config.getMqttHost() + " as " + this.config.getClientId());
+      this.mqtt.reconnect();
       return;
     }
 
-    this.log.info("[BaseClient:connect] Connecting to IoTF with host : " + this.mqttHost + " and with client id : " + this.mqttConfig.clientId);
+    this.log.info(this.config.getMqttHost());
+    this.log.info(this.config.getMqttConfig());
 
-    this.mqtt = mqtt.connect(this.mqttHost, this.mqttConfig);
+    this.log.info("[BaseClient:connect] Connecting to " + this.config.getMqttHost() + " as " + this.config.getClientId());
 
-    this.mqtt.on('offline', () => {
-      this.log.warn("[BaseClient:connect] Iotfclient is offline. Retrying connection");
+    this.mqtt = mqtt.connect(this.config.getMqttHost(), this.config.getMqttConfig());
 
-      this.isConnected = false;
-      this.retryCount++;
+    /* Events coming from mqtt
+     * Event 'connect' - Emitted on successful (re)connection (i.e. connack rc=0).
+     * Event 'reconnect' - Emitted when a reconnect starts.
+     * Event 'close' - Emitted after a disconnection.
+     * Event 'offline' - Emitted when the client goes offline.
+     * Event 'error' - Emitted when the client cannot connect (i.e. connack rc != 0) or when a parsing error occurs.
+     * Event 'end' - Emitted when mqtt.Client#end() is called. If a callback was passed to mqtt.Client#end(), this event is emitted once the callback returns.
+     * Event 'message' - Emitted when the client receives a publish packet
+     * Event 'packetsend' - Emitted when the client sends any packet. This includes .published() packets as well as packets used by MQTT for managing subscriptions and connections
+     * Event 'packetreceive' - Emitted when the client receives any packet. This includes packets from subscribed topics as well as packets used by MQTT for managing subscriptions and connections
+     */
 
-      if(this.retryCount < 5){
-        this.log.debug("[BaseClient:connect] Retry in 3 sec. Count : " + this.retryCount);
-        this.mqtt.options.reconnectPeriod = 3000;
-      } else if(this.retryCount < 10){
-        this.log.debug("[BaseClient:connect] Retry in 10 sec. Count : " + this.retryCount);
-        this.mqtt.options.reconnectPeriod = 10000;
-      } else {
-        this.log.debug("[BaseClient:connect] Retry in 60 sec. Count : " + this.retryCount);
-        this.mqtt.options.reconnectPeriod = 60000;
-      }
+    // rely on the underlying MQTT client to handle reconnect
+    //this.mqtt.on('offline', () => {
+    //  this.log.warn("[BaseClient:connect] Iotfclient is offline. Retrying connection");
+    //
+    //  this.isConnected = false;
+    //  this.retryCount++;
+    //
+    //  if(this.retryCount < 5){
+    //    this.log.debug("[BaseClient:connect] Retry in 3 sec. Count : " + this.retryCount);
+    //    this.mqtt.options.reconnectPeriod = 3000;
+    //  } else if(this.retryCount < 10){
+    //    this.log.debug("[BaseClient:connect] Retry in 10 sec. Count : " + this.retryCount);
+    //    this.mqtt.options.reconnectPeriod = 10000;
+    //  } else {
+    //    this.log.debug("[BaseClient:connect] Retry in 60 sec. Count : " + this.retryCount);
+    //    this.mqtt.options.reconnectPeriod = 60000;
+    //  }
+    //});
+
+    this.mqtt.on('connect', () => {
+      this.log.info("[BaseClient:onOffline] MQTT client is connected.");
+      this.emit('connect');
+    });
+
+    this.mqtt.on('reconnect', () => {
+      this.log.info("[BaseClient:onOffline] MQTT client is reconnecting.");
+      this.emit('reconnect');
     });
 
     this.mqtt.on('close', () => {
-      this.log.info("[BaseClient:onClose] Connection was closed.");
-      this.isConnected = false;
-      this.emit('disconnect');
+      this.log.info("[BaseClient:onClose] MQTT client connection was closed.");
+      this.emit('close');
+    });
+
+    this.mqtt.on('offline', () => {
+      this.log.info("[BaseClient:onOffline] MQTT client connection is offline.");
+      this.emit('offline');
     });
 
     this.mqtt.on('error', (error) => {
-      this.log.error("[BaseClient:onError] Connection Error :: "+error);
-      this.isConnected = false;
-      let errorMsg = ''+error;
-      if(errorMsg.indexOf('Not authorized') > -1) {
-        this.log.error("[BaseClient:onError] One or more connection parameters are wrong. Update the configuration and try again.");
-        this.mqtt.reconnecting = false;
-        this.mqtt.options.reconnectPeriod = 0;
+      this.log.error("[BaseClient:onError] " + error);
+      
+      let errorMsg = '' + error;
+      if (errorMsg.indexOf('Not authorized') > -1) {
+        this.log.error("[BaseClient:onError] One or more configuration parameters are wrong. Modify the configuration before trying to reconnect.");
+        this.mqtt.end(false, () => {
+          this.log.info("[BaseClient:onError] Closed the MQTT connection to " + this.config.getMqttHost() + " due to client misconfiguration");
+        });
       }
       this.emit('error', error);
     });
   }
 
   disconnect(){
-    if(!this.isConnected){
-      if (this.mqtt) {
-          // The client is disconnected, but the reconnect thread
-          // is running. Need to stop it.
-          this.mqtt.end(true, () => {});
-      }
-      throw new Error("[BaseClient:disconnect] Client is not connected");
+    if(!this.mqtt) {
+      this.log.info("[BaseClient:disconnect] Client was never connected");
+      return;
     }
 
-    this.isConnected = false;
     this.mqtt.end(false, () => {
-      this.log.info("[BaseClient:disconnect] Disconnected from the client.");
+      this.log.info("[BaseClient:disconnect] Closed the MQTT connection to " + this.config.getMqttHost());
     });
-
-    delete this.mqtt;
   }
 }

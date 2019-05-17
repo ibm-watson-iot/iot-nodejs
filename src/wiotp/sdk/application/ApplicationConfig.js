@@ -62,7 +62,7 @@ export default class ApplicationConfig {
             this.options.mqtt.sharedSubscription = false;
         }
         if (!("cleanStart" in this.options.mqtt)) {
-            this.options.mqtt.cleanStart = false;
+            this.options.mqtt.cleanStart = true;
         }
         if (!("sessionExpiry" in this.options.mqtt)) {
             this.options.mqtt.sessionExpiry = 3600;
@@ -99,28 +99,33 @@ export default class ApplicationConfig {
     }
 
     getMqttConfig() {
+        // See: https://www.npmjs.com/package/mqtt#mqttclientstreambuilder-options
         let mqttConfig = {
-            // identity
+            // Identity
             clientId: this.getClientId(),
 
-            // connectivity
-            keepalive: 60,
-            connectTimeout:  90*1000,
+            // Basic Connectivity
+            keepalive: this.options.mqtt.keepAlive, // in seconds
+            connectTimeout:  90*1000, // milliseconds, time to wait before a CONNACK is received
+            reconnectPeriod: 5000, // milliseconds, interval between two reconnections
+            queueQoSZero: true, // if connection is broken, queue outgoing QoS zero messages
+            resubscribe: true, // if connection is broken and reconnects, subscribed topics are automatically subscribed again
+
+            clean: this.options.mqtt.cleanStart, //  set to false to receive QoS 1 and 2 messages while offline
             
-            // certificates - none of this is supported right now
-            // caPaths: [],
-            // ca: [clientCa, serverCA],
-            // cert: clientCert,
-            // key: clientKey,
-            // passphrase: clientKeyPassphrase,
-            
-            // auth
+            // Authentication
             username: this.auth.key,
             password: this.auth.token,
+            
+            // Security
+            // If you are using a self-signed certificate, pass the rejectUnauthorized: false option. Beware 
+            // that you are exposing yourself to man in the middle attacks, so it is a configuration that 
+            // is not recommended for production environments.
             rejectUnauthorized: true,
 
-            servername: this.identity.orgId + "." + this.options.mqtt.domain, // Not sure what this is used for, as we provide the url at connect time
-            protocol: "mqtt" // what else would it be?
+            // MQTTv5 support doesn't work with Watson IoT Platform, so stick to default for now
+            // protocolId: "MQTT",
+            // protocolVersion: 5
         }
         return mqttConfig;
     }

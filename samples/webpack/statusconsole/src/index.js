@@ -9,16 +9,44 @@ window.initialize = function() {
     console.log("Client is already initialized");
   }
   else {
-    let orgId = document.getElementById("orgId").value;
     let apikey = document.getElementById("apikey").value;
     let token = document.getElementById("token").value;
     let portNumber = document.getElementById("port").value;
+    let logLevel = document.getElementById("logLevel").value;
 
-    let appConfig = new ApplicationConfig(null, {key: apikey, token: token}, {logLevel:"debug", mqtt: {transport:"websockets", port: parseInt(portNumber)}});
+    let identity = null;
+    let auth = {
+      key: apikey, 
+      token: token
+    };
+    let options = {
+      logLevel:logLevel, 
+      mqtt: {
+        transport:"websockets", 
+        port: parseInt(portNumber)
+      }
+    };
+    let appConfig = new ApplicationConfig(identity, auth, options);
     appClient = new ApplicationClient(appConfig);
 
     appClient.on("deviceEvent", function (typeId, deviceId, eventId, format, payload) {
       console.log("Device Event from :: " + typeId + " : " + deviceId + " of event " + eventId + " with format " + format + " - payload = " + payload);
+    });
+    appClient.on("connect", function () {
+      console.log("CONNECTED");
+      document.getElementById("status").innerHTML = "CONNECTED";
+    });
+    appClient.on("reconnect", function () {
+      console.log("RECONNECTING");
+      document.getElementById("status").innerHTML = "RECONNECTING";
+    });
+    appClient.on("close", function () {
+      console.log("DISCONNECTED");
+      document.getElementById("status").innerHTML = "DISCONNECTED";
+    });
+    appClient.on("offline", function () {
+      console.log("OFFLINE");
+      document.getElementById("status").innerHTML = "OFFLINE";
     });
   }
 }

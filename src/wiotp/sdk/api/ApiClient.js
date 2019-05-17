@@ -26,29 +26,27 @@ import { default as RulesClient } from './RulesClient';
 import { default as StateClient } from './StateClient';
 
 export default class ApiClient {
-  constructor(orgId, domain, apiKey, apiToken, withProxy, useLtpa, draftMode) {
+  constructor(config, withProxy, useLtpa) {
     this.log = log;
 
-    this.orgId = orgId;
-    this.apiKey = apiKey;
-    this.apiToken = apiToken;
+    this.orgId = config.getOrgId();
+    this.apiKey = config.auth.key;
+    this.apiToken = config.auth.token;
 
-    this.httpServer = orgId + "." + domain;
-    this.domainName = domain;
+    this.domainName = config.options.domain;
+    this.httpServer = this.orgId + "." + this.domainName;
 
     this.withProxy = withProxy;
     this.useLtpa = useLtpa;
-
-    this.draftMode = draftMode;
 
     this.dsc = new DscClient(this);
     this.lec = new LecClient(this);
     this.mgmt = new MgmtClient(this);
     this.registry = new RegistryClient(this);
     this.rules = new RulesClient(this);
-    this.state = new StateClient(this, draftMode);
+    this.state = new StateClient(this);
 
-    this.log.info("[ApiClient:constructor] ApiClient initialized for organization : " + orgId);
+    this.log.info("[ApiClient:constructor] ApiClient initialized for organization : " + this.orgId);
   }
 
   callApi(method, expectedHttpCode, expectJsonContent, paths, body, params) {
