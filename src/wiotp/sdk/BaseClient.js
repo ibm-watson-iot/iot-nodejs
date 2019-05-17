@@ -12,6 +12,10 @@ import events from 'events';
 import mqtt from 'mqtt';
 import log from 'loglevel';
 
+import TinyCache from 'tinycache';
+
+const uuidv4 = require('uuid/v4');
+
 export default class BaseClient extends events.EventEmitter {
   constructor(config){
     super();
@@ -20,19 +24,20 @@ export default class BaseClient extends events.EventEmitter {
 
     this.config = config;
 
-    this.retryCount = 0;
+    this.reconnectLog = 0;
     this.isConnected = false;
+    this.mqtt = null;
+
+    this.lostConnectionLog = new TinyCache();
+
   }
 
   connect(){
-    if(this.mqtt) {
+    if(this.mqtt != null) {
       this.log.info("[BaseClient:connect] Reconnecting to " + this.config.getMqttHost() + " as " + this.config.getClientId());
       this.mqtt.reconnect();
       return;
     }
-
-    this.log.info(this.config.getMqttHost());
-    this.log.info(this.config.getMqttConfig());
 
     this.log.info("[BaseClient:connect] Connecting to " + this.config.getMqttHost() + " as " + this.config.getClientId());
 
@@ -50,32 +55,43 @@ export default class BaseClient extends events.EventEmitter {
      * Event 'packetreceive' - Emitted when the client receives any packet. This includes packets from subscribed topics as well as packets used by MQTT for managing subscriptions and connections
      */
 
-    // rely on the underlying MQTT client to handle reconnect
-    //this.mqtt.on('offline', () => {
-    //  this.log.warn("[BaseClient:connect] Iotfclient is offline. Retrying connection");
-    //
-    //  this.isConnected = false;
-    //  this.retryCount++;
-    //
-    //  if(this.retryCount < 5){
-    //    this.log.debug("[BaseClient:connect] Retry in 3 sec. Count : " + this.retryCount);
-    //    this.mqtt.options.reconnectPeriod = 3000;
-    //  } else if(this.retryCount < 10){
-    //    this.log.debug("[BaseClient:connect] Retry in 10 sec. Count : " + this.retryCount);
-    //    this.mqtt.options.reconnectPeriod = 10000;
-    //  } else {
-    //    this.log.debug("[BaseClient:connect] Retry in 60 sec. Count : " + this.retryCount);
-    //    this.mqtt.options.reconnectPeriod = 60000;
-    //  }
-    //});
-
     this.mqtt.on('connect', () => {
-      this.log.info("[BaseClient:onOffline] MQTT client is connected.");
+      this.log.info("[BaseClient:onConnect] MQTT client is connected.");
       this.emit('connect');
+
+      // less than 3 connect attempts you get put to a connect delay of 1 second
+      // after 3 connect attempts you get put to a connect delay of 2 seconds (3 seconds elapsed - 3 attempts @ 1 second intervals)
+      // after 6 connect attempts you get put to a connect delay of 5 seconds (3 + 6 seconds elapsed - 3 attempts @ 2 second intervals)
+      // after 9 connect attempts you get put to a connect delay of 20 seconds (3 + 6 + 15 seconds elapsed - 3 attempts @ 5 second intervals)
+      let connectionLostCount = this.lostConnectionLog.size;
+
+      // Default is 1 second reconnect period
+      let reconnectPeriod = 1000;
+      if (connectionLostCount >= 9) {
+        reconnectPeriod = 20000;
+      }
+      else if (connectionLostCount >= 6) {
+        reconnectPeriod = 5000;
+      }
+      else if (connectionLostCount >= 3) {
+        reconnectPeriod = 2000;
+      }
+
+      if (reconnectPeriod != this.mqtt.options.reconnectPeriod) {
+        this.log.info("[BaseClient:onOffline] Client has lost connection " + connectionLostCount + " times during the last 5 minutes, reconnect delay adjusted to " + reconnectPeriod + " ms");
+        if (connectionLostCount >= 9) {
+          this.log.warn("[BaseClient:onOffline] This client is likely suffering from clientId stealing (where two connections try to use the same client Id).");
+          this.emit("error", "Exceeded 9 connection losses in a 5 minute period.  Check for clientId conflict with another connection.")
+        }
+        this.mqtt.options.reconnectPeriod = reconnectPeriod;
+      }
+  
     });
 
     this.mqtt.on('reconnect', () => {
-      this.log.info("[BaseClient:onOffline] MQTT client is reconnecting.");
+      this.log.info("[BaseClient:onReconnect] MQTT client is reconnecting.");
+      // this.log.debug("[BaseClient:onReconnect] Resubscribe topics:");
+      // this.log.debug(this.mqtt._resubscribeTopics);
       this.emit('reconnect');
     });
 
@@ -85,8 +101,15 @@ export default class BaseClient extends events.EventEmitter {
     });
 
     this.mqtt.on('offline', () => {
-      this.log.info("[BaseClient:onOffline] MQTT client connection is offline.");
+      let newId = uuidv4();
+      this.log.info("[BaseClient:onOffline] MQTT client connection is offline. [" + newId + "]");
       this.emit('offline');
+      // Record the disconnect event for 5 minutes
+      this.lostConnectionLog.put( newId, '1', 300000 );
+
+      let connectionLostCount = this.lostConnectionLog.size;
+      this.log.info("[BaseClient:onOffline] Connection losses in the last 5 minutes: " + connectionLostCount);
+
     });
 
     this.mqtt.on('error', (error) => {
@@ -96,7 +119,7 @@ export default class BaseClient extends events.EventEmitter {
       if (errorMsg.indexOf('Not authorized') > -1) {
         this.log.error("[BaseClient:onError] One or more configuration parameters are wrong. Modify the configuration before trying to reconnect.");
         this.mqtt.end(false, () => {
-          this.log.info("[BaseClient:onError] Closed the MQTT connection to " + this.config.getMqttHost() + " due to client misconfiguration");
+          this.log.info("[BaseClient:onError] Closed the MQTT connection due to client misconfiguration");
         });
       }
       this.emit('error', error);
@@ -104,13 +127,13 @@ export default class BaseClient extends events.EventEmitter {
   }
 
   disconnect(){
-    if(!this.mqtt) {
+    if(this.mqtt == null) {
       this.log.info("[BaseClient:disconnect] Client was never connected");
       return;
     }
 
     this.mqtt.end(false, () => {
-      this.log.info("[BaseClient:disconnect] Closed the MQTT connection to " + this.config.getMqttHost());
+      this.log.info("[BaseClient:disconnect] Closed the MQTT connection due to disconnect() call");
     });
   }
 }

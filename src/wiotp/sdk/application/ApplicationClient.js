@@ -108,32 +108,51 @@ export default class ApplicationClient extends BaseClient {
   subscribe(topic, QoS) {
     QoS = QoS || 0;
 
-    if (!this.mqtt)
+    if (this.mqtt == null) {
       this.emit('error', "[ApplicationClient:subscribe] MQTT Client is not initialized - call connect() first");
+      return;
+    }
+    if (!this.mqtt.connected) {
+      this.emit('error', "[ApplicationClient:subscribe] MQTT Client is not connected - call connect() first");
+      return;
+    }
 
     this.log.debug("[ApplicationClient:subscribe] Subscribing to topic " + topic + " with QoS " + QoS);
 
     this.mqtt.subscribe(topic, { qos: parseInt(QoS) }, (err, granted) => {
       if (err == null) {
-        for (var grant in granted) {
+        for (var index in granted) {
+          let grant = granted[index];
           this.log.debug("[ApplicationClient:subscribe] Subscribed to " + grant.topic + " at QoS " + grant.qos);
         }
       } else {
         this.log.error("[ApplicationClient:subscribe] " + err);
+        this.emit("error", err);
       }
     });
 
   }
 
   unsubscribe(topic) {
-    if (!this.mqtt)
-      this.emit('error', "[ApplicationClient:subscribe] MQTT Client is not initialized - call connect() first");
+    if (this.mqtt == null) {
+      this.emit('error', "[ApplicationClient:unsubscribe] MQTT Client is not initialized - call connect() first");
+      return;
+    }
+    if (!this.mqtt.connected) {
+      this.emit('error', "[ApplicationClient:unsubscribe] MQTT Client is not connected - call connect() first");
+      return;
+    }
 
     this.log.debug("[ApplicationClient:unsubscribe] Unsubscribe: " + topic);
 
-    this.mqtt.unsubscribe(topic);
-    this.log.debug("[ApplicationClient:unsubscribe] Unsubscribed to: " + topic);
-
+    this.mqtt.unsubscribe(topic, (err) => {
+      if (err == null) {
+        this.log.debug("[ApplicationClient:unsubscribe] Unsubscribed from: " + topic);
+      } else {
+        this.log.error("[ApplicationClient:unsubscribe] " + err);
+        this.emit("error", err);
+      } 
+    });
   }
 
   publish(topic, msg, QoS, callback) {
@@ -144,9 +163,9 @@ export default class ApplicationClient extends BaseClient {
       // All JSON object, array will be encoded.
       msg = JSON.stringify(msg);
     }
+
     this.log.debug("[ApplicationClient:publish] Publish: " + topic + ", " + msg + ", QoS : " + QoS);
     this.mqtt.publish(topic, msg, { qos: parseInt(QoS) }, callback);
-
   }
 
   // ==========================================================================
@@ -173,7 +192,6 @@ export default class ApplicationClient extends BaseClient {
     qos = qos || 0;
 
     var topic = "iot-2/type/" + type + "/id/" + id + "/evt/" + event + "/fmt/" + format;
-    this.log.debug("[ApplicationClient:subscribeToDeviceEvents] Calling subscribe with QoS " + qos);
     this.subscribe(topic, qos);
     return this;
   }

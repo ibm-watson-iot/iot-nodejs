@@ -107,7 +107,7 @@ export default class ApplicationConfig {
             // Basic Connectivity
             keepalive: this.options.mqtt.keepAlive, // in seconds
             connectTimeout:  90*1000, // milliseconds, time to wait before a CONNACK is received
-            reconnectPeriod: 5000, // milliseconds, interval between two reconnections
+            reconnectPeriod: 1000, // milliseconds, interval between two reconnections
             queueQoSZero: true, // if connection is broken, queue outgoing QoS zero messages
             resubscribe: true, // if connection is broken and reconnects, subscribed topics are automatically subscribed again
 

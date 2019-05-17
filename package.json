@@ -13,6 +13,7 @@
     "format": "^0.2.2",
     "loglevel": "^1.6.1",
     "mqtt": "^2.18.8",
+    "tinycache": "^1.1.2",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
