@@ -11,6 +11,13 @@
 import { isDefined } from '../util';
 import { default as BaseClient } from '../BaseClient';
 import { default as ApiClient } from '../api/ApiClient';
+import { default as RegistryClient } from '../api/RegistryClient';
+import { default as MgmtClient } from '../api/MgmtClient';
+import { default as LecClient } from '../api/LecClient';
+import { default as DscClient } from '../api/DscClient';
+import { default as RulesClient } from '../api/RulesClient';
+import { default as StateClient } from '../api/StateClient';
+
 import { default as ApplicationConfig } from './ApplicationConfig';
 
 const DEVICE_EVT_RE         = /^iot-2\/type\/(.+)\/id\/(.+)\/evt\/(.+)\/fmt\/(.+)$/;
@@ -23,16 +30,22 @@ const DEVICE_MON_RE         = /^iot-2\/type\/(.+)\/id\/(.+)\/mon$/;
 const APP_MON_RE            = /^iot-2\/app\/(.+)\/mon$/;
 
 export default class ApplicationClient extends BaseClient {
-  constructor(config, useLtpa, withProxy) {
+  constructor(config, useLtpa) {
     if (!config instanceof ApplicationConfig) {
       throw new Error("Config must be an instance of ApplicationConfig");
     }
     super(config);
     this.useLtpa = useLtpa;
-    this.withProxy = withProxy;
     
     if (config.getOrgId() != "quickstart") {
-      this.apiClient = new ApiClient(config, this.withProxy, this.useLtpa);
+      this._apiClient = new ApiClient(this.config, this.useLtpa);
+
+      this.dsc = new DscClient(this._apiClient);
+      this.lec = new LecClient(this._apiClient);
+      this.mgmt = new MgmtClient(this._apiClient);
+      this.registry = new RegistryClient(this._apiClient);
+      this.rules = new RulesClient(this._apiClient);
+      this.state = new StateClient(this._apiClient);
     }
 
     this.log.debug("[ApplicationClient:constructor] ApplicationClient initialized for organization : " + config.getOrgId());
@@ -100,72 +113,6 @@ export default class ApplicationClient extends BaseClient {
       // catch all which logs the receipt of an unexpected message
       this.log.warn("[ApplicationClient:onMessage] Message received on unexpected topic" + ", " + topic + ", " + payload);
     });
-  }
-
-
-  _subscribe(topic, QoS, callback) {
-    if (this.mqtt == null) {
-      this.emit('error', "[ApplicationClient:subscribe] MQTT Client is not initialized - call connect() first");
-      return;
-    }
-    if (!this.mqtt.connected) {
-      this.emit('error', "[ApplicationClient:subscribe] MQTT Client is not connected - call connect() first");
-      return;
-    }
-
-    QoS = QoS || 0;
-    callback = callback || function (err, granted) {
-      if (err == null) {
-        for (var index in granted) {
-          let grant = granted[index];
-          this.log.debug("[ApplicationClient:subscribe] Subscribed to " + grant.topic + " at QoS " + grant.qos);
-        }
-      } else {
-        this.log.error("[ApplicationClient:subscribe] " + err);
-        this.emit("error", err);
-      }
-    };
-
-    this.log.debug("[ApplicationClient:subscribe] Subscribing to topic " + topic + " with QoS " + QoS);
-    this.mqtt.subscribe(topic, { qos: parseInt(QoS) }, callback);
-  }
-
-
-  _unsubscribe(topic, callback) {
-    if (this.mqtt == null) {
-      this.emit('error', "[ApplicationClient:unsubscribe] MQTT Client is not initialized - call connect() first");
-      return;
-    }
-    if (!this.mqtt.connected) {
-      this.emit('error', "[ApplicationClient:unsubscribe] MQTT Client is not connected - call connect() first");
-      return;
-    }
-
-    callback = callback || function (err) {
-      if (err == null) {
-        this.log.debug("[ApplicationClient:unsubscribe] Unsubscribed from: " + topic);
-      } else {
-        this.log.error("[ApplicationClient:unsubscribe] " + err);
-        this.emit("error", err);
-      } 
-    };
-
-    this.log.debug("[ApplicationClient:unsubscribe] Unsubscribe: " + topic);
-    this.mqtt.unsubscribe(topic, callback);
-  }
-
-
-  _publish(topic, msg, QoS, callback) {
-    QoS = QoS || 0;
-
-    if ((typeof msg === 'object' || typeof msg === 'boolean' || typeof msg === 'number') && !Buffer.isBuffer(msg)) {
-      // mqtt library does not support sending JSON/Boolean/Number data. So stringifying it.
-      // All JSON object, array will be encoded.
-      msg = JSON.stringify(msg);
-    }
-
-    this.log.debug("[ApplicationClient:publish] Publish: " + topic + ", " + msg + ", QoS : " + QoS);
-    this.mqtt.publish(topic, msg, { qos: parseInt(QoS) }, callback);
   }
 
 

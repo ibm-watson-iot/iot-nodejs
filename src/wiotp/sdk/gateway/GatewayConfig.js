@@ -8,7 +8,15 @@
  *****************************************************************************
  *
  */
+import { default as DeviceConfig } from '../device/DeviceConfig';
 
-export { default as DeviceClient } from './DeviceClient';
-export { default as DeviceConfig } from './DeviceConfig';
+export default class GatewayConfig extends DeviceConfig{
+    constructor(identity, auth, options) {
+        super(identity, auth, options);
+    }
 
+    getClientId() {
+        return "g:" + this.identity.orgId + ":" + this.identity.typeId + ":" + this.identity.deviceId;
+    }
+
+};

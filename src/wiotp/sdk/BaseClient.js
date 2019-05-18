@@ -31,12 +31,14 @@ export default class BaseClient extends events.EventEmitter {
 
   }
 
+
   isConnected() {
     if (this.mqtt == null) {
       return false;
     }
     return this.mqtt.connected;
   }
+
 
   connect(){
     if(this.mqtt != null) {
@@ -132,6 +134,7 @@ export default class BaseClient extends events.EventEmitter {
     });
   }
 
+
   disconnect(){
     if(this.mqtt == null) {
       this.log.info("[BaseClient:disconnect] Client was never connected");
@@ -142,4 +145,71 @@ export default class BaseClient extends events.EventEmitter {
       this.log.info("[BaseClient:disconnect] Closed the MQTT connection due to disconnect() call");
     });
   }
+
+
+  _subscribe(topic, QoS, callback) {
+    if (this.mqtt == null) {
+      this.emit('error', "[BaseClient:_subscribe] MQTT Client is not initialized - call connect() first");
+      return;
+    }
+    if (!this.mqtt.connected) {
+      this.emit('error', "[BaseClient:_subscribe] MQTT Client is not connected - call connect() first");
+      return;
+    }
+
+    QoS = QoS || 0;
+    callback = callback || function (err, granted) {
+      if (err == null) {
+        for (var index in granted) {
+          let grant = granted[index];
+          this.log.debug("[BaseClient:_subscribe] Subscribed to " + grant.topic + " at QoS " + grant.qos);
+        }
+      } else {
+        this.log.error("[BaseClient:_subscribe] " + err);
+        this.emit("error", err);
+      }
+    };
+
+    this.log.debug("[BaseClient:_subscribe] Subscribing to topic " + topic + " with QoS " + QoS);
+    this.mqtt.subscribe(topic, { qos: parseInt(QoS) }, callback);
+  }
+
+
+  _unsubscribe(topic, callback) {
+    if (this.mqtt == null) {
+      this.emit('error', "[BaseClient:_unsubscribe] MQTT Client is not initialized - call connect() first");
+      return;
+    }
+    if (!this.mqtt.connected) {
+      this.emit('error', "[BaseClient:_unsubscribe] MQTT Client is not connected - call connect() first");
+      return;
+    }
+
+    callback = callback || function (err) {
+      if (err == null) {
+        this.log.debug("[BaseClient:_unsubscribe] Unsubscribed from: " + topic);
+      } else {
+        this.log.error("[BaseClient:_unsubscribe] " + err);
+        this.emit("error", err);
+      } 
+    };
+
+    this.log.debug("[BaseClient:_unsubscribe] Unsubscribe: " + topic);
+    this.mqtt.unsubscribe(topic, callback);
+  }
+
+
+  _publish(topic, msg, QoS, callback) {
+    QoS = QoS || 0;
+
+    if ((typeof msg === 'object' || typeof msg === 'boolean' || typeof msg === 'number') && !Buffer.isBuffer(msg)) {
+      // mqtt library does not support sending JSON/Boolean/Number data. So stringifying it.
+      // All JSON object, array will be encoded.
+      msg = JSON.stringify(msg);
+    }
+
+    this.log.debug("[BaseClient:_publish] Publish: " + topic + ", " + msg + ", QoS : " + QoS);
+    this.mqtt.publish(topic, msg, { qos: parseInt(QoS) }, callback);
+  }
+
 }

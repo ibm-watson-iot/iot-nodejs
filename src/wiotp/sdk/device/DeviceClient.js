@@ -8,65 +8,46 @@
  *****************************************************************************
  *
  */
-import format from 'format';
-
-import { isDefined, isString } from '../util';
+import { isDefined } from '../util';
 import { default as BaseClient } from '../BaseClient';
+import { default as DeviceConfig } from './DeviceConfig';
 
 const WILDCARD_TOPIC = 'iot-2/cmd/+/fmt/+';
 const CMD_RE = /^iot-2\/cmd\/(.+)\/fmt\/(.+)$/;
-const QUICKSTART_ORG_ID = "quickstart";
+
+const util = require('util');
 
 export default class DeviceClient extends BaseClient {
 
   constructor(config){
+    if (!config instanceof DeviceConfig) {
+      throw new Error("Config must be an instance of DeviceConfig");
+    }
     super(config);
 
-    if(!isDefined(config.type)){
-      throw new Error('[DeviceClient:constructor] config must contain type');
-    }
-    else if(!isString(config.type)){
-      throw new Error('[DeviceClient:constructor] type must be a string');
-    }
-
-    if(config.org !== QUICKSTART_ORG_ID){
-      this.mqttConfig.username = 'use-token-auth';
-    }
-
-    this.org = config.org;
-    this.typeId = config.type;
-    this.deviceId = config.id;
-    this.deviceToken = config['auth-token'];
-    this.mqttConfig.clientId = "d:" + config.org + ":" + config.type + ":" + config.id;
-
-    this.log.info("[DeviceClient:constructor] DeviceClient initialized for organization : " + config.org + " for ID : "+config.id);
+    this.log.debug("[DeviceClient:constructor] DeviceClient initialized for " + config.getClientId());
   }
 
-  connect(QoS){
-    QoS = QoS || 2;
+  _commandSubscriptionCallback(err, granted) {
+    if (err == null) {
+      for (var index in granted) {
+        let grant = granted[index];
+        this.log.debug("[DeviceClient:connect] Subscribed to device commands on " + grant.topic + " at QoS " + grant.qos);
+      }
+    } else {
+      this.log.error("[DeviceClient:connect] Unable to establish subscription for device commands: " + err);
+      this.emit("error", new Error("Unable to establish subscription for device commands: " + err));
+    }
+  }
+
+  connect(){
     super.connect();
 
-    var mqtt = this.mqtt;
-
     this.mqtt.on('connect', () => {
-      this.isConnected = true;
-      if(isDefined(this.mqttConfig.servername)){
-        this.log.info("[DeviceClient:connect] DeviceClient Connected using Client Side Certificates");
-      }
-      else {
-        this.log.info("[DeviceClient:connect] DeviceClient Connected");
-      }
-      if(this.retryCount === 0){
-        this.emit('connect');
-      } else {
-        this.emit('reconnect');
-      }
-
-      //reset the counter to 0 incase of reconnection
-      this.retryCount = 0;
-
-      if(!this.isQuickstart){
-        mqtt.subscribe(WILDCARD_TOPIC, { qos: parseInt(QoS) }, function(){});
+      // On connect establish a subscription for commands sent to this device (but not if connecting to quickstart)
+      if(!this.config.isQuickstart()){
+        // You need to bind a particular this context to the method before you can use it as a callback
+        this.mqtt.subscribe(WILDCARD_TOPIC, { qos: 1 }, this._commandSubscriptionCallback.bind(this));
       }
     });
 
@@ -75,36 +56,23 @@ export default class DeviceClient extends BaseClient {
 
       let match = CMD_RE.exec(topic);
 
-      if(match){
-        this.emit('command',
-          match[1],
-          match[2],
-          payload,
-          topic
-        );
+      if (match) {
+        this.emit('command', match[1], match[2], payload, topic);
       }
     });
   }
 
-  publish(eventType, eventFormat, payload, qos, callback){
-    if (!this.isConnected) {
-      this.log.error("[DeviceClient:publish] Client is not connected");
-      //throw new Error();
-      //instead of throwing error, will emit 'error' event.
-      this.emit('error', "[DeviceClient:publish] Client is not connected");
+  publishEvent(eventId, format, data, qos, callback){
+    qos = qos || 0;
+
+    if (!isDefined(eventId) || !isDefined(format)) {
+      this.log.error("[DeviceClient:publishEvent] Required params for publishEvent not present");
+      this.emit('error', "[DeviceClient:publishEvent] Required params for publishEvent not present");
+      return;
     }
 
-    let topic = format("iot-2/evt/%s/fmt/%s", eventType, eventFormat);
-    let QOS = qos || 0;
-
-    if( (typeof payload === 'object' || typeof payload === 'boolean' || typeof payload === 'number') && !Buffer.isBuffer(payload) ) {
-        // mqtt library does not support sending JSON/boolean/number data. So stringifying it.
-        // All JSON object, array will be encoded.
-        payload = JSON.stringify(payload);
-    }
-    this.log.debug("[DeviceClient:publish] Publishing to topic "+topic+" with payload "+payload+" with QoS "+QOS);
-    this.mqtt.publish(topic,payload,{qos: parseInt(QOS)}, callback);
-
+    let topic = util.format("iot-2/evt/%s/fmt/%s", eventId, format);
+    this._publish(topic, data, qos, callback);
     return this;
   }
 }
