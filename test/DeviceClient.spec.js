@@ -1,271 +1,267 @@
 /**
  *****************************************************************************
- Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
+ Copyright (c) 2019 IBM Corporation and other Contributors.
  All rights reserved. This program and the accompanying materials
  are made available under the terms of the Eclipse Public License v1.0
  which accompanies this distribution, and is available at
  http://www.eclipse.org/legal/epl-v10.html
- Contributors:
- Tim-Daniel Jacobi - Initial Contribution
  *****************************************************************************
  *
  */
-import { DeviceClient } from '../src/wiotp/sdk/device';
-import { expect } from 'chai';
-import sinon from 'sinon';
-import mqtt from 'mqtt';
+import { ApplicationConfig, ApplicationClient } from '../src/wiotp/sdk/application';
+import { DeviceConfig, DeviceClient } from '../src/wiotp/sdk/device';
+import { assert } from 'chai';
+import { step } from 'mocha-steps';
 
+const uuidv4 = require('uuid/v4');
+
+// Turn off console output
 console.info = () => {};
 
-describe('IotfDevice', () => {
+describe('WIoTP Device Capabilities', function() {
+  
+  let appConfig = ApplicationConfig.parseEnvVars();
 
-  describe('Constructor', () => {
+  describe("Event Publication", function() {
+    let testTypeId = "iotnodejs-test";
+    let testDeviceId = uuidv4();
+    let testEventId = "testEvent";
+    let testEventFormat = "json";
+    let testEventData = "{'foo': 'bar'}";
+    let testQos = 1;
 
-    it('should throw an error if instantiated without config', () => {
-      expect(() => {
-        let client = new DeviceClient();
-      }).to.throw(/missing properties/);
+    let appClient = null;
+    let deviceConfig = null;
+    let deviceClient = null;
+
+    before("Register the test device", function(done){
+      this.timeout(10000);
+      appClient = new ApplicationClient(appConfig);
+      
+      // Register the device type
+      appClient.registry.registerDeviceType(testTypeId)
+      .catch(function(err){
+        if (err.response.status != 409) {
+          // Anything other than conflict is bad!
+          throw err;
+        }
+        console.info("device type already exists, carry on!")
+      })
+      .then(function(result) {
+        // Register the device
+        return appClient.registry.registerDevice(testTypeId, testDeviceId);
+      })
+      .then(function(deviceDetails) {
+        console.info(deviceDetails);
+        let identity = {orgId: appConfig.getOrgId(), typeId: deviceDetails.typeId, deviceId: deviceDetails.deviceId};
+        let auth = {token: deviceDetails.authToken}
+        let options = {logLevel: "info"};
+        deviceConfig = new DeviceConfig(identity, auth, options);
+        deviceClient = new DeviceClient(deviceConfig);
+        done();
+      })
+      .catch(function(err){
+        done(err);
+      });
+    })
+    
+    afterEach("Remove error listener(s)", function() {
+      appClient.removeAllListeners("error");
+      deviceClient.removeAllListeners("error");
     });
 
-    it('should throw an error if org is not present', () => {
-      expect(() => {
-        let client = new DeviceClient({});
-      }).to.throw(/config must contain org/);
+    step("Connect application within 5 seconds", function(done){
+      this.timeout(5000);
+      appClient.on("connect", done);
+      appClient.on("error", done);
+      appClient.connect();
     });
 
-    it('should throw an error if org is not a string', () => {
-      expect(() => {
-        let client = new DeviceClient({org: false});
-      }).to.throw(/org must be a string/);
+    step("Connect device within 5 seconds", function(done){
+      this.timeout(5000);
+      deviceClient.on("connect", done);
+      deviceClient.on("error", done);
+      deviceClient.connect();
     });
 
-    describe('Quickstart mode', () => {
-      it('should throw an error if id is not present', () => {
-        expect(() => {
-          let client = new DeviceClient({org:'quickstart'});
-        }).to.throw(/config must contain id/);
-      });
-
-      it('should throw an error if type is not present', () => {
-        expect(() => {
-          let client = new DeviceClient({org:'quickstart', id:'123'});
-        }).to.throw(/config must contain type/);
-      });
-
-      it('should return an instance if org, id and type are specified', () => {
-        let client;
-        expect(() => {
-          client = new DeviceClient({org:'quickstart', id:'123', type:'123'});
-        }).not.to.throw();
-        expect(client).to.be.instanceof(DeviceClient);
-      });
-
-      it('should run in quickstart mode if org is set to "quickstart"', () => {
-        let client = new DeviceClient({org: 'quickstart', type: 'mytype', id: '3215'});
-        expect(client.isQuickstart).to.equal(true);
-        expect(client.mqttConfig.username).to.be.undefined;
-        expect(client.mqttConfig.password).to.be.undefined;
-      });
-    });
-
-    describe('Registered mode', () => {
-      it('should throw an error if id is not present', () => {
-        expect(() => {
-          let client = new DeviceClient({org:'regorg'});
-        }).to.throw(/config must contain id/);
-      });
-
-      it('should throw an error if auth-token is not present', () => {
-        expect(() => {
-          let client = new DeviceClient({org:'regorg', id:'123'});
-        }).to.throw(/config must contain auth-token/);
-      });
-
-      it('should throw an error if type is not present', () => {
-        expect(() => {
-          let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123'});
-        }).to.throw(/config must contain type/);
-      });
-
-      it('should run in registered mode if org is not set to "quickstart"', () => {
-        let client = new DeviceClient({org: 'qs', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
-        expect(client.isQuickstart).to.equal(false);
-      });
-      it.skip('should throw an error if path to ca-cert is not provided', () => {
-        expect(() => {
-          let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123',
-                                         'auth-method': 'abc', 'use-client-certs':true,});
-        }).to.throw(/config must specify path to self-signed CA certificate/);
-      });
-      it.skip('should throw an error if path to client-cert is not provided', () => {
-        expect(() => {
-          let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123',
-                                'auth-method': 'abc', 'use-client-certs':true,'client-ca': './IoTFoundation.pem'});
-        }).to.throw(/config must specify path to self-signed client certificate/);
-      });
-      it.skip('should throw an error if path to client-key is not provided', () => {
-        expect(() => {
-          let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123',
-           'auth-method': 'abc', 'use-client-certs':true,'client-ca': './IoTFoundation.pem', 'client-cert':'./IoTFoundation.pem'});
-        }).to.throw(/config must specify path to client key/);
-      });
-    });
-  });
-
-  describe('.connect()', () => {
-    afterEach(() => {
-      if(mqtt.connect.restore){
-        mqtt.connect.restore();
+    step("Subscribe to device events", function(done){
+      let onSubscribe = function(err, granted) {
+        if (err != null) {
+          done(err);
+        }
+        done();
       }
+      appClient.on("error", done);
+      appClient.subscribeToEvents(testTypeId, testDeviceId, testEventId, testEventFormat, testQos, onSubscribe);
     });
 
-    it.skip('should connect to the correct broker', () => {
-      let mqttConnect = sinon.stub(mqtt, 'connect').returns({
-        on: function(){}
+    step("Publish & recieve device event within 10 seconds", function(done){
+      this.timeout(10000);
+
+      let onEventSent = function(err) {
+        if (err != null) {
+          done(err);
+        }
+      }
+
+      let onEventReceived = function(typeId, deviceId, eventId, format, payload) {
+        assert(typeId == testTypeId, "Type ID does not match");
+        assert(deviceId == testDeviceId, "Device ID does not match");
+        assert(eventId == testEventId, "Event ID does not match");
+        assert(format == testEventFormat, "Format does not match");
+        assert(payload == testEventData, "Payload does not match");
+        done();
+      }
+
+      deviceClient.on("error", done);
+      appClient.on("error", done);
+      appClient.on("deviceEvent", onEventReceived);
+
+      deviceClient.publishEvent(testEventId, testEventFormat, testEventData, testQos, onEventSent);
+    });
+
+    step("Disconnect the device MQTT client", function(done) {
+      deviceClient.on("error", done);
+      deviceClient.on("close", function() {
+        assert(deviceClient.isConnected() == false, "Device is still connected");
+        done();
       });
-
-      let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-      client.connect();
-      client.log.setLevel('silent');
-      client.log.setLevel('silent');
+      deviceClient.disconnect();
     });
 
-    it.skip('should connect to the broker with client certificates', () => {
-      let mqttConnect = sinon.stub(mqtt, 'connect').returns({
-        on: function(){}
+    step("Disconnect the application MQTT client", function(done) {
+      appClient.on("error", done);
+      appClient.on("close", function() {
+        assert(appClient.isConnected() == false, "Application is still connected");
+        done();
       });
-
-      let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123',
-      'auth-method': 'token', 'use-client-certs':true, 'client-ca':'./IoTFoundation.pem',
-      'client-cert':'./IoTFoundation.pem', 'client-key':'./IoTFoundation.pem'});
-      client.connect();
-      client.log.setLevel('silent');
-      client.log.setLevel('silent');
+      appClient.disconnect();
     });
 
-    it.skip('should connect to the broker with client-key passphrase', () => {
-      let mqttConnect = sinon.stub(mqtt, 'connect').returns({
-        on: function(){}
-      });
+    after("Delete the test device & ensure the the MQTT clients are disconnected", function() {
+      if (appClient != null && appClient.isConnected()) {
+        appClient.disconnect();
+      }
+      if (deviceClient != null && deviceClient.isConnected()) {
+        deviceClient.disconnect();
+      }
 
-      let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123',
-      'auth-method': 'token', 'use-client-certs':true, 'client-ca':'./IoTFoundation.pem',
-      'client-cert':'./IoTFoundation.pem', 'client-key':'./IoTFoundation.pem', 'client-key-passphrase':'password'});
-      client.connect();
-      client.log.setLevel('silent');
-      client.log.setLevel('silent');
+      appClient.registry.unregisterDevice(testTypeId, testDeviceId);
     });
-
-    it.skip('should set up a callback for the "offline" event', () => {
-      let on = sinon.spy();
-      let mqttConnect = sinon.stub(mqtt, 'connect').returns({
-        on: on
-      });
-
-      let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-      client.connect();
-      client.log.setLevel('silent');
-      client.log.setLevel('silent');
-
-      expect(on.calledWith('offline')).to.be.true;
-    });
-
-    it.skip('should set up a callback for the "close" event', () => {
-      let on = sinon.spy();
-      let mqttConnect = sinon.stub(mqtt, 'connect').returns({
-        on: on
-      });
-
-      let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-      client.connect();
-      client.log.setLevel('silent');
-
-      expect(on.calledWith('close')).to.be.true;
-    });
-
-    it.skip('should set up a callback for the "error" event', () => {
-      let on = sinon.spy();
-      let mqttConnect = sinon.stub(mqtt, 'connect').returns({
-        on: on
-      });
-
-      let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-      client.connect();
-      client.log.setLevel('silent');
-
-      expect(on.calledWith('error')).to.be.true;
-    });
-
-    it.skip('should set up a callback for the "connect" event', () => {
-      let on = sinon.spy();
-      let mqttConnect = sinon.stub(mqtt, 'connect').returns({
-        on: on
-      });
-
-      let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-      client.connect();
-      client.log.setLevel('silent');
-
-      expect(on.calledWith('connect')).to.be.true;
-    });
-
-    it.skip('should set up a callback for the "message" event', () => {
-      let on = sinon.spy();
-      let mqttConnect = sinon.stub(mqtt, 'connect').returns({
-        on: on
-      });
-
-      let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-      client.connect();
-      client.log.setLevel('silent');
-
-      expect(on.calledWith('message')).to.be.true;
-    });
-
   });
 
-  describe('.publish()', () => {
+  describe("Command Subscription", function() {
+    let testTypeId = "iotnodejs-test";
+    let testDeviceId = uuidv4();
+    let testCommandId = "testCommand";
+    let testCommandFormat = "json";
+    let testCommandData = "{'foo': 'bar'}";
+    let testQos = 1;
 
-    it.skip('should publish event', () => {
+    let appClient = null;
+    let deviceConfig = null;
+    let deviceClient = null;
 
-      let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-      client.connect();
-      client.log.setLevel('silent');
-      //simulate connect
-      client.isConnected = true;
-
-      let pubSpy = sinon.spy(client.mqtt,'publish');
-
-      let QOS = 2;
-      client.publish('stat','json','test',QOS);
-
-      expect(pubSpy.calledWith('iot-2/evt/stat/fmt/json','test',{qos: QOS})).to.be.true;
+    before("Register the test device", function(done){
+      this.timeout(10000);
+      appClient = new ApplicationClient(appConfig);
+      
+      // Register the device type
+      appClient.registry.registerDeviceType(testTypeId)
+      .catch(function(err){
+        if (err.response.status != 409) {
+          // Anything other than conflict is bad!
+          throw err;
+        }
+        console.info("device type already exists, carry on!")
+      })
+      .then(function(result) {
+        // Register the device
+        return appClient.registry.registerDevice(testTypeId, testDeviceId);
+      })
+      .then(function(deviceDetails) {
+        console.info(deviceDetails);
+        let identity = {orgId: appConfig.getOrgId(), typeId: deviceDetails.typeId, deviceId: deviceDetails.deviceId};
+        let auth = {token: deviceDetails.authToken}
+        let options = {logLevel: "info"};
+        deviceConfig = new DeviceConfig(identity, auth, options);
+        deviceClient = new DeviceClient(deviceConfig);
+        done();
+      })
+      .catch(function(err){
+        done(err);
+      });
+    })
+    
+    afterEach("Remove error listener(s)", function() {
+      appClient.removeAllListeners("error");
+      deviceClient.removeAllListeners("error");
     });
 
-    it('should throw exception when client is not connected', () => {
-      expect(() => {
-          let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-          client.publish('stat','json','test');
-
-      }).to.throw(/Client is not connected/);
-
+    step("Connect application within 5 seconds", function(done){
+      this.timeout(5000);
+      appClient.on("connect", done);
+      appClient.on("error", done);
+      appClient.connect();
     });
 
-    it.skip('should publish event with default QOS 0 if qos is not provided', () => {
-
-      let client = new DeviceClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-      client.connect();
-      client.log.setLevel('silent');
-      //simulate connect
-      client.isConnected = true;
-
-      let pubSpy = sinon.spy(client.mqtt,'publish');
-
-      client.publish('stat','json','test');
-
-      let expectedQOS = 0;
-      expect(pubSpy.calledWith('iot-2/evt/stat/fmt/json','test',{qos: expectedQOS})).to.be.true;
+    step("Connect device within 5 seconds", function(done){
+      this.timeout(5000);
+      deviceClient.on("connect", done);
+      deviceClient.on("error", done);
+      deviceClient.connect();
     });
 
+    step("Publish & recieve device command within 10 seconds", function(done){
+      this.timeout(10000);
+      let onCommandSent = function(err) {
+        if (err != null) {
+          done(err);
+        }
+      }
+
+      let onCommandReceived = function(commandId, format, payload) {
+        assert(commandId == testCommandId, "Command ID does not match");
+        assert(format == testCommandFormat, "Format does not match");
+        assert(payload == testCommandData, "Payload does not match");
+        done();
+      }
+
+      deviceClient.on("error", done);
+      appClient.on("error", done);
+      deviceClient.on("command", onCommandReceived);
+
+      appClient.publishCommand(testTypeId, testDeviceId, testCommandId, testCommandFormat, testCommandData, testQos, onCommandSent);
+    });
+
+    step("Disconnect the device MQTT client", function(done) {
+      deviceClient.on("error", done);
+      deviceClient.on("close", function() {
+        assert(deviceClient.isConnected() == false, "Device is still connected");
+        done();
+      });
+      deviceClient.disconnect();
+    });
+
+    step("Disconnect the application MQTT client", function(done) {
+      appClient.on("error", done);
+      appClient.on("close", function() {
+        assert(appClient.isConnected() == false, "Application is still connected");
+        done();
+      });
+      appClient.disconnect();
+    });
+
+    after("Delete the test device & ensure the the MQTT clients are disconnected", function() {
+      if (appClient != null && appClient.isConnected()) {
+        appClient.disconnect();
+      }
+      if (deviceClient != null && deviceClient.isConnected()) {
+        deviceClient.disconnect();
+      }
+
+      appClient.registry.unregisterDevice(testTypeId, testDeviceId);
+    });    
   });
+
 });

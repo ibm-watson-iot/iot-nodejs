@@ -8,222 +8,107 @@
  *****************************************************************************
  *
  */
-import format from 'format';
-
-import { isDefined, isString } from '../util';
 import { default as BaseClient } from '../BaseClient';
+import { default as GatewayConfig } from './GatewayConfig';
 
 const CMD_RE = /^iot-2\/type\/(.+)\/id\/(.+)\/cmd\/(.+)\/fmt\/(.+)$/;
-const QUICKSTART_ORG_ID = "quickstart";
+
+const util = require('util');
 
 export default class GatewayClient extends BaseClient {
 
   constructor(config){
-    super(config);
-
-    if(!isDefined(config.type)){
-      throw new Error('[GatewayClient:constructor] config must contain type');
+    if (!config instanceof GatewayConfig) {
+      throw new Error("Config must be an instance of GatewayConfig");
     }
-    else if(!isString(config.type)){
-      throw new Error('[GatewayClient:constructor] type must be a string');
-    }
-
-    if(config.org === QUICKSTART_ORG_ID){
+    if (config.isQuickstart()) {
       throw new Error('[GatewayClient:constructor] Quickstart not supported in Gateways');
     }
+    super(config);
 
-    this.mqttConfig.username = 'use-token-auth';
-
-    this.org = config.org;
-    this.type = config.type;
-    this.id = config.id;
-    this.deviceToken = config['auth-token'];
-    this.mqttConfig.clientId = "g:" + config.org + ":" + config.type + ":" + config.id;
-
-    this.subscriptions = [];
-
-    this.log.info("[GatewayClient:constructor] GatewayClient initialized for organization : " + config.org + " for ID : "+config.id);
+    this.log.debug("[GatewayClient:constructor] GatewayClient initialized for " + config.getClientId());
   }
 
-  connect(QoS){
-    QoS = QoS || 0;
+
+  connect(){
     super.connect();
 
-    var mqtt = this.mqtt;
-
     this.mqtt.on('connect', () => {
-      this.isConnected = true;
-      if(isDefined(this.mqttConfig.servername)){
-        this.log.info("[GatewayClient:connect] GatewayClient Connected using Client Side Certificates");
-      }
-      else {
-        this.log.info("[GatewayClient:connect] GatewayClient Connected");
-      }
-      if(this.retryCount === 0){
-        this.emit('connect');
-      } else {
-        this.emit('reconnect');
-      }
-
-      //reset the counter to 0 incase of reconnection
-      this.retryCount = 0;
-
-      try {
-        for(var i = 0, l = this.subscriptions.length; i < l; i++) {
-          mqtt.subscribe(this.subscriptions[i], {qos: parseInt(QoS)});
-        }
-
-      }
-      catch (err){
-        this.log.error("[GatewayClient:connect] Error while trying to subscribe : "+err);
-      }
-
-      //subscribe to all the commands for this gateway by default
-      /*let gatewayWildCardTopic = format("iot-2/type/%s/id/%s/cmd/+/fmt/+", this.type, this.id);
-      mqtt.subscribe(gatewayWildCardTopic, { qos: 2 }, function(){});*/
-
+      // This gateway client implemention does not automatically subscribe to any commands!?
     });
 
     this.mqtt.on('message', (topic, payload) => {
       this.log.debug("[GatewayClient:onMessage] Message received on topic : "+ topic + " with payload : "+ payload);
 
       let match = CMD_RE.exec(topic);
-
       if(match){
-        this.emit('command',
-          match[1],
-          match[2],
-          match[3],
-          match[4],
-          payload,
-          topic
-        );
+        this.emit('command', match[1], match[2], match[3], match[4], payload, topic);
       }
     });
   }
 
-  publishGatewayEvent(eventType, eventFormat, payload, qos, callback){
-    return this.publishEvent(this.type, this.id, eventType, eventFormat, payload, qos, callback);
+
+  publishEvent(eventId, format, payload, qos, callback){
+    return this._publishEvent(this.config.identity.typeId, this.config.identity.deviceId, eventId, format, payload, qos, callback);
   }
 
-  publishDeviceEvent(deviceType, deviceId, eventType, eventFormat, payload, qos, callback){
-    return this.publishEvent(deviceType, deviceId, eventType, eventFormat, payload, qos, callback);
+
+  publishDeviceEvent(typeid, deviceId, eventid, format, payload, qos, callback){
+    return this._publishEvent(typeId, deviceId, eventid, format, payload, qos, callback);
   }
 
-  publishEvent(type, id, eventType, eventFormat, payload, qos, callback){
-    if (!this.isConnected) {
-      this.log.error("[GatewayClient:publishEvent] Client is not connected");
-      //throw new Error("Client is not connected");
-      //instead of throwing error, will emit 'error' event.
-      this.emit('error', "[GatewayClient:publishEvent] Client is not connected");
-    }
 
-    if(!isDefined(payload)){
-      this.log.error("[GatewayClient:publishEvent] Payload is undefined");
-      payload = "";
-    }
-
-    let topic = format("iot-2/type/%s/id/%s/evt/%s/fmt/%s", type, id, eventType, eventFormat);
-    let QoS = qos || 0;
-
-    if( (typeof payload === 'object' || typeof payload === 'boolean' || typeof payload === 'number') && !Buffer.isBuffer(payload) ) {
-      // mqtt library does not support sending JSON data. So stringifying it.
-      // All JSON object, array will be encoded.
-      payload = JSON.stringify(payload);
-    }
-
-    this.log.debug("[GatewayClient:publishEvent] Publishing to topic : "+ topic + " with payload : "+payload+" with QoS : "+QoS);
-    this.mqtt.publish(topic,payload,{qos: parseInt(QoS)}, callback);
-
+  _publishEvent(typeId, deviceId, eventId, format, data, qos, callback){
+    let topic = util.format("iot-2/type/%s/id/%s/evt/%s/fmt/%s", typeId, deviceId, eventId, format);
+    qos = qos || 0;
+    this._publish(topic, data, qos, callback);
     return this;
   }
 
-  subscribeToDeviceCommand(type, id, command, format, qos){
-    type = type || '+';
-    id = id || '+';
-    command = command || '+';
+
+  subscribeToDeviceCommands(typeId, deviceId, commandId, format, qos, callback){
+    typeId = typeId || '+';
+    deviceId = deviceId || '+';
+    commandId = commandid || '+';
     format = format || '+';
     qos = qos || 0;
 
-    let topic = "iot-2/type/" + type + "/id/" + id + "/cmd/"+ command + "/fmt/" + format;
-
-    this.log.debug("[GatewayClient:subscribeToDeviceCommand] Subscribing to topic: "+topic+" with QoS: " +qos);
-    this.subscribe(topic,qos);
-
+    let topic = "iot-2/type/" + typeId + "/id/" + deviceId + "/cmd/"+ commandId + "/fmt/" + format;
+    this._subscribe(topic,qos, callback);
     return this;
   }
 
-  unsubscribeToDeviceCommand(type, id, command, format){
-    type = type || '+';
-    id = id || '+';
-    command = command || '+';
+
+  unsubscribeFromDeviceCommands(typeId, deviceId, commandId, format, callback){
+    typeId = typeId || '+';
+    deviceId = deviceId || '+';
+    commandId = commandId || '+';
     format = format || '+';
 
-    let topic = "iot-2/type/" + type + "/id/" + id + "/cmd/"+ command + "/fmt/" + format;
-
-    this.unsubscribe(topic);
-
+    let topic = "iot-2/type/" + typeId + "/id/" + deviceId + "/cmd/"+ commandId + "/fmt/" + format;
+    this._unsubscribe(topic, callback);
     return this;
   }
 
-  subscribeToGatewayCommand(command, format, qos){
-    command = command || '+';
+
+  subscribeToCommands(commandId, format, qos, callback){
+    commandId = commandId || '+';
     format = format || '+';
     qos = qos || 0;
 
-    let topic = "iot-2/type/" + this.type + "/id/" + this.id + "/cmd/"+ command + "/fmt/" + format;
-
-    this.subscribe(topic,qos);
+    let topic = "iot-2/type/" + this.config.identity.typeId + "/id/" + this.config.identity.deviceId + "/cmd/"+ commandId + "/fmt/" + format;
+    this._subscribe(topic, qos, callback);
     return this;
   }
 
-  unsubscribeToGatewayCommand( command, format){
-    command = command || '+';
+
+  unsubscribeFromCommands(commandId, format, callback){
+    commandId = commandId || '+';
     format = format || '+';
 
-    let topic = "iot-2/type/" + this.type + "/id/" + this.id + "/cmd/"+ command + "/fmt/" + format;
-
-    this.unsubscribe(topic);
-
+    let topic = "iot-2/type/" + this.config.identity.typeId + "/id/" + this.config.identity.deviceId + "/cmd/"+ commandId + "/fmt/" + format;
+    this._unsubscribe(topic, callback);
     return this;
   }
 
-  subscribe(topic,QoS){
-    QoS = QoS || 0;
-    if (!this.isConnected) {
-      this.log.error("[GatewayClient:subscribe] Client is not connected");
-      //throw new Error("Client is not connected");
-      //instead of throwing error, will emit 'error' event.
-      this.emit('error', "[GatewayClient:subscribe] Client is not connected. So cannot subscribe to topic :"+topic);
-    }
-
-    this.subscriptions.push(topic);
-
-    if(this.isConnected) {
-      this.mqtt.subscribe(topic, {qos: parseInt(QoS)});
-      this.log.debug("[GatewayClient:subscribe] Subscribed to: " +topic);
-    } else {
-      this.log.error("[GatewayClient:subscribe] Unable to subscribe as application is not currently connected");
-    }
-
-  }
-
-  unsubscribe(topic){
-    if (!this.isConnected) {
-      this.log.error("[GatewayClient:unsubscribe] Client is not connected");
-      //throw new Error("Client is not connected");
-      //instead of throwing error, will emit 'error' event.
-      this.emit('error', "[GatewayClient:unsubscribe] Client is not connected");
-    }
-
-    this.log.debug("[GatewayClient:unsubscribe] Unsubscribe: "+topic);
-    var i = this.subscriptions.indexOf(topic);
-      if(i != -1) {
-        this.subscriptions.splice(i, 1);
-    }
-
-    this.mqtt.unsubscribe(topic);
-    this.log.debug("[GatewayClient:unsubscribe] Unsubscribed to: " +  topic);
-
-  }
 }

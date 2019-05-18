@@ -8,7 +8,6 @@
  *****************************************************************************
  *
  */
-import fs from 'fs';
 
 export function isString(value){
   return typeof value === 'string';
@@ -37,49 +36,3 @@ export function generateUUID() {
   });
 }
 
-export function initializeMqttConfig(config){
-  var mqttConfig = {
-     password: config['auth-token'],
-     rejectUnauthorized: (config['reject-unauthorized']) ? config['reject-unauthorized'] : true
-  };
-  if(config['use-client-certs'] == true || config['use-client-certs'] == "true"){
-    var serverCA = fs.readFileSync(__dirname + '/IoTFoundation.pem');
-    if(config['read-certs'] == true){
-        mqttConfig.ca = [config['client-ca'],serverCA];
-        mqttConfig.cert = config['client-cert'];
-        mqttConfig.key = config['client-key'];
-        if(isDefined(config['client-key-passphrase'])){
-          mqttConfig.passphrase = config['client-key-passphrase'];
-       }
-    }
-    else {
-       if(isDefined(config['server-ca'])){
-          serverCA = fs.readFileSync(config['server-ca']);
-       }
-       if(isDefined(config['client-ca'])){
-          mqttConfig.ca = [fs.readFileSync(config['client-ca']),serverCA];
-       }
-       else {
-          throw new Error('[initializeMqttConfig] config must specify path to self-signed CA certificate');
-       }
-       if(isDefined(config['client-cert'])){
-          mqttConfig.cert = fs.readFileSync(config['client-cert']);
-       }
-       else {
-          throw new Error('[initializeMqttConfig] config must specify path to self-signed client certificate');
-       }
-       if(isDefined(config['client-key'])){
-          mqttConfig.key = fs.readFileSync(config['client-key']);
-       }
-       else {
-          throw new Error('[initializeMqttConfig] config must specify path to client key');
-       }
-       if(isDefined(config['client-key-passphrase'])){
-          mqttConfig.passphrase = config['client-key-passphrase'];
-       }
-    }
-    mqttConfig.servername = config['mqtt-server'];
-    mqttConfig.protocol = "mqtt";
-  }
-  return mqttConfig;
-}

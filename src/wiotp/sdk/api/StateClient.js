@@ -11,11 +11,11 @@
 import log from 'loglevel';
 
 export default class StateClient {
-  constructor(apiClient, draftMode) {
+  constructor(apiClient) {
     this.log = log;
     
     this.apiClient = apiClient;
-    this.draftMode = draftMode;
+    this.draftMode = true;
     
     // Create an alias to the apiClient's methods that we use
     this.callApi = this.apiClient.callApi;
@@ -23,8 +23,15 @@ export default class StateClient {
     this.invalidOperation = this.apiClient.invalidOperation;
   }
 
-  // IM Device state API
+  workWithActive() {
+    this.draftMode = false;
+  }
 
+  workWithDraft() {
+    this.draftMode = true;
+  }
+
+  // IM Device state API
   createSchema(schemaContents, name, description) {
     var body = {
       'schemaFile': schemaContents,

@@ -8,51 +8,45 @@
  *****************************************************************************
  *
  */
-import log from 'loglevel';
 
 export default class RegistryClient {
   constructor(apiClient) {
-    this.log = log;
-    
     this.apiClient = apiClient;
-
-    // Create an alias to the apiClient's callApi
-    this.callApi = this.apiClient.callApi;
   }
 
   listAllDevicesOfType(type) {
-    this.log.debug("[ApiClient] listAllDevicesOfType(" + type + ")");
-    return this.callApi('GET', 200, true, ['device', 'types', type, 'devices'], null);
+    this.apiClient.log.debug("[ApiClient] listAllDevicesOfType(" + type + ")");
+    return this.apiClient.callApi('GET', 200, true, ['device', 'types', type, 'devices'], null);
   }
 
   deleteDeviceType(type) {
-    this.log.debug("[ApiClient] deleteDeviceType(" + type + ")");
-    return this.callApi('DELETE', 204, false, ['device', 'types', type], null);
+    this.apiClient.log.debug("[ApiClient] deleteDeviceType(" + type + ")");
+    return this.apiClient.callApi('DELETE', 204, false, ['device', 'types', type], null);
   }
 
   getDeviceType(type) {
-    this.log.debug("[ApiClient] getDeviceType(" + type + ")");
-    return this.callApi('GET', 200, true, ['device', 'types', type], null);
+    this.apiClient.log.debug("[ApiClient] getDeviceType(" + type + ")");
+    return this.apiClient.callApi('GET', 200, true, ['device', 'types', type], null);
   }
 
   getAllDeviceTypes() {
-    this.log.debug("[ApiClient] getAllDeviceTypes()");
-    return this.callApi('GET', 200, true, ['device', 'types'], null);
+    this.apiClient.log.debug("[ApiClient] getAllDeviceTypes()");
+    return this.apiClient.callApi('GET', 200, true, ['device', 'types'], null);
   }
 
   updateDeviceType(type, description, deviceInfo, metadata) {
-    this.log.debug("[ApiClient] updateDeviceType(" + type + ", " + description + ", " + deviceInfo + ", " + metadata + ")");
+    this.apiClient.log.debug("[ApiClient] updateDeviceType(" + type + ", " + description + ", " + deviceInfo + ", " + metadata + ")");
     let body = {
       deviceInfo: deviceInfo,
       description: description,
       metadata: metadata
     };
 
-    return this.callApi('PUT', 200, true, ['device', 'types', type], JSON.stringify(body));
+    return this.apiClient.callApi('PUT', 200, true, ['device', 'types', type], JSON.stringify(body));
   }
 
   registerDeviceType(typeId, description, deviceInfo, metadata, classId) {
-    this.log.debug("[ApiClient] registerDeviceType(" + typeId + ", " + description + ", " + deviceInfo + ", " + metadata + ", " + classId + ")");
+    this.apiClient.log.debug("[ApiClient] registerDeviceType(" + typeId + ", " + description + ", " + deviceInfo + ", " + metadata + ", " + classId + ")");
     // TODO: field validation
     classId = classId || "Device";
     let body = {
@@ -63,11 +57,11 @@ export default class RegistryClient {
       metadata: metadata
     };
 
-    return this.callApi('POST', 201, true, ['device', 'types'], JSON.stringify(body));
+    return this.apiClient.callApi('POST', 201, true, ['device', 'types'], JSON.stringify(body));
   }
 
   registerDevice(type, deviceId, authToken, deviceInfo, location, metadata) {
-    this.log.debug("[ApiClient] registerDevice(" + type + ", " + deviceId + ", " + deviceInfo + ", " + location + ", " + metadata + ")");
+    this.apiClient.log.debug("[ApiClient] registerDevice(" + type + ", " + deviceId + ", " + deviceInfo + ", " + location + ", " + metadata + ")");
     // TODO: field validation
     let body = {
       deviceId: deviceId,
@@ -77,16 +71,16 @@ export default class RegistryClient {
       metadata: metadata
     };
 
-    return this.callApi('POST', 201, true, ['device', 'types', type, 'devices'], JSON.stringify(body));
+    return this.apiClient.callApi('POST', 201, true, ['device', 'types', type, 'devices'], JSON.stringify(body));
   }
 
   unregisterDevice(type, deviceId) {
-    this.log.debug("[ApiClient] unregisterDevice(" + type + ", " + deviceId + ")");
-    return this.callApi('DELETE', 204, false, ['device', 'types', type, 'devices', deviceId], null);
+    this.apiClient.log.debug("[ApiClient] unregisterDevice(" + type + ", " + deviceId + ")");
+    return this.apiClient.callApi('DELETE', 204, false, ['device', 'types', type, 'devices', deviceId], null);
   }
 
   updateDevice(type, deviceId, deviceInfo, status, metadata, extensions) {
-    this.log.debug("[ApiClient] updateDevice(" + type + ", " + deviceId + ", " + deviceInfo + ", " + status + ", " + metadata + ")");
+    this.apiClient.log.debug("[ApiClient] updateDevice(" + type + ", " + deviceId + ", " + deviceInfo + ", " + status + ", " + metadata + ")");
     let body = {
       deviceInfo: deviceInfo,
       status: status,
@@ -94,12 +88,12 @@ export default class RegistryClient {
       extensions: extensions
     };
 
-    return this.callApi('PUT', 200, true, ['device', 'types', type, 'devices', deviceId], JSON.stringify(body));
+    return this.apiClient.callApi('PUT', 200, true, ['device', 'types', type, 'devices', deviceId], JSON.stringify(body));
   }
 
   getDevice(type, deviceId) {
-    this.log.debug("[ApiClient] getDevice(" + type + ", " + deviceId + ")");
-    return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId], null);
+    this.apiClient.log.debug("[ApiClient] getDevice(" + type + ", " + deviceId + ")");
+    return this.apiClient.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId], null);
   }
 
 
@@ -114,8 +108,8 @@ export default class RegistryClient {
    * for more information about the schema to be used
    */
   registerMultipleDevices(arryOfDevicesToBeAdded) {
-    this.log.debug("[ApiClient] arryOfDevicesToBeAdded() - BULK");
-    return this.callApi('POST', 201, true, ["bulk", "devices", "add"], JSON.stringify(arryOfDevicesToBeAdded));
+    this.apiClient.log.debug("[ApiClient] arryOfDevicesToBeAdded() - BULK");
+    return this.apiClient.callApi('POST', 201, true, ["bulk", "devices", "add"], JSON.stringify(arryOfDevicesToBeAdded));
   }
 
   /**
@@ -127,74 +121,74 @@ export default class RegistryClient {
   */
   deleteMultipleDevices(arryOfDevicesToBeDeleted) {
 
-    this.log.debug("[ApiClient] deleteMultipleDevices() - BULK");
-    return this.callApi('POST', 201, true, ["bulk", "devices", "remove"], JSON.stringify(arryOfDevicesToBeDeleted));
+    this.apiClient.log.debug("[ApiClient] deleteMultipleDevices() - BULK");
+    return this.apiClient.callApi('POST', 201, true, ["bulk", "devices", "remove"], JSON.stringify(arryOfDevicesToBeDeleted));
   }
 
   getDeviceLocation(type, deviceId) {
-    this.log.debug("[ApiClient] getDeviceLocation(" + type + ", " + deviceId + ")");
-    return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'location'], null);
+    this.apiClient.log.debug("[ApiClient] getDeviceLocation(" + type + ", " + deviceId + ")");
+    return this.apiClient.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'location'], null);
   }
 
   updateDeviceLocation(type, deviceId, location) {
-    this.log.debug("[ApiClient] updateDeviceLocation(" + type + ", " + deviceId + ", " + location + ")");
+    this.apiClient.log.debug("[ApiClient] updateDeviceLocation(" + type + ", " + deviceId + ", " + location + ")");
 
-    return this.callApi('PUT', 200, true, ['device', 'types', type, 'devices', deviceId, 'location'], JSON.stringify(location));
+    return this.apiClient.callApi('PUT', 200, true, ['device', 'types', type, 'devices', deviceId, 'location'], JSON.stringify(location));
   }
 
 
   getDeviceManagementInformation(type, deviceId) {
-    this.log.debug("[ApiClient] getDeviceManagementInformation(" + type + ", " + deviceId + ")");
-    return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'mgmt'], null);
+    this.apiClient.log.debug("[ApiClient] getDeviceManagementInformation(" + type + ", " + deviceId + ")");
+    return this.apiClient.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'mgmt'], null);
   }
 
   getAllDiagnosticLogs(type, deviceId) {
-    this.log.debug("[ApiClient] getAllDiagnosticLogs(" + type + ", " + deviceId + ")");
-    return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs'], null);
+    this.apiClient.log.debug("[ApiClient] getAllDiagnosticLogs(" + type + ", " + deviceId + ")");
+    return this.apiClient.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs'], null);
   }
 
   clearAllDiagnosticLogs(type, deviceId) {
-    this.log.debug("[ApiClient] clearAllDiagnosticLogs(" + type + ", " + deviceId + ")");
-    return this.callApi('DELETE', 204, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs'], null);
+    this.apiClient.log.debug("[ApiClient] clearAllDiagnosticLogs(" + type + ", " + deviceId + ")");
+    return this.apiClient.callApi('DELETE', 204, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs'], null);
   }
 
   addDeviceDiagLogs(type, deviceId, log) {
-    this.log.debug("[ApiClient] addDeviceDiagLogs(" + type + ", " + deviceId + ", " + log + ")");
-    return this.callApi('POST', 201, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs'], JSON.stringify(log));
+    this.apiClient.log.debug("[ApiClient] addDeviceDiagLogs(" + type + ", " + deviceId + ", " + log + ")");
+    return this.apiClient.callApi('POST', 201, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs'], JSON.stringify(log));
   }
 
   getDiagnosticLog(type, deviceId, logId) {
-    this.log.debug("[ApiClient] getAllDiagnosticLogs(" + type + ", " + deviceId + ", " + logId + ")");
-    return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs', logId], null);
+    this.apiClient.log.debug("[ApiClient] getAllDiagnosticLogs(" + type + ", " + deviceId + ", " + logId + ")");
+    return this.apiClient.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs', logId], null);
   }
 
   deleteDiagnosticLog(type, deviceId, logId) {
-    this.log.debug("[ApiClient] deleteDiagnosticLog(" + type + ", " + deviceId + ", " + logId + ")");
-    return this.callApi('DELETE', 204, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs', logId], null);
+    this.apiClient.log.debug("[ApiClient] deleteDiagnosticLog(" + type + ", " + deviceId + ", " + logId + ")");
+    return this.apiClient.callApi('DELETE', 204, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'logs', logId], null);
   }
 
   getDeviceErrorCodes(type, deviceId) {
-    this.log.debug("[ApiClient] getDeviceErrorCodes(" + type + ", " + deviceId + ")");
-    return this.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'diag', 'errorCodes'], null);
+    this.apiClient.log.debug("[ApiClient] getDeviceErrorCodes(" + type + ", " + deviceId + ")");
+    return this.apiClient.callApi('GET', 200, true, ['device', 'types', type, 'devices', deviceId, 'diag', 'errorCodes'], null);
   }
 
   clearDeviceErrorCodes(type, deviceId) {
-    this.log.debug("[ApiClient] clearDeviceErrorCodes(" + type + ", " + deviceId + ")");
-    return this.callApi('DELETE', 204, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'errorCodes'], null);
+    this.apiClient.log.debug("[ApiClient] clearDeviceErrorCodes(" + type + ", " + deviceId + ")");
+    return this.apiClient.callApi('DELETE', 204, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'errorCodes'], null);
   }
 
   addErrorCode(type, deviceId, log) {
-    this.log.debug("[ApiClient] addErrorCode(" + type + ", " + deviceId + ", " + log + ")");
-    return this.callApi('POST', 201, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'errorCodes'], JSON.stringify(log));
+    this.apiClient.log.debug("[ApiClient] addErrorCode(" + type + ", " + deviceId + ", " + log + ")");
+    return this.apiClient.callApi('POST', 201, false, ['device', 'types', type, 'devices', deviceId, 'diag', 'errorCodes'], JSON.stringify(log));
   }
 
   getDeviceConnectionLogs(typeId, deviceId) {
-    this.log.debug("[ApiClient] getDeviceConnectionLogs(" + typeId + ", " + deviceId + ")");
+    this.apiClient.log.debug("[ApiClient] getDeviceConnectionLogs(" + typeId + ", " + deviceId + ")");
     let params = {
       typeId: typeId,
       deviceId: deviceId
     };
-    return this.callApi('GET', 200, true, ['logs', 'connection'], null, params);
+    return this.apiClient.callApi('GET', 200, true, ['logs', 'connection'], null, params);
   }
 
 

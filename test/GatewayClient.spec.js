@@ -1,346 +1,279 @@
 /**
  *****************************************************************************
- Copyright (c) 2014, 2015 IBM Corporation and other Contributors.
+ Copyright (c) 2019 IBM Corporation and other Contributors.
  All rights reserved. This program and the accompanying materials
  are made available under the terms of the Eclipse Public License v1.0
  which accompanies this distribution, and is available at
  http://www.eclipse.org/legal/epl-v10.html
- Contributors:
- Tim-Daniel Jacobi - Initial Contribution
  *****************************************************************************
  *
  */
-import { GatewayClient } from '../src/wiotp/sdk/gateway';
-import { expect } from 'chai';
-import sinon from 'sinon';
-import mqtt from 'mqtt';
+import { ApplicationConfig, ApplicationClient } from '../src/wiotp/sdk/application';
+import { GatewayConfig, GatewayClient } from '../src/wiotp/sdk/gateway';
+import { assert } from 'chai';
+import { step } from 'mocha-steps';
 
+const uuidv4 = require('uuid/v4');
+
+// Turn off console output
 console.info = () => {};
 
-describe('IotfGateway', () => {
+describe('WIoTP Gateway Capabilities', function() {
+  
+  let testTypeId = "iotnodejs-testgw";
+  let testQos = 1;
+  let appConfig = ApplicationConfig.parseEnvVars();
 
-  describe('Constructor', () => {
+  describe("Event Publication", function() {
+    let testDeviceId = uuidv4();
+    let testEventId = "testEvent";
+    let testEventFormat = "json";
+    let testEventData = "{'foo': 'bar'}";
 
-    it('should throw an error if instantiated without config', () => {
-      expect(() => {
-        let client = new GatewayClient();
-      }).to.throw(/missing properties/);
+    let appClient = null;
+    let deviceConfig = null;
+    let deviceClient = null;
+
+    before("Register the test gateway", function(done){
+      this.timeout(10000);
+      appClient = new ApplicationClient(appConfig);
+      
+      // Register the device type
+      appClient.registry.registerDeviceType(testTypeId, null, null, null, "Gateway")
+      .catch(function(err){
+        if (err.response.status != 409) {
+          // Anything other than conflict is bad!
+          throw err;
+        }
+        console.info("device type already exists, carry on!")
+      })
+      .then(function(result) {
+        // Register the device
+        return appClient.registry.registerDevice(testTypeId, testDeviceId);
+      })
+      .then(function(deviceDetails) {
+        console.info(deviceDetails);
+        let identity = {orgId: appConfig.getOrgId(), typeId: deviceDetails.typeId, deviceId: deviceDetails.deviceId};
+        let auth = {token: deviceDetails.authToken}
+        let options = {logLevel: "info"};
+        deviceConfig = new GatewayConfig(identity, auth, options);
+        deviceClient = new GatewayClient(deviceConfig);
+        done();
+      })
+      .catch(function(err){
+        done(err);
+      });
+    })
+    
+    afterEach("Remove error listener(s)", function() {
+      appClient.removeAllListeners("error");
+      deviceClient.removeAllListeners("error");
     });
 
-    it('should throw an error if org is not present', () => {
-      expect(() => {
-        let client = new GatewayClient({});
-      }).to.throw(/config must contain org/);
+    step("Connect application within 5 seconds", function(done){
+      this.timeout(5000);
+      appClient.on("connect", done);
+      appClient.on("error", done);
+      appClient.connect();
     });
 
-    it('should throw an error if org is not a string', () => {
-      expect(() => {
-        let client = new GatewayClient({org: false});
-      }).to.throw(/org must be a string/);
+    step("Connect gateway within 5 seconds", function(done){
+      this.timeout(5000);
+      deviceClient.on("connect", done);
+      deviceClient.on("error", done);
+      deviceClient.connect();
     });
 
-    describe('Registered mode', () => {
-      it('should throw an error if id is not present', () => {
-        expect(() => {
-          let client = new GatewayClient({org:'regorg'});
-        }).to.throw(/config must contain id/);
-      });
-
-      it('should throw an error if auth-token is not present', () => {
-        expect(() => {
-          let client = new GatewayClient({org:'regorg', id:'123'});
-        }).to.throw(/config must contain auth-token/);
-      });
-
-      it('should throw an error if type is not present', () => {
-        expect(() => {
-          let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123'});
-        }).to.throw(/config must contain type/);
-      });
-
-      it('should throw an error if type is not string', () => {
-        expect(() => {
-          let client = new GatewayClient({org:'regorg', id:'123', 'type': 123, 'auth-token': '123'});
-        }).to.throw(/type must be a string/);
-      });
-
-      it('should throw an error if org is set to quickstart', () => {
-        expect(() => {
-          let client = new GatewayClient({org:'quickstart', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'abc'});
-        }).to.throw(/Quickstart not supported in Gateways/);
-      });
-
-      it('should throw an error if auth-method is not "token"', () => {
-        let client;
-        expect(() => {
-          client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-        }).not.to.throw();
-        expect(client).to.be.instanceof(GatewayClient);
-      });
-
-      it('should run in registered mode if org is not set to "quickstart"', () => {
-        let client = new GatewayClient({org: 'qs', type: 'mytype', id: '3215', 'auth-method': 'token', 'auth-token': 'abc'});
-        expect(client.isQuickstart).to.equal(false);
-      });
-    });
-  });
-
-  describe('.connect()', () => {
-    afterEach(() => {
-      if(mqtt.connect.restore){
-        mqtt.connect.restore();
+    step("Subscribe to gateway events", function(done){
+      let onSubscribe = function(err, granted) {
+        if (err != null) {
+          done(err);
+        }
+        done();
       }
+      appClient.on("error", done);
+      appClient.subscribeToEvents(testTypeId, testDeviceId, testEventId, testEventFormat, testQos, onSubscribe);
     });
 
-    it.skip('should connect to the correct broker', () => {
-      let mqttConnect = sinon.stub(mqtt, 'connect').returns({
-        on: function(){}
+    step("Publish & recieve gateway event within 10 seconds", function(done){
+      this.timeout(10000);
+
+      let onEventSent = function(err) {
+        if (err != null) {
+          done(err);
+        }
+      }
+
+      let onEventReceived = function(typeId, deviceId, eventId, format, payload) {
+        assert(typeId == testTypeId, "Type ID does not match");
+        assert(deviceId == testDeviceId, "Device ID does not match");
+        assert(eventId == testEventId, "Event ID does not match");
+        assert(format == testEventFormat, "Format does not match");
+        assert(payload == testEventData, "Payload does not match");
+        done();
+      }
+
+      deviceClient.on("error", done);
+      appClient.on("error", done);
+      appClient.on("deviceEvent", onEventReceived);
+
+      deviceClient.publishEvent(testEventId, testEventFormat, testEventData, testQos, onEventSent);
+    });
+
+    step("Disconnect the gateway MQTT client", function(done) {
+      deviceClient.on("error", done);
+      deviceClient.on("close", function() {
+        assert(deviceClient.isConnected() == false, "Device is still connected");
+        done();
       });
-
-      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-      client.connect();
-      client.log.setLevel('silent');
+      deviceClient.disconnect();
     });
 
-    it.skip('should connect to the broker with client certificates', () => {
-      let mqttConnect = sinon.stub(mqtt, 'connect').returns({
-        on: function(){}
+    step("Disconnect the application MQTT client", function(done) {
+      appClient.on("error", done);
+      appClient.on("close", function() {
+        assert(appClient.isConnected() == false, "Application is still connected");
+        done();
       });
-
-      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123',
-      'auth-method': 'token','use-client-certs':true, 'client-ca':'./IoTFoundation.pem',
-      'client-cert':'./IoTFoundation.pem', 'client-key':'./IoTFoundation.pem'});
-      client.connect();
-      client.log.setLevel('silent');
+      appClient.disconnect();
     });
 
-    it.skip('should set up a callback for the "offline" event', () => {
-      let on = sinon.spy();
-      let mqttConnect = sinon.stub(mqtt, 'connect').returns({
-        on: on
-      });
+    after("Delete the test gateway & ensure the the MQTT clients are disconnected", function() {
+      if (appClient != null && appClient.isConnected()) {
+        appClient.disconnect();
+      }
+      if (deviceClient != null && deviceClient.isConnected()) {
+        deviceClient.disconnect();
+      }
 
-      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-      client.connect();
-      client.log.setLevel('silent');
-
-      expect(on.calledWith('offline')).to.be.true;
+      appClient.registry.unregisterDevice(testTypeId, testDeviceId);
     });
-
-    it.skip('should set up a callback for the "close" event', () => {
-      let on = sinon.spy();
-      let mqttConnect = sinon.stub(mqtt, 'connect').returns({
-        on: on
-      });
-
-      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-      client.connect();
-      client.log.setLevel('silent');
-
-      expect(on.calledWith('close')).to.be.true;
-    });
-
-    it.skip('should set up a callback for the "error" event', () => {
-      let on = sinon.spy();
-      let mqttConnect = sinon.stub(mqtt, 'connect').returns({
-        on: on
-      });
-
-      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-      client.connect();
-      client.log.setLevel('silent');
-
-      expect(on.calledWith('error')).to.be.true;
-    });
-
-    it.skip('should set up a callback for the "connect" event', () => {
-      let on = sinon.spy();
-      let mqttConnect = sinon.stub(mqtt, 'connect').returns({
-        on: on
-      });
-
-      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-      client.connect();
-      client.log.setLevel('silent');
-
-      expect(on.calledWith('connect')).to.be.true;
-    });
-
-    it.skip('should set up a callback for the "message" event', () => {
-      let on = sinon.spy();
-      let mqttConnect = sinon.stub(mqtt, 'connect').returns({
-        on: on
-      });
-
-      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-      client.connect();
-      client.log.setLevel('silent');
-
-      expect(on.calledWith('message')).to.be.true;
-    });
-
   });
 
-  describe('.publish()', () => {
+  describe("Command Subscription", function() {
+    let testDeviceId = uuidv4();
+    let testCommandId = "testCommand";
+    let testCommandFormat = "json";
+    let testCommandData = "{'foo': 'bar'}";
 
-    it.skip('should publish gateway message', () => {
+    let appClient = null;
+    let deviceConfig = null;
+    let deviceClient = null;
 
-      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-
-      client.connect();
-      client.log.setLevel('silent');
-      //simulate connect
-      client.isConnected = true;
-
-      let pubSpy = sinon.spy(client.mqtt,'publish');
-
-      // /sinon.stub(client.mqtt,'publish').returns({});
-
-      client.publishGatewayEvent('stat','json','test',0);
-
-      expect(pubSpy.called).to.be.true;
-
+    before("Register the test device", function(done){
+      this.timeout(10000);
+      appClient = new ApplicationClient(appConfig);
+      
+      // Register the device type
+      appClient.registry.registerDeviceType(testTypeId, null, null, null, "Gateway")
+      .catch(function(err){
+        if (err.response.status != 409) {
+          // Anything other than conflict is bad!
+          throw err;
+        }
+        console.info("device type already exists, carry on!")
+      })
+      .then(function(result) {
+        // Register the device
+        return appClient.registry.registerDevice(testTypeId, testDeviceId);
+      })
+      .then(function(deviceDetails) {
+        console.info(deviceDetails);
+        let identity = {orgId: appConfig.getOrgId(), typeId: deviceDetails.typeId, deviceId: deviceDetails.deviceId};
+        let auth = {token: deviceDetails.authToken}
+        let options = {logLevel: "info"};
+        deviceConfig = new GatewayConfig(identity, auth, options);
+        deviceClient = new GatewayClient(deviceConfig);
+        done();
+      })
+      .catch(function(err){
+        done(err);
+      });
+    })
+    
+    afterEach("Remove error listener(s)", function() {
+      appClient.removeAllListeners("error");
+      deviceClient.removeAllListeners("error");
     });
 
-    it('should throw exception when client is not connected', () => {
-
-      expect(() => {
-          let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-          client.publishGatewayEvent('stat','json','test',0);
-
-      }).to.throw(/Client is not connected/);
+    step("Connect application within 5 seconds", function(done){
+      this.timeout(5000);
+      appClient.on("connect", done);
+      appClient.on("error", done);
+      appClient.connect();
     });
 
-    it.skip('should publish with empty string if payload is not provided', () => {
-
-      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-
-      client.connect();
-      client.log.setLevel('silent');
-      //simulate connect
-      client.isConnected = true;
-
-      let pubSpy = sinon.spy(client.mqtt,'publish');
-
-      // /sinon.stub(client.mqtt,'publish').returns({});
-
-      client.publishGatewayEvent('stat','json');
-
-      expect(pubSpy.calledWith("iot-2/type/123/id/123/evt/stat/fmt/json","",{qos: 0})).to.be.true;
-
+    step("Connect gateway within 5 seconds", function(done){
+      this.timeout(5000);
+      deviceClient.on("connect", done);
+      deviceClient.on("error", done);
+      deviceClient.connect();
     });
 
-    it.skip('should publish device event', () => {
-
-      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-
-      client.connect();
-      client.log.setLevel('silent');
-      //simulate connect
-      client.isConnected = true;
-
-      let pubSpy = sinon.spy(client.mqtt,'publish');
-
-      // /sinon.stub(client.mqtt,'publish').returns({});
-
-      client.publishDeviceEvent('devicetype','deviceid','stat','json','test');
-
-      expect(pubSpy.calledWith("iot-2/type/devicetype/id/deviceid/evt/stat/fmt/json","test",{qos: 0})).to.be.true;
-
+    step("Subscribe to gateway command", function(done){
+      let onSubscribe = function(err, granted) {
+        if (err != null) {
+          done(err);
+        }
+        done();
+      }
+      deviceClient.on("error", done);
+      deviceClient.subscribeToCommands(testCommandId, testCommandFormat, testQos, onSubscribe);
     });
 
-  });
 
-  describe('.subscribe()', () => {
+    step("Publish & recieve gateway command within 10 seconds", function(done){
+      this.timeout(10000);
+      let onCommandSent = function(err) {
+        if (err != null) {
+          done(err);
+        }
+      }
 
-    it.skip('should subscribe device command', () => {
-      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
+      let onCommandReceived = function(typeId, deviceId, commandId, format, payload) {
+        assert(typeId == testTypeId, "Type ID does not match");
+        assert(deviceId == testDeviceId, "Device ID does not match");
+        assert(commandId == testCommandId, "Command ID does not match");
+        assert(format == testCommandFormat, "Format does not match");
+        assert(payload == testCommandData, "Payload does not match");
+        done();
+      }
 
-      client.connect();
-      client.log.setLevel('silent');
-      //simulate connect
-      client.isConnected = true;
+      deviceClient.on("error", done);
+      appClient.on("error", done);
+      deviceClient.on("command", onCommandReceived);
 
-      let subSpy = sinon.spy(client.mqtt,'subscribe');
-
-      client.subscribeToDeviceCommand('devicetype','deviceid','blink','json');
-
-      expect(subSpy.calledWith("iot-2/type/devicetype/id/deviceid/cmd/blink/fmt/json",{qos: 0})).to.be.true;
-
+      appClient.publishCommand(testTypeId, testDeviceId, testCommandId, testCommandFormat, testCommandData, testQos, onCommandSent);
     });
 
-    it.skip('should subscribe gateway command', () => {
-      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-
-      client.connect();
-      client.log.setLevel('silent');
-      //simulate connect
-      client.isConnected = true;
-
-      let subSpy = sinon.spy(client.mqtt,'subscribe');
-
-      // /sinon.stub(client.mqtt,'publish').returns({});
-
-      client.subscribeToGatewayCommand('blink','json');
-
-      expect(subSpy.calledWith("iot-2/type/123/id/123/cmd/blink/fmt/json",{qos: 0})).to.be.true;
-
+    step("Disconnect the gateway MQTT client", function(done) {
+      deviceClient.on("error", done);
+      deviceClient.on("close", function() {
+        assert(deviceClient.isConnected() == false, "Device is still connected");
+        done();
+      });
+      deviceClient.disconnect();
     });
 
-    it('should throw exception when client is not connected', () => {
-      expect(() => {
-          let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-          client.subscribeToGatewayCommand('blink','json');
-
-      }).to.throw(/Client is not connected/);
+    step("Disconnect the application MQTT client", function(done) {
+      appClient.on("error", done);
+      appClient.on("close", function() {
+        assert(appClient.isConnected() == false, "Application is still connected");
+        done();
+      });
+      appClient.disconnect();
     });
 
-  });
+    after("Delete the test gateway & ensure the the MQTT clients are disconnected", function() {
+      if (appClient != null && appClient.isConnected()) {
+        appClient.disconnect();
+      }
+      if (deviceClient != null && deviceClient.isConnected()) {
+        deviceClient.disconnect();
+      }
 
-  describe('.unsubscribe()', () => {
-
-    it.skip('should unsubscribe device command', () => {
-      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-
-      client.connect();
-      client.log.setLevel('silent');
-      //simulate connect
-      client.isConnected = true;
-
-      let subSpy = sinon.spy(client.mqtt,'unsubscribe');
-
-      client.unsubscribeToDeviceCommand('devicetype','deviceid','blink','json');
-
-      expect(subSpy.calledWith("iot-2/type/devicetype/id/deviceid/cmd/blink/fmt/json")).to.be.true;
-
-    });
-
-    it.skip('should subscribe gateway command', () => {
-      let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-
-      client.connect();
-      client.log.setLevel('silent');
-      //simulate connect
-      client.isConnected = true;
-
-      let subSpy = sinon.spy(client.mqtt,'unsubscribe');
-
-      // /sinon.stub(client.mqtt,'publish').returns({});
-
-      client.unsubscribeToGatewayCommand('blink','json');
-
-      expect(subSpy.calledWith("iot-2/type/123/id/123/cmd/blink/fmt/json")).to.be.true;
-
-    });
-
-    it('should throw exception when client is not connected', () => {
-      expect(() => {
-          let client = new GatewayClient({org:'regorg', id:'123', 'auth-token': '123', 'type': '123', 'auth-method': 'token'});
-          client.unsubscribeToGatewayCommand('blink','json');
-
-      }).to.throw(/Client is not connected/);
-    });
-
+      appClient.registry.unregisterDevice(testTypeId, testDeviceId);
+    });    
   });
 
 });

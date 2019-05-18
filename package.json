@@ -12,7 +12,9 @@
     "form-data": "^2.3.3",
     "format": "^0.2.2",
     "loglevel": "^1.6.1",
-    "mqtt": "^2.18.8"
+    "mqtt": "^2.18.8",
+    "tinycache": "^1.1.2",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "@babel/cli": "7.4.4",
@@ -21,38 +23,21 @@
     "@babel/register": "7.4.4",
     "@istanbuljs/nyc-config-babel": "^2.1.1",
     "babel-plugin-istanbul": "^5.1.4",
-    "babelify": "^10.0.0",
-    "browserify": "^16.2.3",
     "chai": "4.2.0",
+    "coveralls": "3.0.3",
     "cpx": "1.5.0",
-    "cross-env": "5.2.0",
     "mocha": "6.1.4",
-    "moxios": "0.4.0",
+    "mocha-steps": "^1.3.0",
     "nyc": "14.1.1",
-    "rimraf": "2.6.3",
-    "sinon": "7.3.2",
-    "uglify-js": "3.5.12",
-    "coveralls": "3.0.3"
+    "rimraf": "2.6.3"
   },
   "scripts": {
     "clean": "rimraf dist/*",
     "build:commonjs": "babel src --out-dir dist --modules umd",
-    "build:bundle": "npm run build:bundle:app && npm run build:bundle:device && npm run build:bundle:gateway",
-    "build:bundle:app": "browserify src/wiotp/sdk/application/index.js -t babelify -s wiotp.sdk.application --outfile dist/wiotp-sdk-application-bundle.js",
-    "build:bundle:device": "browserify src/wiotp/sdk/device/index.js -t babelify -s wiotp.sdk.device --outfile dist/wiotp-sdk-device-bundle.js",
-    "build:bundle:gateway": "browserify src/wiotp/sdk/gateway/index.js -t babelify -s wiotp.sdk.gateway --outfile dist/wiotp-sdk-gateway-bundle.js",
-    "build:min": "npm run build:min:app && npm run build:min:device && npm run build:min:gateway",
-    "build:min:app": "browserify src/wiotp/sdk/application/index.js -t babelify -s wiotp.sdk.application | uglifyjs > dist/wiotp-sdk-app-bundle.min.js",
-    "build:min:device": "browserify src/wiotp/sdk/device/index.js -t babelify -s wiotp.sdk.device | uglifyjs > dist/wiotp-sdk-device-bundle.min.js",
-    "build:min:gateway": "browserify src/wiotp/sdk/gateway/index.js -t babelify -s wiotp.sdk.gateway | uglifyjs > dist/wiotp-sdk-gateway-bundle.min.js",
-    "build": "npm run clean",
-    "buildreally": "npm run clean && npm run build:commonjs && npm run build:bundle && npm run build:min",
-    "postbuild": "cpx src/clients/IoTFoundation.pem dist/util",
-    "prepublish": "npm run build",
-    "pretest": "cpx src/clients/IoTFoundation.pem . && cpx src/clients/IoTFoundation.pem src/util",
-    "test": "mocha --require @babel/register --timeout 3000",
-    "test-cov": "nyc --reporter=lcov --reporter=text-summary mocha --timeout 3000",
-    "test:watch": "mocha --require @babel/register --timeout 3000 --watch"
+    "build": "npm run clean && npm run build:commonjs",
+    "test": "mocha --require @babel/register --require mocha-steps",
+    "test-cov": "nyc --reporter=lcov --reporter=text-summary mocha --require mocha-steps",
+    "test:watch": "mocha --require @babel/register --require mocha-steps --watch"
   },
   "author": {
     "name": "David Parker",
@@ -72,6 +57,10 @@
   "nyc": {
     "require": [
       "@babel/register"
+    ],
+    "all": true,
+    "include": [
+      "src/**/*.js"
     ],
     "reporter": [
       "lcov",

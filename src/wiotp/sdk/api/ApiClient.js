@@ -10,55 +10,26 @@
  */
 import xhr from 'axios';
 import Promise from 'bluebird';
-import format from 'format';
-import nodeBtoa from 'btoa';
+import btoa from 'btoa';
 import FormData from 'form-data';
 import log from 'loglevel';
 
-const myBtoa = btoa || nodeBtoa; // if browser btoa is available use it otherwise use node module
-
 import { isBrowser } from '../util';
-import { default as RegistryClient } from './RegistryClient';
-import { default as MgmtClient } from './MgmtClient';
-import { default as LecClient } from './LecClient';
-import { default as DscClient } from './DscClient';
-import { default as RulesClient } from './RulesClient';
-import { default as StateClient } from './StateClient';
 
 export default class ApiClient {
-  constructor(orgId, domain, apiKey, apiToken, withProxy, useLtpa, draftMode) {
+  constructor(config, useLtpa) {
     this.log = log;
+    this.log.setDefaultLevel(config.options.logLevel);
 
-    this.orgId = orgId;
-    this.apiKey = apiKey;
-    this.apiToken = apiToken;
-
-    this.httpServer = orgId + "." + domain;
-    this.domainName = domain;
-
-    this.withProxy = withProxy;
+    this.config = config;
     this.useLtpa = useLtpa;
-
-    this.draftMode = draftMode;
-
-    this.dsc = new DscClient(this);
-    this.lec = new LecClient(this);
-    this.mgmt = new MgmtClient(this);
-    this.registry = new RegistryClient(this);
-    this.rules = new RulesClient(this);
-    this.state = new StateClient(this, draftMode);
-
-    this.log.info("[ApiClient:constructor] ApiClient initialized for organization : " + orgId);
+    
+    this.log.debug("[ApiClient:constructor] ApiClient initialized for " + this.config.getApiBaseUri());
   }
 
   callApi(method, expectedHttpCode, expectJsonContent, paths, body, params) {
     return new Promise((resolve, reject) => {
-      // const API_HOST = "https://%s.internetofthings.ibmcloud.com/api/v0002";
-      let uri = this.withProxy
-        ? "/api/v0002"
-        : this.withHttps
-          ? format("https://%s/api/v0002", this.httpServer)
-          : format("http://%s/api/v0002", this.httpServer);
+      let uri = this.config.getApiBaseUri();
 
       if (Array.isArray(paths)) {
         for (var i = 0, l = paths.length; i < l; i++) {
@@ -78,7 +49,7 @@ export default class ApiClient {
         xhrConfig.withCredentials = true;
       }
       else {
-        xhrConfig.headers['Authorization'] = 'Basic ' + myBtoa(this.apiKey + ':' + this.apiToken);
+        xhrConfig.headers['Authorization'] = 'Basic ' + btoa(this.config.auth.key + ':' + this.config.auth.token);
       }
 
       if (body) {
@@ -324,10 +295,7 @@ export default class ApiClient {
 
   callFormDataApi(method, expectedHttpCode, expectJsonContent, paths, body, params) {
     return new Promise((resolve, reject) => {
-      // const API_HOST = "https://%s.internetofthings.ibmcloud.com/api/v0002";
-      let uri = this.withProxy
-        ? "/api/v0002"
-        : format("https://%s/api/v0002", this.httpServer);
+      let uri = this.config.getApiBaseUri();
 
       if (Array.isArray(paths)) {
         for (var i = 0, l = paths.length; i < l; i++) {
@@ -347,7 +315,7 @@ export default class ApiClient {
         xhrConfig.withCredentials = true;
       }
       else {
-        xhrConfig.headers['Authorization'] = 'Basic ' + myBtoa(this.apiKey + ':' + this.apiToken);
+        xhrConfig.headers['Authorization'] = 'Basic ' + btoa(this.apiKey + ':' + this.apiToken);
       }
 
       if (body) {
