@@ -15,7 +15,7 @@ import { assert } from 'chai';
 console.info = () => {};
 
 
-describe('WIoTP Application MQTT Capabilities', function() {
+describe('WIoTP Application Capabilities', function() {
   
   let appConfig = ApplicationConfig.parseEnvVars();
 
