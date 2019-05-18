@@ -35,13 +35,10 @@ export default class ApplicationClient extends BaseClient {
       this.apiClient = new ApiClient(config, this.withProxy, this.useLtpa);
     }
 
-    this.log.info("[ApplicationClient:constructor] ApplicationClient initialized for organization : " + config.getOrgId());
+    this.log.debug("[ApplicationClient:constructor] ApplicationClient initialized for organization : " + config.getOrgId());
   }
 
-  /**
-   * Note: The underlying mqtt client handles automatic re-establishment of any subscriptions 
-   * because resubscribe is set to true in the configuration
-   */
+
   connect() {
     super.connect();
 
@@ -105,9 +102,8 @@ export default class ApplicationClient extends BaseClient {
     });
   }
 
-  subscribe(topic, QoS) {
-    QoS = QoS || 0;
 
+  _subscribe(topic, QoS, callback) {
     if (this.mqtt == null) {
       this.emit('error', "[ApplicationClient:subscribe] MQTT Client is not initialized - call connect() first");
       return;
@@ -117,9 +113,8 @@ export default class ApplicationClient extends BaseClient {
       return;
     }
 
-    this.log.debug("[ApplicationClient:subscribe] Subscribing to topic " + topic + " with QoS " + QoS);
-
-    this.mqtt.subscribe(topic, { qos: parseInt(QoS) }, (err, granted) => {
+    QoS = QoS || 0;
+    callback = callback || function (err, granted) {
       if (err == null) {
         for (var index in granted) {
           let grant = granted[index];
@@ -129,11 +124,14 @@ export default class ApplicationClient extends BaseClient {
         this.log.error("[ApplicationClient:subscribe] " + err);
         this.emit("error", err);
       }
-    });
+    };
 
+    this.log.debug("[ApplicationClient:subscribe] Subscribing to topic " + topic + " with QoS " + QoS);
+    this.mqtt.subscribe(topic, { qos: parseInt(QoS) }, callback);
   }
 
-  unsubscribe(topic) {
+
+  _unsubscribe(topic, callback) {
     if (this.mqtt == null) {
       this.emit('error', "[ApplicationClient:unsubscribe] MQTT Client is not initialized - call connect() first");
       return;
@@ -143,19 +141,21 @@ export default class ApplicationClient extends BaseClient {
       return;
     }
 
-    this.log.debug("[ApplicationClient:unsubscribe] Unsubscribe: " + topic);
-
-    this.mqtt.unsubscribe(topic, (err) => {
+    callback = callback || function (err) {
       if (err == null) {
         this.log.debug("[ApplicationClient:unsubscribe] Unsubscribed from: " + topic);
       } else {
         this.log.error("[ApplicationClient:unsubscribe] " + err);
         this.emit("error", err);
       } 
-    });
+    };
+
+    this.log.debug("[ApplicationClient:unsubscribe] Unsubscribe: " + topic);
+    this.mqtt.unsubscribe(topic, callback);
   }
 
-  publish(topic, msg, QoS, callback) {
+
+  _publish(topic, msg, QoS, callback) {
     QoS = QoS || 0;
 
     if ((typeof msg === 'object' || typeof msg === 'boolean' || typeof msg === 'number') && !Buffer.isBuffer(msg)) {
@@ -168,42 +168,43 @@ export default class ApplicationClient extends BaseClient {
     this.mqtt.publish(topic, msg, { qos: parseInt(QoS) }, callback);
   }
 
+
   // ==========================================================================
   // Device Events
   // ==========================================================================
 
-  publishDeviceEvent(type, id, event, format, data, qos, callback) {
+  publishEvent(typeId, deviceId, eventId, format, data, qos, callback) {
     qos = qos || 0;
-    if (!isDefined(type) || !isDefined(id) || !isDefined(event) || !isDefined(format)) {
+    if (!isDefined(typeId) || !isDefined(deviceId) || !isDefined(eventId) || !isDefined(format)) {
       this.log.error("[ApplicationClient:publishDeviceEvent] Required params for publishDeviceEvent not present");
       this.emit('error', "[ApplicationClient:publishDeviceEvent] Required params for publishDeviceEvent not present");
       return;
     }
-    var topic = "iot-2/type/" + type + "/id/" + id + "/evt/" + event + "/fmt/" + format;
-    this.publish(topic, data, qos, callback);
+    var topic = "iot-2/type/" + typeId + "/id/" + deviceId + "/evt/" + eventId + "/fmt/" + format;
+    this._publish(topic, data, qos, callback);
     return this;
   }
 
-  subscribeToDeviceEvents(type, id, event, format, qos) {
-    type = type || '+';
-    id = id || '+';
-    event = event || '+';
+  subscribeToEvents(typeId, deviceId, eventId, format, qos, callback) {
+    typeId = typeId || '+';
+    deviceId = deviceId || '+';
+    eventId = eventId || '+';
     format = format || '+';
     qos = qos || 0;
 
-    var topic = "iot-2/type/" + type + "/id/" + id + "/evt/" + event + "/fmt/" + format;
-    this.subscribe(topic, qos);
+    var topic = "iot-2/type/" + typeId + "/id/" + deviceId + "/evt/" + eventId + "/fmt/" + format;
+    this._subscribe(topic, qos, callback);
     return this;
   }
 
-  unsubscribeToDeviceEvents(type, id, event, format) {
-    type = type || '+';
-    id = id || '+';
-    event = event || '+';
+  unsubscribeFromEvents(typeId, deviceId, eventId, format) {
+    typeId = typeId || '+';
+    deviceId = deviceId || '+';
+    eventId = eventId || '+';
     format = format || '+';
 
-    var topic = "iot-2/type/" + type + "/id/" + id + "/evt/" + event + "/fmt/" + format;
-    this.unsubscribe(topic);
+    var topic = "iot-2/type/" + typeId + "/id/" + deviceId + "/evt/" + eventId + "/fmt/" + format;
+    this._unsubscribe(topic, callback);
     return this;
   }
 
@@ -212,39 +213,39 @@ export default class ApplicationClient extends BaseClient {
   // Device Commands
   // ==========================================================================
 
-  publishDeviceCommand(type, id, command, format, data, qos, callback) {
+  publishCommand(typeId, deviceId, commandId, format, data, qos, callback) {
     qos = qos || 0;
-    if (!isDefined(type) || !isDefined(id) || !isDefined(command) || !isDefined(format)) {
+    if (!isDefined(typeId) || !isDefined(deviceId) || !isDefined(commandId) || !isDefined(format)) {
       this.log.error("[ApplicationClient:publishDeviceCommand] Required params for publishDeviceCommand not present");
       this.emit('error', "[ApplicationClient:publishDeviceCommand] Required params for publishDeviceCommand not present");
       return;
     }
-    var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/" + command + "/fmt/" + format;
-    this.publish(topic, data, qos, callback);
+    var topic = "iot-2/type/" + typeId + "/id/" + deviceId + "/cmd/" + commandId + "/fmt/" + format;
+    this._publish(topic, data, qos, callback);
     return this;
   }
 
-  subscribeToDeviceCommands(type, id, command, format, qos){
-    type = type || '+';
-    id = id || '+';
-    command = command || '+';
+  subscribeToCommands(typeId, deviceId, commandId, format, qos, callback){
+    typeId = typeId || '+';
+    deviceId = deviceId || '+';
+    commandId = commandId || '+';
     format = format || '+';
     qos = qos || 0;
 
-    var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/" + command + "/fmt/" + format;
+    var topic = "iot-2/type/" + typeId + "/id/" + deviceId + "/cmd/" + commandId + "/fmt/" + format;
     this.log.debug("[ApplicationClient:subscribeToDeviceCommands] Calling subscribe with QoS " + qos);
-    this.subscribe(topic, qos);
+    this._subscribe(topic, qos, callback);
     return this;
   }
 
-  unsubscribeToDeviceCommands(type, id, command, format) {
-    type = type || '+';
-    id = id || '+';
-    command = command || '+';
+  unsubscribeFromCommands(typeId, deviceId, commandId, format, callback) {
+    typeId = typeId || '+';
+    deviceId = deviceId || '+';
+    commandId = commandId || '+';
     format = format || '+';
 
-    var topic = "iot-2/type/" + type + "/id/" + id + "/cmd/" + command + "/fmt/" + format;
-    this.unsubscribe(topic);
+    var topic = "iot-2/type/" + typeId + "/id/" + deviceId + "/cmd/" + commandId + "/fmt/" + format;
+    this._unsubscribe(topic, callback);
     return this;
   }
 
@@ -261,7 +262,7 @@ export default class ApplicationClient extends BaseClient {
 
     var topic = "iot-2/type/" + type + "/id/" + id + "/intf/"+ interfaceId + "/evt/state";
     this.log.debug("[ApplicationClient:subscribeToDeviceStateEvents] Calling subscribe with QoS "+qos);
-    this.subscribe(topic, qos);
+    this._subscribe(topic, qos);
     return this;
   }
 
@@ -271,7 +272,7 @@ export default class ApplicationClient extends BaseClient {
     interfaceId = interfaceId || '+';
 
     var topic = "iot-2/type/" + type + "/id/" + id + "/intf/"+ interfaceId + "/evt/state";
-    this.unsubscribe(topic);
+    this._unsubscribe(topic);
     return this;
   }
 
@@ -287,7 +288,7 @@ export default class ApplicationClient extends BaseClient {
 
     var topic = "iot-2/type/" + type + "/id/" + id + "/err/data";
     this.log.debug("[ApplicationClient:subscribeToDeviceStateErrorEvents] Calling subscribe with QoS "+qos);
-    this.subscribe(topic, qos);
+    this._subscribe(topic, qos);
     return this;
   }
 
@@ -296,7 +297,7 @@ export default class ApplicationClient extends BaseClient {
     id = id || '+';
 
     var topic = "iot-2/type/" + type + "/id/" + id + "/err/data";
-    this.unsubscribe(topic);
+    this._unsubscribe(topic);
     return this;
   }
 
@@ -312,7 +313,7 @@ export default class ApplicationClient extends BaseClient {
 
     var topic = "iot-2/intf/" + interfaceId + "/rule/" + ruleId + "/evt/trigger";
     this.log.debug("[ApplicationClient:subscribeToRuleTriggerEvents] Calling subscribe with QoS "+qos);
-    this.subscribe(topic, qos);
+    this._subscribe(topic, qos);
     return this;
   }
 
@@ -321,7 +322,7 @@ export default class ApplicationClient extends BaseClient {
     ruleId = ruleId || '+';
 
     var topic = "iot-2/intf/" + interfaceId + "/rule/" + ruleId + "/evt/trigger";
-    this.unsubscribe(topic);
+    this._unsubscribe(topic);
     return this;
   }
 
@@ -337,7 +338,7 @@ export default class ApplicationClient extends BaseClient {
 
     var topic = "iot-2/intf/" + interfaceId + "/rule/" + ruleId + "/err/data";
     this.log.debug("[ApplicationClient:subscribeToRuleErrorEvents] Calling subscribe with QoS "+qos);
-    this.subscribe(topic, qos);
+    this._subscribe(topic, qos);
     return this;
   }
 
@@ -346,7 +347,7 @@ export default class ApplicationClient extends BaseClient {
     ruleId = ruleId || '+';
 
     var topic = "iot-2/intf/" + interfaceId + "/rule/" + ruleId + "/err/data";
-    this.unsubscribe(topic);
+    this._unsubscribe(topic);
     return this;
   }
 
@@ -362,7 +363,7 @@ export default class ApplicationClient extends BaseClient {
 
     var topic = "iot-2/type/" + type + "/id/" + id + "/mon";
     this.log.debug("[ApplicationClient:subscribeToDeviceStatus] Calling subscribe with QoS " + qos);
-    this.subscribe(topic, qos);
+    this._subscribe(topic, qos);
     return this;
   }
 
@@ -371,7 +372,7 @@ export default class ApplicationClient extends BaseClient {
     id = id || '+';
 
     var topic = "iot-2/type/" + type + "/id/" + id + "/mon";
-    this.unsubscribe(topic);
+    this._unsubscribe(topic);
     return this;
   }
 
@@ -385,7 +386,7 @@ export default class ApplicationClient extends BaseClient {
 
     var topic = "iot-2/app/" + id + "/mon";
     this.log.debug("[ApplicationClient:subscribeToAppStatus] Calling subscribe with QoS " + qos);
-    this.subscribe(topic, qos);
+    this._subscribe(topic, qos);
     return this;
   }
 
@@ -393,7 +394,7 @@ export default class ApplicationClient extends BaseClient {
     id = id || '+';
 
     var topic = "iot-2/app/" + id + "/mon";
-    this.unsubscribe(topic);
+    this._unsubscribe(topic);
 
     return this;
   }

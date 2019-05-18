@@ -11,11 +11,9 @@
 import xhr from 'axios';
 import Promise from 'bluebird';
 import format from 'format';
-import nodeBtoa from 'btoa';
+import btoa from 'btoa';
 import FormData from 'form-data';
 import log from 'loglevel';
-
-const myBtoa = btoa || nodeBtoa; // if browser btoa is available use it otherwise use node module
 
 import { isBrowser } from '../util';
 import { default as RegistryClient } from './RegistryClient';
@@ -46,7 +44,7 @@ export default class ApiClient {
     this.rules = new RulesClient(this);
     this.state = new StateClient(this);
 
-    this.log.info("[ApiClient:constructor] ApiClient initialized for organization : " + this.orgId);
+    this.log.debug("[ApiClient:constructor] ApiClient initialized for organization : " + this.orgId);
   }
 
   callApi(method, expectedHttpCode, expectJsonContent, paths, body, params) {
@@ -76,7 +74,7 @@ export default class ApiClient {
         xhrConfig.withCredentials = true;
       }
       else {
-        xhrConfig.headers['Authorization'] = 'Basic ' + myBtoa(this.apiKey + ':' + this.apiToken);
+        xhrConfig.headers['Authorization'] = 'Basic ' + btoa(this.apiKey + ':' + this.apiToken);
       }
 
       if (body) {
@@ -345,7 +343,7 @@ export default class ApiClient {
         xhrConfig.withCredentials = true;
       }
       else {
-        xhrConfig.headers['Authorization'] = 'Basic ' + myBtoa(this.apiKey + ':' + this.apiToken);
+        xhrConfig.headers['Authorization'] = 'Basic ' + btoa(this.apiKey + ':' + this.apiToken);
       }
 
       if (body) {

@@ -25,11 +25,17 @@ export default class BaseClient extends events.EventEmitter {
     this.config = config;
 
     this.reconnectLog = 0;
-    this.isConnected = false;
     this.mqtt = null;
 
     this.lostConnectionLog = new TinyCache();
 
+  }
+
+  isConnected() {
+    if (this.mqtt == null) {
+      return false;
+    }
+    return this.mqtt.connected;
   }
 
   connect(){
@@ -69,7 +75,7 @@ export default class BaseClient extends events.EventEmitter {
       let reconnectPeriod = 1000;
       if (connectionLostCount >= 9) {
         reconnectPeriod = 20000;
-        
+
         // Log this and raise the error EVERY time we reconnect under these conditions.
         this.log.warn("[BaseClient:onOffline] This client is likely suffering from clientId stealing (where two connections try to use the same client Id).");
         this.emit("error", "Exceeded 9 connection losses in a 5 minute period.  Check for clientId conflict with another connection.")

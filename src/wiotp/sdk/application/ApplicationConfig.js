@@ -20,12 +20,12 @@ export default class ApplicationConfig {
             // validate port
             if ("port" in this.options.mqtt && this.options.mqtt.port != null) {
                 if (isNaN(this.options.mqtt.port)) {
-                    throw new Error("Optional setting options.mqtt.port must be a number if provided");
+                    throw new Error("Optional setting options.mqtt.port must be a number if provided: " + typeof(this.options.mqtt.port));
                 }
             }
             // Validate cleanStart
-            if ("cleanStart" in this.options.mqtt && typeof(this.options.mqtt.cleanStart) != boolean) {
-                throw new Error("Optional setting options.mqtt.cleanStart must be a boolean if provided");
+            if ("cleanStart" in this.options.mqtt && typeof(this.options.mqtt.cleanStart) != "boolean") {
+                throw new Error("Optional setting options.mqtt.cleanStart must be a boolean if provided: " + typeof(this.options.mqtt.cleanStart));
             }
         }
 
@@ -41,9 +41,10 @@ export default class ApplicationConfig {
         if (this.options == null) {
             this.options = {};
         }
-        if (!("domain" in this.options) ||this.options.domain.domain == null) {
+        if (!("domain" in this.options) || this.options.domain == null) {
             this.options.domain = "internetofthings.ibmcloud.com";
         }
+
         if (!("logLevel" in this.options) || this.options.logLevel == null) {
             this.options.logLevel = "info";
         }
@@ -52,7 +53,7 @@ export default class ApplicationConfig {
             this.options.mqtt = {};
         }
 
-        if (!("port" in this.options.mqtt)) {
+        if (!("port" in this.options.mqtt) || this.options.mqtt.port == null) {
             this.options.mqtt.port = 8883;
         }
         if (!("transport" in this.options.mqtt) || this.options.mqtt.transport == null) {
@@ -92,7 +93,7 @@ export default class ApplicationConfig {
 
     getClientId() {
         let clientIdPrefix = "a";
-        if (self.sharedSubscription == true) {
+        if (this.sharedSubscription == true) {
             clientIdPrefix = "A";
         }
         return clientIdPrefix + ":" + this.getOrgId() + ":" + this.identity.appId;
@@ -155,5 +156,67 @@ export default class ApplicationConfig {
 
         // Default to something, but really shouldn't hit this scenario unless misconfigured
         return "ssl://" + server;
+    }
+
+
+    static parseEnvVars() {
+        let PORT = process.env.WIOTP_ || 3000;
+
+        // Auth
+        let authKey = process.env.WIOTP_AUTH_KEY || null;
+        let authToken = process.env.WIOTP_AUTH_TOKEN || null;
+    
+        // Also support WIOTP_API_KEY / WIOTP_API_TOKEN usage
+        if (authKey == null && authToken == null) {
+            authKey = process.env.WIOTP_API_KEY || null;
+            authToken = process.env.WIOTP_API_TOKEN || null;
+        }
+
+        // Identity
+        let appId = process.env.WIOTP_IDENTITY_APPID || uuidv4();
+
+        // Options
+        let domain = process.env.WIOTP_OPTIONS_DOMAIN || null;
+        let logLevel = process.env.WIOTP_OPTIONS_LOGLEVEL || "info";
+        let port = process.env.WIOTP_OPTIONS_MQTT_PORT || null;
+        let transport = process.env.WIOTP_OPTIONS_MQTT_TRANSPORT || null;
+        let caFile = process.env.WIOTP_OPTIONS_MQTT_CAFILE || null;
+        let cleanStart = process.env.WIOTP_OPTIONS_MQTT_CLEANSTART || "true";
+        let sessionExpiry = process.env.WIOTP_OPTIONS_MQTT_SESSIONEXPIRY || 3600;
+        let keepAlive = process.env.WIOTP_OPTIONS_MQTT_KEEPALIVE || 60;
+        let sharedSubs = process.env.WIOTP_OPTIONS_MQTT_SHAREDSUBSCRIPTION || "false";
+        let verifyCert = process.env.WIOTP_OPTIONS_HTTP_VERIFY || "true";
+    
+        // String to int conversions
+        if (port != null) {
+            port = parseInt(port);
+        }
+        sessionExpiry = parseInt(sessionExpiry);
+        keepAlive = parseInt(keepAlive)
+    
+        let identity = {appId: appId};
+        let options = {
+            domain: domain,
+            logLevel: logLevel,
+            mqtt: {
+                port: port,
+                transport: transport,
+                cleanStart: (["True", "true", "1"].includes(cleanStart)),
+                sessionExpiry: sessionExpiry,
+                keepAlive: keepAlive,
+                sharedSubscription: (["True", "true", "1"].includes(sharedSubs)),
+                caFile: caFile,
+            },
+            http: {
+                verify: (["True", "true", "1"].includes(verifyCert))
+            },
+        };
+        let auth = null;
+        // Quickstart doesn't support auth, so ensure we only add this if it's defined
+        if (authToken != null) {
+            auth = {key: authKey, token: authToken};
+        }
+
+        return new ApplicationConfig(identity, auth, options);
     }
 }
