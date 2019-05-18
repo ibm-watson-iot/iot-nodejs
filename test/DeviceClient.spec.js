@@ -95,7 +95,8 @@ describe('WIoTP Device Capabilities', function() {
       appClient.subscribeToEvents(testTypeId, testDeviceId, testEventId, testEventFormat, testQos, onSubscribe);
     });
 
-    step("Publish & recieve device event", function(done){
+    step("Publish & recieve device event within 5 seconds", function(done){
+      this.timeout(5000);
       let onEventSent = function(err) {
         if (err != null) {
           done(err);
@@ -210,8 +211,8 @@ describe('WIoTP Device Capabilities', function() {
       deviceClient.connect();
     });
 
-    step("Publish & recieve device command", function(done){
-      this.timeout(10000);
+    step("Publish & recieve device command within 5 seconds", function(done){
+      this.timeout(5000);
       let onCommandSent = function(err) {
         if (err != null) {
           done(err);
