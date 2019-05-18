@@ -97,8 +97,6 @@ describe('WIoTP Device Capabilities', function() {
 
     step("Publish & recieve device event within 10 seconds", function(done){
       this.timeout(10000);
-      // I don't know why, but even at QoS 1, messaging seems pretty unreliable when running in Travis CI
-      this.retries(4);
 
       let onEventSent = function(err) {
         if (err != null) {
@@ -214,8 +212,8 @@ describe('WIoTP Device Capabilities', function() {
       deviceClient.connect();
     });
 
-    step("Publish & recieve device command within 20 seconds", function(done){
-      this.timeout(20000);
+    step("Publish & recieve device command within 10 seconds", function(done){
+      this.timeout(10000);
       let onCommandSent = function(err) {
         if (err != null) {
           done(err);
