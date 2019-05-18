@@ -93,7 +93,7 @@ export default class DeviceConfig{
         let mqttConfig = {
             // connectivity
             keepalive: 60,
-            connectTimeout = 90*1000,
+            connectTimeout: 90*1000,
             
             // certificates - none of this is supported right now
             // caPaths: [],
