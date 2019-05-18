@@ -95,8 +95,8 @@ describe('WIoTP Gateway Capabilities', function() {
       appClient.subscribeToEvents(testTypeId, testDeviceId, testEventId, testEventFormat, testQos, onSubscribe);
     });
 
-    step("Publish & recieve gateway event within 5 seconds", function(done){
-      this.timeout(5000);
+    step("Publish & recieve gateway event within 20 seconds", function(done){
+      this.timeout(20000);
       let onEventSent = function(err) {
         if (err != null) {
           done(err);
@@ -221,8 +221,8 @@ describe('WIoTP Gateway Capabilities', function() {
     });
 
 
-    step("Publish & recieve gateway command within 5 seconds", function(done){
-      this.timeout(5000);
+    step("Publish & recieve gateway command within 20 seconds", function(done){
+      this.timeout(20000);
       let onCommandSent = function(err) {
         if (err != null) {
           done(err);
