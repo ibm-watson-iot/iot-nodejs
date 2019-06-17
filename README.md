@@ -13,8 +13,6 @@
 npm install @wiotp/sdk --save
 ```
 
-_Note: This package is still in development and is not yet available from NPM, if you want to get started straight away you will need to download the source from this repository._
-
 
 ## Usage
 
