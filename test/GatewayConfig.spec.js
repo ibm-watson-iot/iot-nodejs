@@ -9,7 +9,7 @@
  *
  */
 
-import { GatewayConfig } from '../src/wiotp/sdk/gateway';
+import { GatewayConfig } from '../src/gateway';
 import { expect } from 'chai';
 
 // Turn off console output

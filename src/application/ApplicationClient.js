@@ -201,19 +201,19 @@ export default class ApplicationClient extends BaseClient {
   // Device State Events
   // ==========================================================================
 
-  subscribeToDeviceStateEvents(type, id, interfaceId, qos){
+  subscribeToDeviceState(type, id, interfaceId, qos){
     type = type || '+';
     id = id || '+';
     interfaceId = interfaceId || '+';
     qos = qos || 0;
 
     var topic = "iot-2/type/" + type + "/id/" + id + "/intf/"+ interfaceId + "/evt/state";
-    this.log.debug("[ApplicationClient:subscribeToDeviceStateEvents] Calling subscribe with QoS "+qos);
+    this.log.debug("[ApplicationClient:subscribeToDeviceState] Calling subscribe with QoS "+qos);
     this._subscribe(topic, qos);
     return this;
   }
 
-  unsubscribeToDeviceStateEvents(type, id, interfaceId){
+  unsubscribeToDeviceState(type, id, interfaceId){
     type = type || '+';
     id = id || '+';
     interfaceId = interfaceId || '+';
@@ -228,18 +228,18 @@ export default class ApplicationClient extends BaseClient {
   // Device State Errors
   // ==========================================================================
 
-  subscribeToDeviceStateErrorEvents(type, id, qos){
+  subscribeToDeviceErrors(type, id, qos){
     type = type || '+';
     id = id || '+';
     qos = qos || 0;
 
     var topic = "iot-2/type/" + type + "/id/" + id + "/err/data";
-    this.log.debug("[ApplicationClient:subscribeToDeviceStateErrorEvents] Calling subscribe with QoS "+qos);
+    this.log.debug("[ApplicationClient:subscribeToDeviceErrors] Calling subscribe with QoS "+qos);
     this._subscribe(topic, qos);
     return this;
   }
 
-  unsubscribeToDeviceStateErrorEvents(type, id){
+  unsubscribeToDeviceErrors(type, id){
     type = type || '+';
     id = id || '+';
 
@@ -250,21 +250,21 @@ export default class ApplicationClient extends BaseClient {
 
 
   // ==========================================================================
-  // Rule Trigger Events
+  // Rule Triggers
   // ==========================================================================
 
-  subscribeToRuleTriggerEvents(interfaceId, ruleId, qos){
+  subscribeToRuleTriggers(interfaceId, ruleId, qos){
     interfaceId = interfaceId || '+';
     ruleId = ruleId || '+';
     qos = qos || 0;
 
     var topic = "iot-2/intf/" + interfaceId + "/rule/" + ruleId + "/evt/trigger";
-    this.log.debug("[ApplicationClient:subscribeToRuleTriggerEvents] Calling subscribe with QoS "+qos);
+    this.log.debug("[ApplicationClient:subscribeToRuleTriggers] Calling subscribe with QoS "+qos);
     this._subscribe(topic, qos);
     return this;
   }
 
-  unsubscribeToRuleTriggerEvents(interfaceId, ruleId){
+  unsubscribeToRuleTriggers(interfaceId, ruleId){
     interfaceId = interfaceId || '+';
     ruleId = ruleId || '+';
 
@@ -278,18 +278,18 @@ export default class ApplicationClient extends BaseClient {
   // Rule Trigger Errors
   // ==========================================================================
 
-  subscribeToRuleErrorEvents(interfaceId, ruleId, qos){
+  subscribeToRuleErrors(interfaceId, ruleId, qos){
     interfaceId = interfaceId || '+';
     ruleId = ruleId || '+';
     qos = qos || 0;
 
     var topic = "iot-2/intf/" + interfaceId + "/rule/" + ruleId + "/err/data";
-    this.log.debug("[ApplicationClient:subscribeToRuleErrorEvents] Calling subscribe with QoS "+qos);
+    this.log.debug("[ApplicationClient:subscribeToRuleErrors] Calling subscribe with QoS "+qos);
     this._subscribe(topic, qos);
     return this;
   }
 
-  unsubscribeToRuleErrorEvents(interfaceId, ruleId){
+  unsubscribeToRuleErrors(interfaceId, ruleId){
     interfaceId = interfaceId || '+';
     ruleId = ruleId || '+';
 

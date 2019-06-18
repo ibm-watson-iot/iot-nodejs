@@ -1,4 +1,4 @@
-import { ApplicationClient, ApplicationConfig } from '../../../../src/wiotp/sdk/'
+import { ApplicationClient, ApplicationConfig } from '@wiotp/sdk'
 
 
 let appClient = null;
@@ -81,5 +81,5 @@ window.subscribeToEvents = function() {
     document.getElementById("lastError").innerHTML = "Need to initialize client before you can disconnect!";
     return;
   }
-  appClient.subscribeToDeviceEvents("+", "+", "+", "+", 0);
+  appClient.subscribeToEvents("+", "+", "+", "+", 0);
 }

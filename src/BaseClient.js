@@ -168,7 +168,7 @@ export default class BaseClient extends events.EventEmitter {
         this.log.error("[BaseClient:_subscribe] " + err);
         this.emit("error", err);
       }
-    };
+    }.bind(this);
 
     this.log.debug("[BaseClient:_subscribe] Subscribing to topic " + topic + " with QoS " + QoS);
     this.mqtt.subscribe(topic, { qos: parseInt(QoS) }, callback);
@@ -192,7 +192,7 @@ export default class BaseClient extends events.EventEmitter {
         this.log.error("[BaseClient:_unsubscribe] " + err);
         this.emit("error", err);
       } 
-    };
+    }.bind(this);
 
     this.log.debug("[BaseClient:_unsubscribe] Unsubscribe: " + topic);
     this.mqtt.unsubscribe(topic, callback);

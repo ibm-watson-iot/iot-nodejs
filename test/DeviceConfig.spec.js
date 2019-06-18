@@ -9,7 +9,7 @@
  *
  */
 
-import { DeviceConfig } from '../src/wiotp/sdk/device';
+import { DeviceConfig } from '../src/device';
 import { expect } from 'chai';
 
 // Turn off console output

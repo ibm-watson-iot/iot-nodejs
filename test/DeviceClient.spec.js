@@ -8,8 +8,8 @@
  *****************************************************************************
  *
  */
-import { ApplicationConfig, ApplicationClient } from '../src/wiotp/sdk/application';
-import { DeviceConfig, DeviceClient } from '../src/wiotp/sdk/device';
+import { ApplicationConfig, ApplicationClient } from '../src/application';
+import { DeviceConfig, DeviceClient } from '../src/device';
 import { assert } from 'chai';
 import { step } from 'mocha-steps';
 

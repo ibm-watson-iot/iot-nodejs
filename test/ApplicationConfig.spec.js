@@ -8,7 +8,7 @@
  *****************************************************************************
  *
  */
-import { ApplicationConfig } from '../src/wiotp/sdk/application';
+import { ApplicationConfig } from '../src/application';
 import { expect } from 'chai';
 
 // Turn off console output

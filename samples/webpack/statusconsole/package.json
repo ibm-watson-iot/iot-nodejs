@@ -12,6 +12,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "@wiotp/sdk": "^0.1.2"
+  },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
     "@babel/register": "^7.4.4",

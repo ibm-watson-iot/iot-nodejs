@@ -51,3 +51,18 @@ gwClient.connect();
 // Do stuff
 gwClient.disconnect();
 ```
+
+## Development
+
+### Build
+```
+npm i
+npm run build
+```
+
+## Publish
+
+```
+npm login
+npm publish --access public .
+```

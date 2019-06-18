@@ -8,7 +8,7 @@
  *****************************************************************************
  *
  */
-import { ApplicationConfig, ApplicationClient } from '../src/wiotp/sdk/application';
+import { ApplicationConfig, ApplicationClient } from '../src/application';
 import { assert } from 'chai';
 
 // Turn off console output

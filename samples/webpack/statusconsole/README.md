@@ -4,7 +4,14 @@
 
 ```
 npm i
-npm build
+npm run build-prod
+```
+
+## Publishing the application
+
+```
+npm login
+npm publish --access public .
 ```
 
 ## Running the application
