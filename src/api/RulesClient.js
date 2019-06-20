@@ -17,7 +17,7 @@ export default class RulesClient {
     this.apiClient = apiClient;
 
     // Create an alias to the apiClient's callApi
-    this.callApi = this.apiClient.callApi;
+    this.callApi = this.apiClient.callApi.bind(this.apiClient);
   }
 
   

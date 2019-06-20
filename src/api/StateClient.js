@@ -18,9 +18,9 @@ export default class StateClient {
     this.draftMode = true;
     
     // Create an alias to the apiClient's methods that we use
-    this.callApi = this.apiClient.callApi;
-    this.callFormDataApi = this.apiClient.callFormDataApi;
-    this.invalidOperation = this.apiClient.invalidOperation;
+    this.callApi = this.apiClient.callApi.bind(this.apiClient);
+    this.callFormDataApi = this.apiClient.callFormDataApi.bind(this.apiClient);
+    this.invalidOperation = this.apiClient.invalidOperation.bind(this.apiClient);
   }
 
   workWithActive() {
