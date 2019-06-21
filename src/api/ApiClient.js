@@ -42,6 +42,9 @@ export default class ApiClient {
         method: method,
         headers: {
           'Content-Type': 'application/json'
+        },
+        validateStatus: (status) => {
+          return status === expectedHttpCode;
         }
       };
 
@@ -61,18 +64,14 @@ export default class ApiClient {
       }
 
       function transformResponse(response) {
-        if (response.status === expectedHttpCode) {
-          if (expectJsonContent && !(typeof response.data === 'object')) {
-            try {
-              resolve(JSON.parse(response.data));
-            } catch (e) {
-              reject(e);
-            }
-          } else {
-            resolve(response.data);
+        if (expectJsonContent && !(typeof response.data === 'object')) {
+          try {
+            resolve(JSON.parse(response.data));
+          } catch (e) {
+            reject(e);
           }
         } else {
-          reject(new Error(method + " " + uri + ": Expected HTTP " + expectedHttpCode + " from server but got HTTP " + response.status + ". Error Body: " + response.data));
+          resolve(response.data);
         }
       }
       this.log.debug("[ApiClient:transformResponse] " + xhrConfig);
