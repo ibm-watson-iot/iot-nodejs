@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css" />
+    <title>IBM Watson IoT Platform Starter Application</title>
+  </head>
+  <body>
+    <script src="../dist/main.js"></script>
+    <div id="status">DISCONNECTED</div>
+    <div id="lastError"></div>
+    <div>
+      <b>Configuration:</b>
+      Application ID: <input id="appId" value="testApp"></input>
+      API Key: <input id="apikey" value=""></input>
+      Token: <input id="token" value=""></input>
+      Port: <input id="port" value="8883"></input>
+      Log Level: <input id="logLevel" value="debug"></input>
+      <a href="#" onclick="initialize()" />Initialize Application</a>
+    </div>
+    <div>
+      <b>Connectivity:</b>
+      <a href="#" onclick="connect()" />Connect Application</a> |
+      <a href="#" onclick="disconnect()" />Disconnect Application</a>
+    </div>
+    <div>
+      <b>Actions:</b>
+      <a href="#" onclick="subscribeToEvents()" />Subscribe to all Events</a> |
+    </div>
+  </body>
+</html>
