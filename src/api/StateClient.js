@@ -258,8 +258,8 @@ export default class StateClient {
   }
 
   getLogicalInterfaces() {
-    var base = this.draftMode ? ["draft", "logicalinterfaces"] : ["applicationinterfaces"]
-    return this.callApi('GET', 200, true, ["logicalinterfaces"]);
+    var base = this.draftMode ? ["draft", "logicalinterfaces"] : ["logicalinterfaces"]
+    return this.callApi('GET', 200, true, base);
   }
 
   getActiveLogicalInterfaces() {

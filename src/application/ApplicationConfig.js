@@ -17,7 +17,8 @@ export default class ApplicationConfig  extends BaseConfig{
         super(identity, auth, options);
 
         // Authentication is not supported for quickstart
-        if (this.auth != null) {
+        // and not required when auth.useLtpa is set
+        if (this.auth != null && !this.auth.useLtpa) { 
             if (!("key" in this.auth) || this.auth.key == null) {
                 throw new Error("Missing auth.key from configuration");
             }
@@ -40,10 +41,19 @@ export default class ApplicationConfig  extends BaseConfig{
     }
 
     getOrgId() {
-        if (this.auth == null) {
-            return "quickstart";
-        }
+      if (this.auth == null) {
+          return "quickstart";
+      } else if (this.auth.key) {
         return this.auth.key.split("-")[1];
+      } else {
+        return null;
+      }
+    }
+
+    getApiBaseUri() {
+      return this.auth && this.auth.useLtpa
+        ? `/api/v0002`
+        :  `https://${this.getOrgId()}.${this.options.domain}/api/v0002`;
     }
 
     getClientId() {

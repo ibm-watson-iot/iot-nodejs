@@ -17,12 +17,12 @@ import log from 'loglevel';
 import { isBrowser } from '../util';
 
 export default class ApiClient {
-  constructor(config, useLtpa) {
+  constructor(config) {
     this.log = log;
     this.log.setDefaultLevel(config.options.logLevel);
 
     this.config = config;
-    this.useLtpa = useLtpa;
+    this.useLtpa = this.config.auth && this.config.auth.useLtpa;
     
     this.log.debug("[ApiClient:constructor] ApiClient initialized for " + this.config.getApiBaseUri());
   }

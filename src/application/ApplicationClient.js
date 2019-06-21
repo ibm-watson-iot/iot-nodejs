@@ -30,15 +30,15 @@ const DEVICE_MON_RE         = /^iot-2\/type\/(.+)\/id\/(.+)\/mon$/;
 const APP_MON_RE            = /^iot-2\/app\/(.+)\/mon$/;
 
 export default class ApplicationClient extends BaseClient {
-  constructor(config, useLtpa) {
+  constructor(config) {
     if (!config instanceof ApplicationConfig) {
       throw new Error("Config must be an instance of ApplicationConfig");
     }
     super(config);
-    this.useLtpa = useLtpa;
+    this.useLtpa = config.auth && config.auth.useLtpa;
     
-    if (config.getOrgId() != "quickstart") {
-      this._apiClient = new ApiClient(this.config, this.useLtpa);
+    if ((config.auth && config.auth.useLtpa) || config.getOrgId() != "quickstart") {
+      this._apiClient = new ApiClient(this.config);
 
       this.dsc = new DscClient(this._apiClient);
       this.lec = new LecClient(this._apiClient);

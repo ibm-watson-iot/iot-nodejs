@@ -120,10 +120,6 @@ export default class BaseConfig{
         return mqttConfig;
     }
 
-    getApiBaseUri() {
-        return "https://" + this.getOrgId() + "." + this.options.domain + "/api/v0002";
-    }
-
     getMqttHost() {
         let server = this.getOrgId() + ".messaging." + this.options.domain + ":" + this.options.mqtt.port;
         
