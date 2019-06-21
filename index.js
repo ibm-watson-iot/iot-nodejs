@@ -9,9 +9,9 @@
  *
  */
 
-export { default as ApplicationClient } from './application/ApplicationClient';
-export { default as DeviceClient } from './device/DeviceClient';
-export { default as GatewayClient } from './gateway/GatewayClient';
+export { default as ApplicationClient } from './src/application/ApplicationClient';
+export { default as DeviceClient } from './src/device/DeviceClient';
+export { default as GatewayClient } from './src/gateway/GatewayClient';
 
-export { default as ApplicationConfig } from './application/ApplicationConfig';
-export { default as DeviceConfig } from './device/DeviceConfig';
+export { default as ApplicationConfig } from './src/application/ApplicationConfig';
+export { default as DeviceConfig } from './src/device/DeviceConfig';
