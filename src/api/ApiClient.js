@@ -27,6 +27,16 @@ export default class ApiClient {
     this.log.debug("[ApiClient:constructor] ApiClient initialized for " + this.config.getApiBaseUri());
   }
 
+  //  e.g. [{name: true}, {description: false}] => -name,description
+  parseSortSpec(sortSpec) {
+    return sortSpec 
+      ? sortSpec.map(s=>{
+        const e = Object.entries(s)[0];
+        return `${e[1] ? '-' : ''}${e[0]}`
+      }).join(',')
+      : undefined;
+  };
+
   callApi(method, expectedHttpCode, expectJsonContent, paths, body, params) {
     return new Promise((resolve, reject) => {
       let uri = this.config.getApiBaseUri();

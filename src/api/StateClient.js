@@ -19,6 +19,7 @@ export default class StateClient {
     
     // Create an alias to the apiClient's methods that we use
     this.callApi = this.apiClient.callApi.bind(this.apiClient);
+    this.parseSortSpec = this.apiClient.parseSortSpec.bind(this.apiClient);
     this.callFormDataApi = this.apiClient.callFormDataApi.bind(this.apiClient);
     this.invalidOperation = this.apiClient.invalidOperation.bind(this.apiClient);
   }
@@ -257,9 +258,13 @@ export default class StateClient {
     return this.callApi('PUT', 200, true, base, body);
   }
 
-  getLogicalInterfaces(bookmark, limit) {
+ 
+  getLogicalInterfaces(bookmark, limit, sort) {
     var base = this.draftMode ? ["draft", "logicalinterfaces"] : ["logicalinterfaces"]
-    return this.callApi('GET', 200, true, base, undefined, {_bookmark: bookmark,_limit: limit});
+
+    const _sort = this.parseSortSpec(sort);
+
+    return this.callApi('GET', 200, true, base, undefined, {_bookmark: bookmark,_limit: limit, _sort});
   }
 
   getActiveLogicalInterfaces() {

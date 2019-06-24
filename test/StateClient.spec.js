@@ -75,11 +75,69 @@ describe('WIoTP State Client Capabilities', function() {
         expect(page1.results[0].id).to.not.equal(page2.results[0].id);
       })
     });
-  
-  });
 
-  
- 
 
+
+    // TODO: test other sortable fields (NOTE: some of which are not strings)
+    [
+      [{name: false}],
+      [{name: true}],
+      
+      [{description: false}],
+      [{description: true}],
+
+      [{name: false}, {description: false}],
+      [{name: false}, {description: true}],
+
+      [{description: false}, {name: true}],
+      [{description: false}, {name: false}],
+
+    ].forEach((sort) => {
+      it(`should correctly honour sort parameters: ${JSON.stringify(sort)}`, () => {
+        return stateClient.getLogicalInterfaces(0, 10, sort)
+          .then((page) => {
+            expect(page).to.have.property('results');
+            const actual = page.results;
+
+            // sort results by name programatically here and check it aligns with expected results
+            const expected = [...actual];
+            expected.sort( (a,b) => {
+
+              for(let i=0; i<sort.length; i++) {
+
+                const e = Object.entries(sort)[0];
+                const f = e[0];
+                const desc = e[1];
+                const af = a[f];
+                const bf = b[f];
+
+                // TODO: ignore case in string comparator once API is fixed to also ignore case
+                // (see https://github.ibm.com/wiotp/tracker/issues/2431)
+                
+                if (af === bf) {
+                  // use next field to sort
+                } else {
+                  // sort on this field
+                  return af < bf ? desc ? 1 : -1 : desc ? -1 : 1;
+                }
+              }
+              return 0;
+              
+            
+            });
+
+            /*
+            console.log();
+            console.log(expected.reduce((a,c)  => `${a}, '${c.description}'(${c.id})`, ''))
+            console.log(actual.reduce((a,c)  => `${a}, '${c.description}'(${c.id})`, ''))
+            */
+
+            expect(actual).to.deep.equal(expected);
+          }); // then
+      }); // it
+      
+    }); // forEach
+
+  }); // describe('getDraftLogicalInterfaces'
 
 });
