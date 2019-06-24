@@ -259,12 +259,12 @@ export default class StateClient {
   }
 
  
-  getLogicalInterfaces(bookmark, limit, sort) {
+  getLogicalInterfaces(bookmark, limit, sort, name) {
     var base = this.draftMode ? ["draft", "logicalinterfaces"] : ["logicalinterfaces"]
 
     const _sort = this.parseSortSpec(sort);
 
-    return this.callApi('GET', 200, true, base, undefined, {_bookmark: bookmark,_limit: limit, _sort});
+    return this.callApi('GET', 200, true, base, undefined, {_bookmark: bookmark,_limit: limit, _sort, name : name ? name : undefined});
   }
 
   getActiveLogicalInterfaces() {

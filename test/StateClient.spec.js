@@ -76,6 +76,22 @@ describe('WIoTP State Client Capabilities', function() {
       })
     });
 
+    it(`should correctly honour name parameter`, () => {
+      let theName;
+      return stateClient.getLogicalInterfaces(0, 1)
+        .then((page) => {
+          expect(page).to.have.property('results');
+          expect(page.results).to.not.be.empty;
+          theName = page.results[0].name;
+          return stateClient.getLogicalInterfaces(0, 10, undefined, theName)
+        })
+        .then(page => {
+          expect(page).to.have.property('results');
+          expect(page.results).to.not.be.empty;
+          expect(page.results.every(r => r.name.includes(theName))).to.be.true;
+        })
+
+    });
 
 
     // TODO: test other sortable fields (NOTE: some of which are not strings)
