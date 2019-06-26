@@ -9,6 +9,9 @@
  *
  */
 import { default as BaseConfig } from '../BaseConfig';
+import log from 'loglevel';
+const YAML = require('yaml');
+const fs = require('fs');
 
 const uuidv4 = require('uuid/v4');
 
@@ -129,5 +132,60 @@ export default class ApplicationConfig  extends BaseConfig{
         }
 
         return new ApplicationConfig(identity, auth, options);
+    }
+
+    static parseConfigFile(configFilePath) {
+
+        //Example Application Configuration File:
+
+        /*
+        identity:
+            appId: myApp
+        auth:
+            key: a-23gh56-sdsdajhjnee
+            token: Ab$76s)asj8_s5
+        options:
+            domain: internetofthings.ibmcloud.com
+            logLevel: error|warning|info|debug
+            mqtt:
+                instanceId: myInstance
+                port: 8883
+                transport: tcp
+                cleanStart: false
+                sessionExpiry: 3600
+                keepAlive: 60
+                caFile: /path/to/certificateAuthorityFile.pem
+            http:
+                verify: true  
+        */  
+
+        const configFile = fs.readFileSync(configFilePath, 'utf8');
+        var data = YAML.parse(configFile);
+        
+        if(!fs.existsSync(configFilePath)) {
+            throw new Error("File not found");
+        }else
+        {try {
+            const configFile = fs.readFileSync(configFilePath, 'utf8');
+            var data = YAML.parse(configFile);
+        } catch (err) {
+            throw new Error("Error reading device configuration file: " + err.code);
+          }
+        }
+        
+
+        if (("options" in data) & ("logLevel" in data["options"]))
+        {
+            if (!(data["options"]["logLevel"] in ["error", "warning", "info", "debug"]))
+            {
+                throw new Error("Optional setting options.logLevel must be one of error, warning, info, debug")
+            }
+        }
+        else
+        {
+            data["options"]["logLevel"] = log.GetLogger(data["options"]["logLevel"].toUpperCase());
+        }
+
+        return new ApplicationConfig(data['identity'],data['auth'],data['options'])
     }
 }

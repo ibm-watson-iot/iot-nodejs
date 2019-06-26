@@ -142,14 +142,17 @@ export default class BaseConfig{
                 return "wss://" + server;
             }
         }
-
+        
         // Default to something, but really shouldn't hit this scenario unless misconfigured
         return "ssl://" + server;
     }
-
 
     static parseEnvVars() {
         throw new Error("Sub class must implement parseEnvVars()");
     }
 
-};
+    static parseConfigFile() {
+        throw new Error("Sub class must implement parseYamlFile()");
+    }
+
+};                                                          
