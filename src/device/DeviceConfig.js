@@ -66,9 +66,9 @@ export default class DeviceConfig extends BaseConfig{
     static parseEnvVars() {
         
         //Identity
-        let orgId = process.env.WIOTP_IDENTITY_ORGID;
-        let typeId = process.env.WIOTP_IDENTITY_TYPEID;
-        let deviceId = process.env.WIOTP_IDENTITY_DEVICEID;
+        let orgId = process.env.WIOTP_IDENTITY_ORGID || null;
+        let typeId = process.env.WIOTP_IDENTITY_TYPEID || null;
+        let deviceId = process.env.WIOTP_IDENTITY_DEVICEID || null;
 
         // Auth
         let authToken = process.env.WIOTP_AUTH_TOKEN || null;
