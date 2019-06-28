@@ -40,4 +40,20 @@ describe('WIoTP Application Configuration', () => {
     expect(config.options.mqtt.port).to.equal(8883);
   });
 
+  it('Load configuration from yaml config file', () => {
+    let config = ApplicationConfig.parseConfigFile("./test/ApplicationConfigFile.spec.yaml");
+    expect(config.identity.appId).to.equal("myApp")
+    expect(config.auth.key).to.equal("myKey")
+    expect(config.auth.token).to.equal("myToken")
+    expect(config.options.domain).to.equal("internetofthings.ibmcloud.com");
+    expect(config.options.logLevel).to.equal("info");
+    expect(config.options.mqtt.port).to.equal(8883);
+    expect(config.options.mqtt.transport).to.equal("tcp");
+    expect(config.options.mqtt.cleanStart).to.equal(false);
+    expect(config.options.mqtt.sessionExpiry).to.equal(3600);
+    expect(config.options.mqtt.keepAlive).to.equal(60);
+    expect(config.options.mqtt.caFile).to.equal("myPath");
+    expect(config.options.http.verify).to.equal(true);
+  });
+
 });

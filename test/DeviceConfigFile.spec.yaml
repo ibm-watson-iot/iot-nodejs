@@ -7,7 +7,7 @@
       token: myToken
     options:
       domain: internetofthings.ibmcloud.com
-      logLevel: notAValidLogLevel
+      logLevel: info
       mqtt:
         port: 8883
         transport: tcp

@@ -66,15 +66,15 @@ export default class DeviceConfig extends BaseConfig{
     static parseEnvVars() {
         
         //Identity
-        let orgId = WIOTP_IDENTITY_ORGID || null;
-        let typeId = WIOTP_IDENTITY_TYPEID || null;
-        let deviceId = WIOTP_IDENTITY_DEVICEID || null;
+        let orgId = process.env.WIOTP_IDENTITY_ORGID;
+        let typeId = process.env.WIOTP_IDENTITY_TYPEID;
+        let deviceId = process.env.WIOTP_IDENTITY_DEVICEID;
 
         // Auth
         let authToken = process.env.WIOTP_AUTH_TOKEN || null;
     
         // Also support WIOTP_API_TOKEN usage
-        if (authKey == null && authToken == null) {
+        if (authToken == null) {
             authToken = process.env.WIOTP_API_TOKEN || null;
         }
 
@@ -160,14 +160,15 @@ export default class DeviceConfig extends BaseConfig{
 
         if (("options" in data) & ("logLevel" in data["options"]))
         {
-            if (!(data["options"]["logLevel"] in ["error", "warning", "info", "debug"]))
+            var validLevels = ["error", "warning", "info", "debug"];
+            if (!(validLevels.includes(data["options"]["logLevel"])))
             {
-                throw new Error("Optional setting options.logLevel must be one of error, warning, info, debug")
+                throw new Error("Optional setting options.logLevel must be one of error, warning, info, debug" + data["options"]["logLevel"])
             }
         }
         else
         {
-            data["options"]["logLevel"] = log.GetLogger(data["options"]["logLevel"].toUpperCase())
+            data["options"]["logLevel"] = log.GetLogger(data["options"]["logLevel"].toUpperCase());
         }
 
         return new DeviceConfig(data['identity'],data['auth'],data['options'])

@@ -31,4 +31,30 @@ describe('WIoTP Device Configuration', () => {
     expect(config.options.mqtt.port).to.equal(8883);
   });
 
+  it('Load mimimal configuration from environment variables', () => {
+    let config = DeviceConfig.parseEnvVars();
+    expect(config.getOrgId()).to.equal(process.env.WIOTP_IDENTITY_ORGID);
+    expect(config.identity.appId).to.not.be.null; // Should be a generated UUID
+    expect(config.options.logLevel).to.equal("info");
+    expect(config.options.domain).to.equal("internetofthings.ibmcloud.com");
+    expect(config.options.mqtt.transport).to.equal("tcp");
+    expect(config.options.mqtt.port).to.equal(8883);
+  });
+
+  it('Load configuration from yaml config file', () => {
+    let config = DeviceConfig.parseConfigFile("./test/DeviceConfigFile.spec.yaml");
+    expect(config.identity.orgId).to.equal("myOrg")
+    expect(config.identity.typeId).to.equal("myType")
+    expect(config.identity.deviceId).to.equal("myDevice")
+    expect(config.auth.token).to.equal("myToken")
+    expect(config.options.domain).to.equal("internetofthings.ibmcloud.com");
+    expect(config.options.logLevel).to.equal("info");
+    expect(config.options.mqtt.port).to.equal(8883);
+    expect(config.options.mqtt.transport).to.equal("tcp");
+    expect(config.options.mqtt.cleanStart).to.equal(true);
+    expect(config.options.mqtt.sessionExpiry).to.equal(3600);
+    expect(config.options.mqtt.keepAlive).to.equal(60);
+    expect(config.options.mqtt.caFile).to.equal("myPath");
+  });
+
 });
