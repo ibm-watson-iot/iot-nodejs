@@ -33,7 +33,6 @@ describe('WIoTP Device Configuration', () => {
 
   it('Load mimimal configuration from environment variables', () => {
     let config = DeviceConfig.parseEnvVars();
-    expect(config.getOrgId()).to.equal(process.env.WIOTP_IDENTITY_ORGID);
     expect(config.identity.appId).to.not.be.null; // Should be a generated UUID
     expect(config.options.logLevel).to.equal("info");
     expect(config.options.domain).to.equal("internetofthings.ibmcloud.com");
