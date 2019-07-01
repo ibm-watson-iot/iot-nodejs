@@ -24,7 +24,6 @@ describe('WIoTP Device Configuration', () => {
 
     let config = new DeviceConfig(identity, auth, options);
     expect(config.getOrgId()).to.equal("orgid");
-    expect(config.identity.appId).to.not.be.null; // Should be a generated UUID
     expect(config.options.logLevel).to.equal("info");
     expect(config.options.domain).to.equal("internetofthings.ibmcloud.com");
     expect(config.options.mqtt.transport).to.equal("tcp");
@@ -32,12 +31,15 @@ describe('WIoTP Device Configuration', () => {
   });
 
   it('Load mimimal configuration from environment variables', () => {
+    process.env['WIOTP_IDENTITY_ORGID'] = 'testOrg';
+    process.env['WIOTP_IDENTITY_DEVICEID'] = 'testDevice';
     let config = DeviceConfig.parseEnvVars();
-    expect(config.identity.appId).to.not.be.null; // Should be a generated UUID
     expect(config.options.logLevel).to.equal("info");
     expect(config.options.domain).to.equal("internetofthings.ibmcloud.com");
     expect(config.options.mqtt.transport).to.equal("tcp");
     expect(config.options.mqtt.port).to.equal(8883);
+    delete process.env['WIOTP_IDENTITY_ORGID'];
+    delete process.env['WIOTP_IDENTITY_DEVICEID'];
   });
 
   it('Load configuration from yaml config file', () => {

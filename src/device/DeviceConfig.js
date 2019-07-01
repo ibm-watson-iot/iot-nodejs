@@ -96,7 +96,7 @@ export default class DeviceConfig extends BaseConfig{
         sessionExpiry = parseInt(sessionExpiry);
         keepAlive = parseInt(keepAlive)
     
-        let identity = {orgId: orgId, typeId: typeId, deviceId:deviceId};
+        let identity = {orgId:orgId, typeId: typeId, deviceId:deviceId};
         let options = {
             domain: domain,
             logLevel: logLevel,
