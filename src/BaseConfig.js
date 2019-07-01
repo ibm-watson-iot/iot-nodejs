@@ -147,9 +147,12 @@ export default class BaseConfig{
         return "ssl://" + server;
     }
 
-
     static parseEnvVars() {
         throw new Error("Sub class must implement parseEnvVars()");
     }
 
-};
+    static parseConfigFile() {
+        throw new Error("Sub class must implement parseConfigFile()");
+    }
+
+};                                                          
