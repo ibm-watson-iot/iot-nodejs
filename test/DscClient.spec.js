@@ -127,7 +127,6 @@ describe('WIoTP DSC Client Capabilities', function() {
         const name = uuidv4();
         return dscClient.createCloudantService({name, description, username: cloudantUsername, password: cloudantPassword})
           .then(_createdService => {
-            console.log(_createdService)
             createdService = _createdService;
             expect(createdService.type).to.equal('cloudant');
             expect(createdService.name).to.equal(name);
@@ -181,7 +180,6 @@ describe('WIoTP DSC Client Capabilities', function() {
       
       step('Create connector destination', function() {
         const name = uuidv4();
-        console.log(name);
         const bucketInterval = 'MONTH';
         return dscClient.createCloudantDestination(createdConnector.id, {name, bucketInterval})
           .then(destination => {
