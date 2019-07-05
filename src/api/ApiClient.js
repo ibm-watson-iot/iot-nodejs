@@ -54,7 +54,11 @@ export default class ApiClient {
           'Content-Type': 'application/json'
         },
         validateStatus: (status) => {
-          return status === expectedHttpCode;
+          if(Array.isArray(expectedHttpCode)) {
+            return expectedHttpCode.includes(status);
+          } else {
+            return status === expectedHttpCode;
+          }
         }
       };
 

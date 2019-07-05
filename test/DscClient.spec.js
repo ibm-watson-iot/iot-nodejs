@@ -147,7 +147,7 @@ describe('WIoTP DSC Client Capabilities', function() {
 
       
       step('Retrieve service', function() {
-        dscClient.getService(createdService.id)
+        return dscClient.getService(createdService.id)
           .then(service => {
             expect(service).to.deep.equal(createdService);
           })
@@ -234,10 +234,6 @@ describe('WIoTP DSC Client Capabilities', function() {
 
 
 
-
-
-
-
       after('Cleanup forwarding rule', () => {
         if(createdConnector && createdForwardingRule) return dscClient.deleteForwardingRule(createdConnector.id, createdForwardingRule.id).catch(err=>{})
       });
@@ -316,6 +312,175 @@ describe('WIoTP DSC Client Capabilities', function() {
         .to.be.rejectedWith(errors.ServiceNotFound);
     });
   });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    describe('Create, retrieve, connect and delete an EventStreams service binding', function() {
+
+      this.timeout(10000);
+
+      const description = 'WIoTP DSC Client Capabilities / Create, retrieve, connect and delete a EventStreams service binding';
+    
+      let eventstreamsApiKey;
+      let eventstreamsAdminUrl;
+      let eventstreamsBrokers;
+      let eventstreamsUser;
+      let eventstreamsPassword;
+
+      let createdService;
+      let createdConnector;
+      let createdDestination;
+      let createdForwardingRule;
+
+
+      before('Get Eventstreams credentials from environment', function() {
+        eventstreamsApiKey = process.env.EVENTSTREAMS_API_KEY ||  expect.fail('EVENTSTREAMS_API_KEY env variable is required for this test');
+        eventstreamsAdminUrl = process.env.EVENTSTREAMS_ADMIN_URL || expect.fail('EVENTSTREAMS_ADMIN_URL env variable is required for this test');
+        eventstreamsBrokers = process.env.EVENTSTREAMS_BROKER1 ? [process.env.EVENTSTREAMS_BROKER1] : expect.fail('EVENTSTREAMS_BROKER1 env variable is required for this test');
+        eventstreamsUser = process.env.EVENTSTREAMS_USER || expect.fail('EVENTSTREAMS_USER env variable is required for this test');
+        eventstreamsPassword = process.env.EVENTSTREAMS_PASSWORD || expect.fail('EVENTSTREAMS_PASSWORD env variable is required for this test');
+      })
+
+      step('Create service', () => {
+        const name = uuidv4();
+        return dscClient.createEventstreamsService({name, description, apiKey: eventstreamsApiKey, adminUrl: eventstreamsAdminUrl, brokers: eventstreamsBrokers, user: eventstreamsUser, password: eventstreamsPassword})
+          .then(_createdService => {
+            createdService = _createdService;
+            expect(createdService.type).to.equal('eventstreams');
+            expect(createdService.name).to.equal(name);
+            expect(createdService.description).to.equal(description);
+          });
+      })
+
+      step('Retrieve services', () => {
+        return dscClient.getServices()
+          .then(services => {
+            expect(services).to.have.property('results');
+            const filtered = services.results.filter(service => service.id === createdService.id);
+            expect(filtered).to.have.length(1);
+            const service = filtered[0];
+            expect(service).to.deep.equal(createdService);
+          });
+      });
+
+      
+      step('Retrieve service', function() {
+        return dscClient.getService(createdService.id)
+          .then(service => {
+            expect(service).to.deep.equal(createdService);
+          })
+      });
+      
+
+      step('Create connector for service', function() {
+        const name = uuidv4();
+        const timezone = "Africa/Casablanca";
+        return dscClient.createConnector({name, description, serviceId: createdService.id, timezone})
+          .then(connector => {
+            createdConnector = connector;
+            expect(connector).to.have.property('id');
+            expect(connector).to.have.property('name', name);
+            expect(connector).to.have.property('serviceId', createdService.id);
+            expect(connector).to.have.property('type', 'eventstreams');
+            expect(connector).to.have.property('timezone', timezone);
+            expect(connector).to.have.property('enabled', true);
+            expect(connector).to.have.property('created');
+            expect(connector).to.have.property('createdBy');
+            expect(connector).to.have.property('updated');
+            expect(connector).to.have.property('updatedBy');
+            expect(connector).to.have.property('refs');
+          })
+      });
+
+      step('Create connector destination', function() {
+        const name = uuidv4();
+        const partitions = 2;
+        return dscClient.createEventstreamsDestination(createdConnector.id, {name, partitions})
+          .then(destination => {
+            createdDestination = destination;
+            expect(destination).to.have.property('name', name);
+            expect(destination).to.have.property('type', 'eventstreams');
+            expect(destination).to.have.property('configuration');
+            expect(destination.configuration).to.have.property('partitions', partitions);
+          })
+      });
+
+
+      step('Create connector forwarding rule', function() {
+        const name = uuidv4();
+        const deviceType='*';
+        const eventId='*';
+        return dscClient.createEventForwardingRule(createdConnector.id, {name, destinationName: createdDestination.name, deviceType, eventId})
+          .then(forwardingRule => {
+            createdForwardingRule = forwardingRule;
+            expect(forwardingRule).to.have.property('name', name);
+            expect(forwardingRule).to.have.property('type', 'event');
+            expect(forwardingRule).to.have.property('destinationName', createdDestination.name);
+            expect(forwardingRule).to.have.property('selector');
+            expect(forwardingRule.selector).to.have.property('deviceType', deviceType);
+            expect(forwardingRule.selector).to.have.property('eventId', eventId);
+          })
+      });
+
+      step('Delete forwarding rule', () => {
+        return dscClient.deleteForwardingRule(createdConnector.id, createdForwardingRule.id)
+      });
+
+
+      step('Delete destination', () => {
+        return dscClient.deleteDestination(createdConnector.id, createdDestination.name)
+      });
+      
+
+      step('Delete connector', () => {
+        return dscClient.deleteConnector(createdConnector.id)
+      });
+
+
+      step('Delete Service', () => {
+        return dscClient.deleteService(createdService.id)
+      });
+
+      after('Cleanup forwarding rule', () => {
+        if(createdConnector && createdForwardingRule) return dscClient.deleteForwardingRule(createdConnector.id, createdForwardingRule.id).catch(err=>{})
+      });
+
+
+      after('Cleanup destination', () => {
+        if(createdConnector && createdDestination) return dscClient.deleteDestination(createdConnector.id, createdDestination.name).catch(err=>{})
+      });
+
+      after('Cleanup connector', () => {
+        if (createdConnector) return dscClient.deleteConnector(createdConnector.id).catch(err=>{});
+      });
+
+      after('Cleanup service', () => {
+        if (createdService) return dscClient.deleteService(createdService.id).catch(err=>{});
+      });
+
+
+      // NOTE: no need to cleanup ES config. Unlike for Cloudant destinations,
+      // WIoTP will delete the ES topic when the associated destination is deleted
+
+    });
   
 
 

@@ -38,6 +38,10 @@ export default class DscClient {
     return this.createService({name, description, type: 'cloudant', credentials: {username, password, host, port, url}})
   }
 
+  createEventstreamsService({name, description, apiKey, adminUrl, brokers, user, password}) {
+    return this.createService({name, description, type: 'eventstreams', credentials: {api_key: apiKey, kafka_admin_url: adminUrl, kafka_brokers_sasl: brokers, user, password}})
+  }
+
   getService(serviceId) {
     return this.apiClient.callApi('GET', 200, true, ['s2s', 'services', serviceId])
       .catch(err => errors.handleError(err, {CUDSS0019E: errors.ServiceNotFound}));
@@ -84,8 +88,12 @@ export default class DscClient {
     return this.createDestination(connectorId, {name, type: 'cloudant', configuration: { bucketInterval }});
    }
 
+  createEventstreamsDestination(connectorId, {name, partitions=1}) {
+    return this.createDestination(connectorId, {name, type: 'eventstreams', configuration: { partitions }});
+   }
+
    deleteDestination(connectorId, destinationName) {
-    return this.apiClient.callApi('DELETE', 200, false, ['historianconnectors', connectorId, 'destinations', destinationName])
+    return this.apiClient.callApi('DELETE', [200, 204], false, ['historianconnectors', connectorId, 'destinations', destinationName])
       .catch(err => errors.handleError(err, {}));
    }
 
