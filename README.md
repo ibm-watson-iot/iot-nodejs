@@ -46,7 +46,7 @@ deviceClient.disconnect();
 import {GatewayClient, GatewayConfig} from '@wiotp/sdk';
 
 let gwConfig = GatewayConfig.parseEnvVars();
-let gwClient = new GatewayClient(appConfig);
+let gwClient = new GatewayClient(gwConfig);
 gwClient.connect();
 // Do stuff
 gwClient.disconnect();
