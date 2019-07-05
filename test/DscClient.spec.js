@@ -44,6 +44,43 @@ const generateCloudantDestinationBucketDbNamePattern = (orgId, destinationName, 
 }
 
 
+/*
+ * Wrap cloudant:2.1.0 (OSS pre-approved) to callbacks to promises
+ */
+
+
+const cloudantDestroyDb = (cloudant, dbName) => {
+  return new Promise( 
+    (resolve, reject) => {
+      cloudant.db.destroy(
+        dbName, 
+        function(err, data) {
+          if(err){
+            console.warn(`Failed to delete cloudant DB ${dbName}: ${err}`);
+            reject(err);
+          } else {
+            resolve(data);
+          }
+        }
+      );
+    }
+  );
+}
+
+
+const cloudantListDbs = (cloudant) => {
+  return new Promise(
+    (resolve, reject) => cloudant.db.list(function(err, data) {
+      if(err) {
+        console.warn(`Failed to list cloudant DBs`);
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    })
+  )
+}
+
 describe('WIoTP DSC Client Capabilities', function() {
 
   let orgId = null;
@@ -246,19 +283,20 @@ describe('WIoTP DSC Client Capabilities', function() {
       // to avoid clogging up our test cloudant instance, we delete all databases that will have been created by WIoTP
       // NOTE: this must occur after we've deleted the destination from WIoTP otherwise it may be recreated by WIoTP
 
+
       after('Cleanup service config DB from cloudant', () => {
         if(createdService)
-          return cloudant.db.destroy(generateCloudantServiceConfigDbName(orgId, createdService.id)).catch(err=>{})
+          return cloudantDestroyDb(cloudant, generateCloudantServiceConfigDbName(orgId, createdService.id)).catch(err=>{});
       });
 
       after('Cleanup destination config DB from cloudant', () => {
         if(createdDestination)
-          return cloudant.db.destroy(generateCloudantDestinationConfigDbName(orgId, createdDestination.name)).catch(err=>{})
+          return cloudantDestroyDb(cloudant,  generateCloudantDestinationConfigDbName(orgId, createdDestination.name)).catch(err=>{});
       });
 
       after('Cleanup destination bucket databases from cloudant', () => {
         if(createdDestination) {
-          return cloudant.db.list()
+          return cloudantListDbs(cloudant)
             .then((body) => {
               return Promise.all(
                 body
@@ -267,7 +305,7 @@ describe('WIoTP DSC Client Capabilities', function() {
                     return pattern.test(db);
                   })
                   .map(db => {
-                    return cloudant.db.destroy(db).catch(err=>{})
+                    return  cloudantDestroyDb(cloudant, db).catch(err=>{})
                   })
               );
             })
