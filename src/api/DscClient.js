@@ -75,7 +75,7 @@ export default class DscClient {
    ** Destinations
    **************************************/
   // {name, type, configuration}
-  createDestination(connectorId, destination) {
+   createDestination(connectorId, destination) {
     return this.apiClient.callApi('POST', 201, true, ['historianconnectors', connectorId, 'destinations'], destination)
       .catch(err => errors.handleError(err, {}));
    }
@@ -90,6 +90,25 @@ export default class DscClient {
    }
 
 
+  /**************************************
+   ** Forwarding Rules
+   **************************************/
+
+  // {name, destinationName, type:event, selector: {deviceType, eventId}}
+  // {name, destinationName, type:state, selector: {logicalInterfaceId}}
+  createForwardingRule(connectorId, forwardingrule) {
+    return this.apiClient.callApi('POST', 201, true, ['historianconnectors', connectorId, 'forwardingrules'], forwardingrule)
+      .catch(err => errors.handleError(err, {}));
+  }
+
+  createEventForwardingRule(connectorId, {name, destinationName, deviceType='*', eventId='*'}) {
+    return this.createForwardingRule(connectorId, {name, destinationName, type: 'event', selector: {deviceType, eventId}})
+  }
+
+  deleteForwardingRule(connectorId, forwardingRuleId) {
+    return this.apiClient.callApi('DELETE', 204, false, ['historianconnectors', connectorId, 'forwardingrules', forwardingRuleId])
+      .catch(err => errors.handleError(err, {}));
+  }
 
 
 }

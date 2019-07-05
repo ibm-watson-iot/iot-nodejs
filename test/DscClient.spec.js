@@ -75,6 +75,7 @@ describe('WIoTP DSC Client Capabilities', function() {
       let createdService;
       let createdConnector;
       let createdDestination;
+      let createdForwardingRule;
 
 
       before('Init Cloudant Client', function() {
@@ -85,7 +86,7 @@ describe('WIoTP DSC Client Capabilities', function() {
         cloudant = Cloudant({account: cloudantUsername, password: cloudantPassword})
       })
 
-      step('Create', () => {
+      step('Create service', () => {
 
         const name = uuidv4();
         return expect(
@@ -100,7 +101,7 @@ describe('WIoTP DSC Client Capabilities', function() {
       })
 
 
-      step('Retrieve (all)', () => {
+      step('Retrieve services', () => {
         return expect(
           dscClient.getServices()
           .then(services => {
@@ -114,7 +115,7 @@ describe('WIoTP DSC Client Capabilities', function() {
       });
 
       
-      step('Retrieve (one)', function() {
+      step('Retrieve service', function() {
         return expect(
           dscClient.getService(createdService.id)
           .then(service => {
@@ -124,7 +125,7 @@ describe('WIoTP DSC Client Capabilities', function() {
       });
       
 
-      step('Connect', function() {
+      step('Create connector for service', function() {
         const name = uuidv4();
         const timezone = "Africa/Casablanca";
         return expect(
@@ -146,8 +147,11 @@ describe('WIoTP DSC Client Capabilities', function() {
         ).to.eventually.be.fulfilled;
       });
 
+      // TODO: retrieve connector
+      // TODO: retrieve connectors
+
       
-      step('Create destination', function() {
+      step('Create connector destination', function() {
         const name = uuidv4();
         const bucketInterval = 'MONTH';
         return expect(
@@ -162,11 +166,37 @@ describe('WIoTP DSC Client Capabilities', function() {
         ).to.eventually.be.fulfilled;
       });
 
-      // TODO: create forwarding rule
+      // TODO: retrieve connector destination
+      // TODO: retrieve connector destinations
+
+      step('Create connector forwarding rule', function() {
+        const name = uuidv4();
+        const deviceType='*';
+        const eventId='*';
+        return expect(
+          dscClient.createEventForwardingRule(createdConnector.id, {name, destinationName: createdDestination.name, deviceType, eventId})
+          .then(forwardingRule => {
+            createdForwardingRule = forwardingRule;
+            expect(forwardingRule).to.have.property('name', name);
+            expect(forwardingRule).to.have.property('type', 'event');
+            expect(forwardingRule).to.have.property('destinationName', createdDestination.name);
+            expect(forwardingRule).to.have.property('selector');
+            expect(forwardingRule.selector).to.have.property('deviceType', deviceType);
+            expect(forwardingRule.selector).to.have.property('eventId', eventId);
+          })
+        ).to.eventually.be.fulfilled;
+      });
+
+      // TODO: retrieve connector forwarding rule
+      // TODO: retrieve connector forwarding rules
 
       // TODO: send an event, check it makes it into cloudant
       
-
+      step('Delete forwarding rule', () => {
+        return expect(
+          dscClient.deleteForwardingRule(createdConnector.id, createdForwardingRule.id)
+        ).to.eventually.be.fulfilled;
+      });
       
       step('Delete destination', () => {
         return expect(
@@ -188,16 +218,25 @@ describe('WIoTP DSC Client Capabilities', function() {
       });
 
 
-      after('Delete destination', () => {
-        if(createdDestination) return dscClient.deleteDestination(createdConnector.id, createdDestination.name).catch(err=>{})
+
+
+
+
+
+      after('Cleanup forwarding rule', () => {
+        if(createdConnector && createdForwardingRule) return dscClient.deleteForwardingRule(createdConnector.id, createdForwardingRule.id).catch(err=>{})
+      });
+
+      after('Cleanup destination', () => {
+        if(createdConnector && createdDestination) return dscClient.deleteDestination(createdConnector.id, createdDestination.name).catch(err=>{})
       });
 
 
-      after('Delete connector', () => {
+      after('Cleanup connector', () => {
         if (createdConnector) return dscClient.deleteConnector(createdConnector.id).catch(err=>{});
       });
 
-      after('Delete service', () => {
+      after('Cleanup service', () => {
         if (createdService) return dscClient.deleteService(createdService.id).catch(err=>{});
       });
 
@@ -207,17 +246,17 @@ describe('WIoTP DSC Client Capabilities', function() {
       // to avoid clogging up our test cloudant instance, we delete all databases that will have been created by WIoTP
       // NOTE: this must occur after we've deleted the destination from WIoTP otherwise it may be recreated by WIoTP
 
-      after('Delete service config DB from cloudant', () => {
+      after('Cleanup service config DB from cloudant', () => {
         if(createdService)
           return cloudant.db.destroy(generateCloudantServiceConfigDbName(orgId, createdService.id)).catch(err=>{})
       });
 
-      after('Delete destination config DB from cloudant', () => {
+      after('Cleanup destination config DB from cloudant', () => {
         if(createdDestination)
           return cloudant.db.destroy(generateCloudantDestinationConfigDbName(orgId, createdDestination.name)).catch(err=>{})
       });
 
-      after('Delete destination bucket databases from cloudant', () => {
+      after('Cleanup destination bucket databases from cloudant', () => {
         if(createdDestination) {
           return cloudant.db.list()
             .then((body) => {
