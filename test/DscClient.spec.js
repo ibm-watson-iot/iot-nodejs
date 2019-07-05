@@ -116,57 +116,49 @@ describe('WIoTP DSC Client Capabilities', function() {
 
 
       before('Init Cloudant Client', function() {
-        cloudantUsername = process.env.WIOTP_TEST_CLOUDANT_USERNAME || null;
-        cloudantPassword = process.env.WIOTP_TEST_CLOUDANT_PASSWORD || null;
-        if( cloudantUsername === null) expect.fail('WIOTP_TEST_CLOUDANT_USERNAME env variable is required for this test');
-        if( cloudantPassword === null) expect.fail('WIOTP_TEST_CLOUDANT_PASSWORD env variable is required for this test');
+        cloudantUsername = process.env.CLOUDANT_USERNAME || null;
+        cloudantPassword = process.env.CLOUDANT_PASSWORD || null;
+        if( cloudantUsername === null) expect.fail('CLOUDANT_USERNAME env variable is required for this test');
+        if( cloudantPassword === null) expect.fail('CLOUDANT_PASSWORD env variable is required for this test');
         cloudant = Cloudant({account: cloudantUsername, password: cloudantPassword})
       })
 
       step('Create service', () => {
-
         const name = uuidv4();
-        return expect(
-          dscClient.createCloudantService({name, description, username: cloudantUsername, password: cloudantPassword})
+        return dscClient.createCloudantService({name, description, username: cloudantUsername, password: cloudantPassword})
           .then(_createdService => {
+            console.log(_createdService)
             createdService = _createdService;
             expect(createdService.type).to.equal('cloudant');
             expect(createdService.name).to.equal(name);
             expect(createdService.description).to.equal(description);
-          })
-        ).to.eventually.be.fulfilled;
+          });
       })
 
-
       step('Retrieve services', () => {
-        return expect(
-          dscClient.getServices()
+        return dscClient.getServices()
           .then(services => {
             expect(services).to.have.property('results');
             const filtered = services.results.filter(service => service.id === createdService.id);
             expect(filtered).to.have.length(1);
             const service = filtered[0];
             expect(service).to.deep.equal(createdService);
-          })
-        ).to.eventually.be.fulfilled;
+          });
       });
 
       
       step('Retrieve service', function() {
-        return expect(
-          dscClient.getService(createdService.id)
+        dscClient.getService(createdService.id)
           .then(service => {
             expect(service).to.deep.equal(createdService);
           })
-        ).to.eventually.be.fulfilled;
       });
       
 
       step('Create connector for service', function() {
         const name = uuidv4();
         const timezone = "Africa/Casablanca";
-        return expect(
-          dscClient.createConnector({name, description, serviceId: createdService.id, timezone})
+        return dscClient.createConnector({name, description, serviceId: createdService.id, timezone})
           .then(connector => {
             createdConnector = connector;
             expect(connector).to.have.property('id');
@@ -181,7 +173,6 @@ describe('WIoTP DSC Client Capabilities', function() {
             expect(connector).to.have.property('updatedBy');
             expect(connector).to.have.property('refs');
           })
-        ).to.eventually.be.fulfilled;
       });
 
       // TODO: retrieve connector
@@ -190,9 +181,9 @@ describe('WIoTP DSC Client Capabilities', function() {
       
       step('Create connector destination', function() {
         const name = uuidv4();
+        console.log(name);
         const bucketInterval = 'MONTH';
-        return expect(
-          dscClient.createCloudantDestination(createdConnector.id, {name, bucketInterval})
+        return dscClient.createCloudantDestination(createdConnector.id, {name, bucketInterval})
           .then(destination => {
             createdDestination = destination;
             expect(destination).to.have.property('name', name);
@@ -200,7 +191,6 @@ describe('WIoTP DSC Client Capabilities', function() {
             expect(destination).to.have.property('configuration');
             expect(destination.configuration).to.have.property('bucketInterval', bucketInterval);
           })
-        ).to.eventually.be.fulfilled;
       });
 
       // TODO: retrieve connector destination
@@ -210,8 +200,7 @@ describe('WIoTP DSC Client Capabilities', function() {
         const name = uuidv4();
         const deviceType='*';
         const eventId='*';
-        return expect(
-          dscClient.createEventForwardingRule(createdConnector.id, {name, destinationName: createdDestination.name, deviceType, eventId})
+        return dscClient.createEventForwardingRule(createdConnector.id, {name, destinationName: createdDestination.name, deviceType, eventId})
           .then(forwardingRule => {
             createdForwardingRule = forwardingRule;
             expect(forwardingRule).to.have.property('name', name);
@@ -221,7 +210,6 @@ describe('WIoTP DSC Client Capabilities', function() {
             expect(forwardingRule.selector).to.have.property('deviceType', deviceType);
             expect(forwardingRule.selector).to.have.property('eventId', eventId);
           })
-        ).to.eventually.be.fulfilled;
       });
 
       // TODO: retrieve connector forwarding rule
@@ -230,28 +218,20 @@ describe('WIoTP DSC Client Capabilities', function() {
       // TODO: send an event, check it makes it into cloudant
       
       step('Delete forwarding rule', () => {
-        return expect(
-          dscClient.deleteForwardingRule(createdConnector.id, createdForwardingRule.id)
-        ).to.eventually.be.fulfilled;
+        return dscClient.deleteForwardingRule(createdConnector.id, createdForwardingRule.id)
       });
       
       step('Delete destination', () => {
-        return expect(
-          dscClient.deleteDestination(createdConnector.id, createdDestination.name)
-        ).to.eventually.be.fulfilled;
+        return dscClient.deleteDestination(createdConnector.id, createdDestination.name)
       });
       
 
       step('Delete connector', () => {
-        return expect(
-          dscClient.deleteConnector(createdConnector.id)
-        ).to.eventually.be.fulfilled;
+        return dscClient.deleteConnector(createdConnector.id)
       });
 
       step('Delete Service', () => {
-        return expect(
-          dscClient.deleteService(createdService.id)
-        ).to.eventually.be.fulfilled;
+        return dscClient.deleteService(createdService.id)
       });
 
 
