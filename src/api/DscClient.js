@@ -69,6 +69,16 @@ export default class DscClient {
       .catch(err => errors.handleError(err, {}));
    }
 
+   getConnectors({name, serviceType, enabled, serviceId}) {
+    return this.apiClient.callApi('GET', 200, true, ['historianconnectors'], null, {
+      name: name ? name : undefined,
+      type: serviceType ? serviceType : undefined,
+      enabled: enabled === undefined ? undefined : enabled,
+      serviceId: serviceId ? serviceId : undefined,
+    })
+    .catch(err => errors.handleError(err, {}));
+   }
+
    deleteConnector(connectorId) {
     return this.apiClient.callApi('DELETE', 204, false, ['historianconnectors', connectorId])
       .catch(err => errors.handleError(err, {}));
@@ -90,7 +100,15 @@ export default class DscClient {
 
   createEventstreamsDestination(connectorId, {name, partitions=1}) {
     return this.createDestination(connectorId, {name, type: 'eventstreams', configuration: { partitions }});
-   }
+  }
+
+  getDestinations(connectorId, params={name:undefined}) {
+    const {name} = params;
+    return this.apiClient.callApi('GET', 200, true, ['historianconnectors', connectorId, 'destinations'], null, {
+      name: name ? name : undefined,
+    })
+    .catch(err => errors.handleError(err, {}));
+  } 
 
    deleteDestination(connectorId, destinationName) {
     return this.apiClient.callApi('DELETE', [200, 204], false, ['historianconnectors', connectorId, 'destinations', destinationName])
@@ -112,6 +130,12 @@ export default class DscClient {
   createEventForwardingRule(connectorId, {name, destinationName, deviceType='*', eventId='*'}) {
     return this.createForwardingRule(connectorId, {name, destinationName, type: 'event', selector: {deviceType, eventId}})
   }
+
+  getForwardingRules(connectorId) {
+    // TODO: QS params
+    return this.apiClient.callApi('GET', 200, true, ['historianconnectors', connectorId, 'forwardingrules'])
+    .catch(err => errors.handleError(err, {}));
+  } 
 
   deleteForwardingRule(connectorId, forwardingRuleId) {
     return this.apiClient.callApi('DELETE', 204, false, ['historianconnectors', connectorId, 'forwardingrules', forwardingRuleId])
