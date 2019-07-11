@@ -91,7 +91,7 @@ export default class DscClient {
   // {name, type, configuration}
    createDestination(connectorId, destination) {
     return this.apiClient.callApi('POST', 201, true, ['historianconnectors', connectorId, 'destinations'], destination)
-      .catch(err => errors.handleError(err, {}));
+      .catch(err => errors.handleError(err, {CUDDSC0103E: errors.DestinationAlreadyExists}));
    }
 
    createCloudantDestination(connectorId, {name, bucketInterval}) {

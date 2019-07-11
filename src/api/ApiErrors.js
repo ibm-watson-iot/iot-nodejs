@@ -9,6 +9,8 @@ export class WiotpError extends Error {
 
 export class InvalidServiceCredentials extends WiotpError {}
 
+export class DestinationAlreadyExists extends WiotpError {}
+
 export class ServiceNotFound extends WiotpError {}
 
 
@@ -22,4 +24,11 @@ export const handleError = (err, errorMappings) => {
   } else {
     throw err;
   }
+}
+
+export default {
+  WiotpError,
+  InvalidServiceCredentials,
+  DestinationAlreadyExists,
+  ServiceNotFound,
 }

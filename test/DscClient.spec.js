@@ -191,6 +191,13 @@ describe('WIoTP DSC Client Capabilities', function() {
           })
       });
 
+      step('Attempting to create duplicate destination should throw DestinationAlreadyExistss error', function() {
+        const bucketInterval = 'MONTH';
+        return expect(
+          dscClient.createCloudantDestination(createdConnector.id, {name: createdDestination.name, bucketInterval})
+        ).to.be.rejectedWith(errors.DestinationAlreadyExistss);
+      });
+
       // TODO: retrieve connector destination
       // TODO: retrieve connector destinations
 
