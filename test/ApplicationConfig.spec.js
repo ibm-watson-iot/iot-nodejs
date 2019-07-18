@@ -53,6 +53,7 @@ describe('WIoTP Application Configuration', () => {
     expect(config.options.mqtt.sessionExpiry).to.equal(3600);
     expect(config.options.mqtt.keepAlive).to.equal(60);
     expect(config.options.mqtt.caFile).to.equal("myPath");
+    expect(config.options.mqtt.protocolVersion).to.equal(4);
     expect(config.options.http.verify).to.equal(true);
   });
 
