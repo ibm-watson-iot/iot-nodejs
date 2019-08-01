@@ -64,8 +64,8 @@ export default class DscClient {
    **************************************/
 
    // {name, description, serviceId, timezone, enabled}
-   createConnector({name, description=undefined, serviceId, timezone='UTC', enabled=true}) {
-    return this.apiClient.callApi('POST', 201, true, ['historianconnectors'], {name, description, serviceId, timezone, enabled})
+   createConnector({name, type, description=undefined, serviceId, timezone='UTC', enabled=true}) {
+    return this.apiClient.callApi('POST', 201, true, ['historianconnectors'], {name, description, type, serviceId, timezone, enabled})
       .catch(err => errors.handleError(err, {}));
    }
 

@@ -157,7 +157,7 @@ describe('WIoTP DSC Client Capabilities', function() {
       step('Create connector for service', function() {
         const name = uuidv4();
         const timezone = "Africa/Casablanca";
-        return dscClient.createConnector({name, description, serviceId: createdService.id, timezone})
+        return dscClient.createConnector({name, type:'cloudant', description, serviceId: createdService.id, timezone})
           .then(connector => {
             createdConnector = connector;
             expect(connector).to.have.property('id');
@@ -400,7 +400,7 @@ describe('WIoTP DSC Client Capabilities', function() {
       step('Create connector for service', function() {
         const name = uuidv4();
         const timezone = "Africa/Casablanca";
-        return dscClient.createConnector({name, description, serviceId: createdService.id, timezone})
+        return dscClient.createConnector({name, type: 'eventstreams', description, serviceId: createdService.id, timezone})
           .then(connector => {
             createdConnector = connector;
             expect(connector).to.have.property('id');
