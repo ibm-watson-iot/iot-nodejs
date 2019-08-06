@@ -174,6 +174,24 @@ describe('WIoTP DSC Client Capabilities', function() {
           })
       });
 
+      step('Update connector', function() {
+        const newName = uuidv4();
+        return dscClient.updateConnector({...createdConnector, name: newName})
+        .then(updatedConnector => {
+          expect(updatedConnector).to.have.property('id', createdConnector.id);
+          expect(updatedConnector).to.have.property('name', newName);
+          expect(updatedConnector).to.have.property('serviceId', createdService.id);
+          expect(updatedConnector).to.have.property('type', createdConnector.type);
+          expect(updatedConnector).to.have.property('timezone', createdConnector.timezone);
+          expect(updatedConnector).to.have.property('enabled', true);
+          expect(updatedConnector).to.have.property('created', createdConnector.created);
+          expect(updatedConnector).to.have.property('createdBy', createdConnector.createdBy);
+          expect(updatedConnector).to.have.property('updated');
+          expect(updatedConnector).to.have.property('updatedBy', createdConnector.updatedBy);
+          expect(updatedConnector).to.have.property('refs');
+        })
+      });
+
       // TODO: retrieve connector
       // TODO: retrieve connectors
 
@@ -415,6 +433,26 @@ describe('WIoTP DSC Client Capabilities', function() {
             expect(connector).to.have.property('updatedBy');
             expect(connector).to.have.property('refs');
           })
+      });
+
+
+
+      step('Update connector', function() {
+        const newName = uuidv4();
+        return dscClient.updateConnector({...createdConnector, name: newName})
+        .then(updatedConnector => {
+          expect(updatedConnector).to.have.property('id', createdConnector.id);
+          expect(updatedConnector).to.have.property('name', newName);
+          expect(updatedConnector).to.have.property('serviceId', createdService.id);
+          expect(updatedConnector).to.have.property('type', createdConnector.type);
+          expect(updatedConnector).to.have.property('timezone', createdConnector.timezone);
+          expect(updatedConnector).to.have.property('enabled', true);
+          expect(updatedConnector).to.have.property('created', createdConnector.created);
+          expect(updatedConnector).to.have.property('createdBy', createdConnector.createdBy);
+          expect(updatedConnector).to.have.property('updated');
+          expect(updatedConnector).to.have.property('updatedBy', createdConnector.updatedBy);
+          expect(updatedConnector).to.have.property('refs');
+        })
       });
 
       step('Create connector destination', function() {

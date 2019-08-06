@@ -69,6 +69,12 @@ export default class DscClient {
       .catch(err => errors.handleError(err, {}));
    }
 
+
+   updateConnector({id, name, description, serviceId, type, enabled, timezone}) {
+    return this.apiClient.callApi('PUT', 200, true, ['historianconnectors', id], {id, name, description, serviceId, type, enabled, timezone})
+     .catch(err => errors.handleError(err, {}));
+   }
+
    getConnectors({name, serviceType, enabled, serviceId}) {
     return this.apiClient.callApi('GET', 200, true, ['historianconnectors'], null, {
       name: name ? name : undefined,
