@@ -386,7 +386,9 @@ describe('WIoTP DSC Client Capabilities', function() {
 
       step('Create service', () => {
         const name = uuidv4();
-        return dscClient.createEventstreamsService({name, description, apiKey: eventstreamsApiKey, adminUrl: eventstreamsAdminUrl, brokers: eventstreamsBrokers, user: eventstreamsUser, password: eventstreamsPassword})
+        return dscClient.createEventstreamsService({name, description, 
+          api_key: eventstreamsApiKey, kafka_admin_url: eventstreamsAdminUrl, kafka_brokers_sasl: eventstreamsBrokers, 
+          user: eventstreamsUser, password: eventstreamsPassword})
           .then(_createdService => {
             createdService = _createdService;
             expect(createdService.type).to.equal('eventstreams');

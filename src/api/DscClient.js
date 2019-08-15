@@ -34,12 +34,25 @@ export default class DscClient {
   }
 
 
-  createCloudantService({name, description, username, password, host=`${username}.cloudant.com`, port=443, url=`https://${username}:${password}@${host}`}) {
-    return this.createService({name, description, type: 'cloudant', credentials: {username, password, host, port, url}})
+  createCloudantService({
+    name, description,
+    username, password, host=`${username}.cloudant.com`, port=443, url=`https://${username}:${password}@${host}`, 
+    apikey, iam_apikey_name, iam_apikey_description, iam_role_crn, iam_serviceid_crn
+  }) {
+    return this.createService({name, description, type: 'cloudant', credentials: {
+        username, password, host, port, url,
+        apikey, iam_apikey_name, iam_apikey_description, iam_role_crn, iam_serviceid_crn
+    }})
   }
 
-  createEventstreamsService({name, description, apiKey, adminUrl, brokers, user, password}) {
-    return this.createService({name, description, type: 'eventstreams', credentials: {api_key: apiKey, kafka_admin_url: adminUrl, kafka_brokers_sasl: brokers, user, password}})
+  createEventstreamsService({name, description,
+    api_key, kafka_admin_url, kafka_brokers_sasl, user, password,
+    apikey, iam_apikey_name, iam_apikey_description, iam_role_crn, iam_serviceid_crn
+  }) {
+    return this.createService({name, description, type: 'eventstreams', credentials: {
+      api_key, kafka_admin_url, kafka_brokers_sasl, user, password,
+      apikey, iam_apikey_name, iam_apikey_description, iam_role_crn, iam_serviceid_crn
+    }})
   }
 
   getService(serviceId) {
