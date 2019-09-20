@@ -25,7 +25,7 @@ export default class DeviceConfig extends BaseConfig{
         if (!("orgId" in this.identity) || this.identity.orgId == null) {
             throw new Error("Missing identity.orgId from configuration");
         }
-        if (!("typeId" in this.identity) || this.identity == null) {
+        if (!("typeId" in this.identity) || this.identity.typeId == null) {
             throw new Error("Missing identity.typeId from configuration");
         }
         if (!("deviceId" in this.identity) || this.identity.deviceId == null) {
@@ -163,7 +163,7 @@ export default class DeviceConfig extends BaseConfig{
             var validLevels = ["error", "warning", "info", "debug"];
             if (!(validLevels.includes(data["options"]["logLevel"])))
             {
-                throw new Error("Optional setting options.logLevel must be one of error, warning, info, debug" + data["options"]["logLevel"])
+                throw new Error("Optional setting options.logLevel (Currently: " + data["options"]["logLevel"] + ") must be one of error, warning, info, debug")
             }
         }
         else
