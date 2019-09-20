@@ -19,7 +19,7 @@ describe('WIoTP Device Configuration', () => {
 
   it('Initialise with the minimum required configuration', () => {
     let identity = {orgId: "orgid", typeId: "mytypeid", deviceId: "mydeviceid"};
-    let auth = {token: "test"};
+    let auth = {token: "myToken"};
     let options = null;
 
     let config = new DeviceConfig(identity, auth, options);
@@ -57,5 +57,67 @@ describe('WIoTP Device Configuration', () => {
     expect(config.options.mqtt.keepAlive).to.equal(60);
     expect(config.options.mqtt.caFile).to.equal("myPath");
   });
+
+  it('Missing identity throws error', () => {
+    let identity = null;
+    let auth = null;
+    let options = null;
+    var deviceConfigTest = function(){new DeviceConfig(identity, auth, options)};
+    expect(deviceConfigTest).to.throw('Missing identity from configuration');
+  });
+
+  it('Missing orgID throws error', () => {
+    let identity = {orgId: null};
+    let auth = null;
+    let options = null;
+    var deviceConfigTest = function(){new DeviceConfig(identity, auth, options)};
+    expect(deviceConfigTest).to.throw('Missing identity.orgId from configuration');
+  });
+
+  it('Missing typeId throws error', () => {
+    let identity = {orgId: "myOrg", typeId: null};
+    let auth = null;
+    let options = null;
+    var deviceConfigTest = function(){new DeviceConfig(identity, auth, options)};
+    expect(deviceConfigTest).to.throw('Missing identity.typeId from configuration');
+  });
+
+  it('Missing deviceId throws error', () => {
+    let identity = {orgId: "myOrg", typeId: "myType", deviceId: null};
+    let auth = null;
+    let options = null;
+    var deviceConfigTest = function(){new DeviceConfig(identity, auth, options)};
+    expect(deviceConfigTest).to.throw('Missing identity.deviceId from configuration');
+  });
+
+  it('Quickstart with an auth throws error', () => {
+    let identity = {orgId: "quickstart", typeId: "myType", deviceId: "MyDevice"};
+    let auth = {token: "myToken"};
+    let options = null;
+    var deviceConfigTest = function(){new DeviceConfig(identity, auth, options)};
+    expect(deviceConfigTest).to.throw('Quickstart service does not support device authentication');
+  });
+
+  it('Missing auth throws error', () => {
+    let identity = {orgId: "myOrg", typeId: "myType", deviceId: "MyDevice"};
+    let auth = null;
+    let options = null;
+    var deviceConfigTest = function(){new DeviceConfig(identity, auth, options)};
+    expect(deviceConfigTest).to.throw('Missing auth from configuration');
+  });
+
+  it('Missing auth token throws error', () => {
+    let identity = {orgId: "myOrg", typeId: "myType", deviceId: "MyDevice"};
+    let auth = {token: null};
+    let options = null;
+    var deviceConfigTest = function(){new DeviceConfig(identity, auth, options)};
+    expect(deviceConfigTest).to.throw('Missing auth.token from configuration');
+  });
+
+  it('Missing config file throws error', () => {
+    var deviceConfigTest = function(){new DeviceConfig.parseConfigFile("./test/DeviceConfigFileLogLevelTest.spec.yaml")};
+    expect(deviceConfigTest).to.throw('Optional setting options.logLevel (Currently: notALogLevel) must be one of error, warning, info, debug');
+  });
+
 
 });
