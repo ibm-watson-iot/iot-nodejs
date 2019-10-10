@@ -179,7 +179,7 @@ export default class ApplicationConfig  extends BaseConfig{
             var validLevels = ["error", "warning", "info", "debug"];
             if (!(validLevels.includes(data["options"]["logLevel"])))
             {
-                throw new Error("Optional setting options.logLevel must be one of error, warning, info, debug" + data["options"]["logLevel"])
+                throw new Error("Optional setting options.logLevel (Currently: " + data["options"]["logLevel"] + ") must be one of error, warning, info, debug")
             }
         }
         else
