@@ -56,4 +56,40 @@ describe('WIoTP Application Configuration', () => {
     expect(config.options.http.verify).to.equal(true);
   });
 
+  it('Missing auth.key throws error', () => {
+    let identity = null;
+    let auth = {key: null};
+    let options = null;
+    var applicationConfigTest = function(){new ApplicationConfig(identity, auth, options)};
+    expect(applicationConfigTest).to.throw('Missing auth.key from configuration');
+  });
+
+  it('Missing auth.token throws error', () => {
+    let identity = null;
+    let auth = {key: "MyKey", token: null};
+    let options = null;
+    var applicationConfigTest = function(){new ApplicationConfig(identity, auth, options)};
+    expect(applicationConfigTest).to.throw('Missing auth.token from configuration');
+  });
+
+  it('Initialise without auth to induce quickstart', () => {
+    let identity = null;
+    let auth = null;
+    let options = null;
+
+    let config = new ApplicationConfig(identity, auth, options);
+    expect(config.getOrgId()).to.equal("quickstart");
+  });
+
+  it('Load port as a string with environment variables', () => {
+    process.env['WIOTP_OPTIONS_MQTT_PORT'] = '8883';
+    let config = ApplicationConfig.parseEnvVars();
+    expect(config.options.mqtt.port).to.equal(8883);
+  });
+
+  it('Incorrect logLevel in config file throws error', () => {
+    var applicationConfigTest = function(){new ApplicationConfig.parseConfigFile("./test/incorrectLogLevelTest.spec.yaml")};
+    expect(applicationConfigTest).to.throw('Optional setting options.logLevel (Currently: notALogLevel) must be one of error, warning, info, debug');
+  });
+
 });
