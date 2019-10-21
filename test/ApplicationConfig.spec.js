@@ -82,9 +82,9 @@ describe('WIoTP Application Configuration', () => {
   });
 
   it('Load port as a string with environment variables', () => {
-    process.env['WIOTP_OPTIONS_MQTT_PORT'] = '1234';
+    process.env['WIOTP_OPTIONS_MQTT_PORT'] = '8883';
     let config = ApplicationConfig.parseEnvVars();
-    expect(config.options.mqtt.port).to.equal(1234);
+    expect(config.options.mqtt.port).to.equal(8883);
   });
 
   it('Incorrect logLevel in config file throws error', () => {
