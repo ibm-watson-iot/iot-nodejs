@@ -1,11 +1,11 @@
 {
   "name": "@wiotp/sdk",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "SDK for developing device, gateway, and application clients for IBM Watson IoT Platform",
   "main": "dist/index.js",
   "files": [
     "src",
-    "index.js",
+    "dist",
     "package.json",
     "README.md",
     "LICENCE"
