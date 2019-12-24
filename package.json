@@ -4,8 +4,8 @@
   "description": "SDK for developing device, gateway, and application clients for IBM Watson IoT Platform",
   "main": "dist/index.js",
   "files": [
-    "src",
     "dist",
+    "src",
     "package.json",
     "README.md",
     "LICENCE"
@@ -60,6 +60,10 @@
     "email": "parkerda@uk.ibm.com"
   },
   "contributors": [
+    {
+      "name": "Tom Klapiscak",
+      "email": "klapitom@uk.ibm.com"
+    },
     {
       "name": "Bryan Boyd",
       "email": "bboyd@us.ibm.com"
