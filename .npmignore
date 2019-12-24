@@ -1,4 +1,9 @@
-.settings
-node_modules
-coverage
+.git
 .idea
+.nyc_output
+.settings
+.travis.yml
+.vscode
+coverage
+docs
+node_modules
