@@ -53,10 +53,15 @@ export default class ApplicationConfig  extends BaseConfig{
       }
     }
 
+    // Returns options.apiRoot if set, 'api/v0002' otherwiss
+    getApiRoot() {
+      return this.options.apiRoot || 'api/v0002';
+    }
+
     getApiBaseUri() {
       return this.auth && this.auth.useLtpa
-        ? `/api/v0002`
-        :  `https://${this.getOrgId()}.${this.options.domain}/api/v0002`;
+        ? `/${this.getApiRoot()}`
+        :  `https://${this.getOrgId()}.${this.options.domain}/${this.getApiRoot()}`;
     }
 
     getClientId() {
@@ -91,6 +96,7 @@ export default class ApplicationConfig  extends BaseConfig{
 
         // Options
         let domain = process.env.WIOTP_OPTIONS_DOMAIN || null;
+        let apiRoot = process.env.WIOTP_OPTIONS_API_ROOT || null;
         let logLevel = process.env.WIOTP_OPTIONS_LOGLEVEL || "info";
         let port = process.env.WIOTP_OPTIONS_MQTT_PORT || null;
         let transport = process.env.WIOTP_OPTIONS_MQTT_TRANSPORT || null;
@@ -111,6 +117,7 @@ export default class ApplicationConfig  extends BaseConfig{
         let identity = {appId: appId};
         let options = {
             domain: domain,
+            apiRoot: apiRoot,
             logLevel: logLevel,
             mqtt: {
                 port: port,
@@ -146,6 +153,7 @@ export default class ApplicationConfig  extends BaseConfig{
             token: Ab$76s)asj8_s5
         options:
             domain: internetofthings.ibmcloud.com
+            apiRoot: 'api/platform'
             logLevel: error|warning|info|debug
             mqtt:
                 instanceId: myInstance
