@@ -144,7 +144,7 @@ export default class ApplicationClient extends BaseClient {
     return this;
   }
 
-  unsubscribeFromEvents(typeId, deviceId, eventId, format) {
+  unsubscribeFromEvents(typeId, deviceId, eventId, format, callback) {
     typeId = typeId || '+';
     deviceId = deviceId || '+';
     eventId = eventId || '+';
