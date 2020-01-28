@@ -328,6 +328,15 @@ export default class StateClient {
     return this.callApi('POST', 201, true, ['device', 'types'], JSON.stringify(body));
   }
 
+
+  getDeviceTypesByLogicalInterfaceId(logicalInterfaceId, bookmark=0, limit=10) {
+    if(this.draftMode) {
+      return this.callApi('GET', 200, true, ['draft', 'device', 'types'], null, {logicalInterfaceId, '_bookmark': bookmark, '_limit': limit});
+    } else {
+      return this.callApi('GET', 200, true, ['device', 'types'], null, {'_bookmark': bookmark, '_limit': limit});
+    }
+  }
+
   createDeviceTypePhysicalInterfaceAssociation(typeId, physicalInterfaceId) {
     let body = {
       id: physicalInterfaceId
