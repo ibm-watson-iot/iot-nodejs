@@ -47,6 +47,7 @@ describe('WIoTP Application Configuration', () => {
     expect(config.auth.token).to.equal("myToken")
     expect(config.options.domain).to.equal("internetofthings.ibmcloud.com");
     expect(config.options.logLevel).to.equal("info");
+    expect(config.options.apiRoot).equal('api/v0002');
     expect(config.options.mqtt.port).to.equal(8883);
     expect(config.options.mqtt.transport).to.equal("tcp");
     expect(config.options.mqtt.cleanStart).to.equal(false);
@@ -54,6 +55,7 @@ describe('WIoTP Application Configuration', () => {
     expect(config.options.mqtt.keepAlive).to.equal(60);
     expect(config.options.mqtt.caFile).to.equal("myPath");
     expect(config.options.http.verify).to.equal(true);
+    expect(config.options.http.additionalHeaders).to.deep.equal({hello: 'world', name: 'tom'});
   });
 
   it('Missing auth.key throws error', () => {

@@ -80,6 +80,18 @@ export default class ApplicationConfig  extends BaseConfig{
         return this.auth.token;
     }
 
+    getAdditionalHeaders() {
+      return this.options && this.options.http
+        ? this.options.http.additionalHeaders
+        : [];
+    }
+
+    setAdditionalHeader(key, value) {
+      if(!this.options.http) this.options.http = {};
+      if(!this.options.http.additionalHeaders) this.options.http.additionalHeaders = {}
+      this.options.http.additionalHeaders[key] = value;
+    }
+
     static parseEnvVars() {
         // Auth
         let authKey = process.env.WIOTP_AUTH_KEY || null;
@@ -106,6 +118,8 @@ export default class ApplicationConfig  extends BaseConfig{
         let keepAlive = process.env.WIOTP_OPTIONS_MQTT_KEEPALIVE || 60;
         let sharedSubs = process.env.WIOTP_OPTIONS_MQTT_SHAREDSUBSCRIPTION || "false";
         let verifyCert = process.env.WIOTP_OPTIONS_HTTP_VERIFY || "true";
+
+        // TODO: add environment variable parsing for options.http.additionalHeaders
     
         // String to int conversions
         if (port != null) {
@@ -164,7 +178,10 @@ export default class ApplicationConfig  extends BaseConfig{
                 keepAlive: 60
                 caFile: /path/to/certificateAuthorityFile.pem
             http:
-                verify: true  
+                verify: true
+                additionalHeaders:
+                    X-Csrf-Token: sdfsdfsdf
+                    X-myheader: hello
         */  
 
         const configFile = fs.readFileSync(configFilePath, 'utf8');

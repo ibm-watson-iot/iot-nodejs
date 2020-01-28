@@ -77,6 +77,10 @@ export default class ApiClient {
         xhrConfig.params = params;
       }
 
+      if (this.config.getAdditionalHeaders()) {
+        xhrConfig.headers = {...xhrConfig.headers, ...this.config.getAdditionalHeaders()};
+      }
+
       function transformResponse(response) {
         if (expectJsonContent && !(typeof response.data === 'object')) {
           try {
