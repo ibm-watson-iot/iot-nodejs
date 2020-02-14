@@ -61,7 +61,7 @@ export default class ApplicationConfig  extends BaseConfig{
 
     getClientId() {
         let clientIdPrefix = "a";
-        if (this.sharedSubscription == true) {
+        if (this.options.mqtt.sharedSubscription == true) {
             clientIdPrefix = "A";
         }
         return clientIdPrefix + ":" + this.getOrgId() + ":" + this.identity.appId;
