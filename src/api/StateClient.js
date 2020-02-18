@@ -282,7 +282,6 @@ export default class StateClient {
       switch(operationId) {
         case 'validate-configuration':
           return this.callApi('PATCH', 200, true, ["draft", "logicalinterfaces", logicalInterfaceId], body);
-          break
         case 'activate-configuration':
           return this.callApi('PATCH', 202, true, ["draft", "logicalinterfaces", logicalInterfaceId], body);
         case 'deactivate-configuration':
@@ -293,7 +292,7 @@ export default class StateClient {
           return this.callApi('PATCH', 200, true, ["draft", "logicalinterfaces", logicalInterfaceId], body);
       }
     } else {
-       return this.invalidOperation("PATCH operation not allowed on logical interface");
+       return this.invalidOperation("PATCH operation not allowed on active logical interface");
     }
   }  
 
@@ -311,6 +310,31 @@ export default class StateClient {
       return this.invalidOperation("PATCH operation 'deactivate-configuration' not allowed on logical interface");
     }
   }
+
+ // Application interface patch operation on draft version
+ // Acceptable operation id - validate-configuration, activate-configuration, list-differences
+ patchOperationDeviceType(deviceTypeId, operationId) {
+  var body = {
+    "operation": operationId
+  }
+
+  if(this.draftMode) {
+    switch(operationId) {
+      case 'validate-configuration':
+        return this.callApi('PATCH', 200, true, ["draft", "device", "types", deviceTypeId], body);
+      case 'activate-configuration':
+        return this.callApi('PATCH', 202, true, ["draft", "device", "types", deviceTypeId], body);
+      case 'deactivate-configuration':
+        return this.callApi('PATCH', 202, true, ["draft", "device", "types", deviceTypeId], body);
+      case 'list-differences':
+        return this.callApi('PATCH', 200, true, ["draft", "device", "types", deviceTypeId], body);
+      default:
+        return this.callApi('PATCH', 200, true, ["draft", "device", "types", deviceTypeId], body);
+    }
+  } else {
+     return this.invalidOperation("this method cannot be called when draftMode=false");
+  }
+}  
 
   // Create device type with physical Interface Id
   createDeviceType(typeId, description, deviceInfo, metadata, classId, physicalInterfaceId) {
