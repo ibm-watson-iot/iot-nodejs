@@ -60,7 +60,13 @@ export default class DeviceConfig extends BaseConfig{
         return "use-token-auth";
     }
     getMqttPassword() {
-        return this.auth.token;
+        if (this.identity.orgId != "quickstart")
+        {
+          return this.auth.token;
+        }
+        else{
+          return null;
+        }
     }
 
     static parseEnvVars() {
