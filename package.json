@@ -19,14 +19,16 @@
     "browserify": "^16.5.0",
     "btoa": "^1.2.1",
     "concat-stream": "^2.0.0",
+    "esm": "^3.2.25",
     "events": "^3.0.0",
     "form-data": "^2.3.3",
     "format": "^0.2.2",
     "loglevel": "^1.6.1",
     "mqtt": "^3.0.0",
     "tinycache": "^1.1.2",
-    "uuid": "^3.3.2",
-    "yaml": "^1.7.2"
+    "uuid": "^3.4.0",
+    "yaml": "^1.7.2",
+    "yargs": "^15.1.0"
   },
   "devDependencies": {
     "@babel/cli": "7.7.7",
