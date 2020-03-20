@@ -78,7 +78,7 @@ window.disconnect = function() {
 
 window.subscribeToEvents = function() {
   if (appClient == null) {
-    document.getElementById("lastError").innerHTML = "Need to initialize client before you can disconnect!";
+    document.getElementById("lastError").innerHTML = "Need to initialize client before you can subscribe to events!";
     return;
   }
   appClient.subscribeToEvents("+", "+", "+", "+", 0);

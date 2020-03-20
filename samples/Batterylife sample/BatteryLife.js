@@ -1,12 +1,16 @@
+// *****************************************************************************
+// Copyright (c) 2014, 2019 IBM Corporation and other Contributors.
+//
+// All rights reserved. This program and the accompanying materials
+// are made available under the terms of the Eclipse Public License v1.0
+// which accompanies this distribution, and is available at
+// http://www.eclipse.org/legal/epl-v10.html
+// *****************************************************************************
 
-
-import {DeviceClient, DeviceConfig} from '@wiotp/sdk';
-//OR import {DeviceClient, DeviceConfig} from a local location eg: '/Users/Username/Documents/GitHub/iot-nodejs/dist/index.js';
+//import {DeviceClient, DeviceConfig} from '@wiotp/sdk';
+import {DeviceClient, DeviceConfig} from  '/Users/jonahluckett/Documents/GitHub/iot-nodejs/dist/index.js';
 import { v4 as uuidv4 } from 'uuid';
-
-
-
-
+const si = require('systeminformation')
 const argv = require('yargs')
     .option('quickstart', {
         alias: 'q',
@@ -24,6 +28,8 @@ const argv = require('yargs')
     .argv;
 
 let deviceConfig = null;
+let deviceClient = null;
+let data = {};
 
 
 if (argv.quickstart) {
@@ -46,21 +52,34 @@ else if(argv.configFile)
 }
 else 
 {
-    deviceConfig = DeviceConfig.parseEnvVars();
-        // Intialize using:
+     // Intialize using:
             // export WIOTP_IDENTITY_ORGID=myOrg
             // export WIOTP_IDENTITY_TYPEID=myType
             // export WIOTP_IDENTITY_DEVICEID=myDevice
             // export WIOTP_AUTH_TOKEN=myToken
+    deviceConfig = DeviceConfig.parseEnvVars();
     startClient();
 }
 
-
-
 function startClient(){
-    let deviceClient = new DeviceClient(deviceConfig);
+    deviceClient = new DeviceClient(deviceConfig);
     deviceClient.connect();
     console.log("Press {ctrl + c} to disconnect at any time.")
+    var interval = 2
+    setInterval(sendInformation, interval*1000)
 }
 
-
+function sendInformation() {
+    si.cpu().then(cpuData => {
+        data['d:CPUSpeed'] = cpuData.speed
+    })
+    si.mem().then(memData => {
+        data['d[ActiveMemory]'] = memData.active
+    })
+    si.battery().then(batteryData => {
+        data['d:Battery:BatteryPercent'] = batteryData.percent
+        data['d:battery:BatteryCharging'] = batteryData.ischarging
+    })
+    console.log(data)
+    deviceClient.publishEvent("BatteryLife","json",data);
+}
