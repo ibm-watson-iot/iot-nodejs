@@ -8,7 +8,7 @@
 // *****************************************************************************
 
 //import {DeviceClient, DeviceConfig} from '@wiotp/sdk';
-import {DeviceClient, DeviceConfig} from  '/Users/jonahluckett/Documents/GitHub/iot-nodejs/dist/index.js';
+// or you can use import {DeviceClient, DeviceConfig} from  '/Users/*InsertYourPathHere/GitHub/iot-nodejs/src/index.js';
 import { v4 as uuidv4 } from 'uuid';
 const si = require('systeminformation')
 const argv = require('yargs')
@@ -71,14 +71,14 @@ function startClient(){
 
 function sendInformation() {
     si.cpu().then(cpuData => {
-        data['d:CPUSpeed'] = cpuData.speed
+        data['CPUSpeed'] = cpuData.speed
     })
     si.mem().then(memData => {
-        data['d[ActiveMemory]'] = memData.active
+        data['ActiveMemory'] = memData.active
     })
     si.battery().then(batteryData => {
-        data['d:Battery:BatteryPercent'] = batteryData.percent
-        data['d:battery:BatteryCharging'] = batteryData.ischarging
+        data['BatteryPercent'] = batteryData.percent
+        data['BatteryCharging'] = batteryData.ischarging
     })
     console.log(data)
     deviceClient.publishEvent("BatteryLife","json",data);
