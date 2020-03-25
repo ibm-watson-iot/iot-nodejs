@@ -7,7 +7,7 @@
 // http://www.eclipse.org/legal/epl-v10.html
 // *****************************************************************************
 
-//import {DeviceClient, DeviceConfig} from '@wiotp/sdk';
+import {DeviceClient, DeviceConfig} from '@wiotp/sdk';
 // or you can use import {DeviceClient, DeviceConfig} from  '/Users/*InsertYourPathHere/GitHub/iot-nodejs/src/index.js';
 import { v4 as uuidv4 } from 'uuid';
 const si = require('systeminformation')
@@ -29,7 +29,19 @@ const argv = require('yargs')
 
 let deviceConfig = null;
 let deviceClient = null;
-let data = {};
+let data = {
+    "cpuSpeed": null,
+    "manufacturer": null,
+    "memory": {
+        "total":null,
+        "free": null,
+        "active": null,
+    },
+    "battery": {
+        "percent":null,
+        "charging": null,
+    }
+};
 
 
 if (argv.quickstart) {
@@ -71,15 +83,23 @@ function startClient(){
 
 function sendInformation() {
     si.cpu().then(cpuData => {
-        data['CPUSpeed'] = cpuData.speed
+        data['cpuSpeed'] = cpuData.speed
+    })
+    si.system().then(system =>{
+        data['manufacturer'] = system.manufacturer
     })
     si.mem().then(memData => {
-        data['ActiveMemory'] = memData.active
+        var memoryRef = data['memory']
+        memoryRef['total'] = memData.total
+        memoryRef['free'] = memData.free
+        memoryRef['active'] = memData.active
     })
     si.battery().then(batteryData => {
-        data['BatteryPercent'] = batteryData.percent
-        data['BatteryCharging'] = batteryData.ischarging
+        var batteryRef = data['battery']
+        batteryRef['percent'] = batteryData.percent
+        batteryRef['charging'] = batteryData.ischarging
     })
     console.log(data)
+    //console.log(data)  ------  Use to visualise date in console
     deviceClient.publishEvent("BatteryLife","json",data);
 }
