@@ -202,6 +202,15 @@ export default class BaseClient extends events.EventEmitter {
   _publish(topic, msg, QoS, callback) {
     QoS = QoS || 0;
 
+    if (this.mqtt == null) {
+      this.emit('error', "[BaseClient:_unsubscribe] MQTT Client is not initialized - call connect() first");
+      return;
+    }
+    if (!this.mqtt.connected) {
+      this.emit('error', "[BaseClient:_unsubscribe] MQTT Client is not connected - call connect() first");
+      return;
+    }
+    
     if ((typeof msg === 'object' || typeof msg === 'boolean' || typeof msg === 'number') && !Buffer.isBuffer(msg)) {
       // mqtt library does not support sending JSON/Boolean/Number data. So stringifying it.
       // All JSON object, array will be encoded.

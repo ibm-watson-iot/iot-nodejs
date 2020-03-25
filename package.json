@@ -25,6 +25,7 @@
     "format": "^0.2.2",
     "loglevel": "^1.6.1",
     "mqtt": "^3.0.0",
+    "systeminformation": "^4.22.3",
     "tinycache": "^1.1.2",
     "uuid": "^3.4.0",
     "yaml": "^1.7.2",
