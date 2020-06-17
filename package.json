@@ -1,6 +1,6 @@
 {
   "name": "@wiotp/sdk",
-  "version": "0.6.2",
+  "version": "0.7.6-pre.monitoring-dashboard-updates",
   "description": "SDK for developing device, gateway, and application clients for IBM Watson IoT Platform",
   "main": "dist/index.js",
   "files": [

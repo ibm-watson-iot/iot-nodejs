@@ -282,7 +282,6 @@ export default class StateClient {
       switch(operationId) {
         case 'validate-configuration':
           return this.callApi('PATCH', 200, true, ["draft", "logicalinterfaces", logicalInterfaceId], body);
-          break
         case 'activate-configuration':
           return this.callApi('PATCH', 202, true, ["draft", "logicalinterfaces", logicalInterfaceId], body);
         case 'deactivate-configuration':
@@ -293,7 +292,7 @@ export default class StateClient {
           return this.callApi('PATCH', 200, true, ["draft", "logicalinterfaces", logicalInterfaceId], body);
       }
     } else {
-       return this.invalidOperation("PATCH operation not allowed on logical interface");
+       return this.invalidOperation("PATCH operation not allowed on active logical interface");
     }
   }  
 
@@ -312,6 +311,31 @@ export default class StateClient {
     }
   }
 
+ // Application interface patch operation on draft version
+ // Acceptable operation id - validate-configuration, activate-configuration, list-differences
+ patchOperationDeviceType(deviceTypeId, operationId) {
+  var body = {
+    "operation": operationId
+  }
+
+  if(this.draftMode) {
+    switch(operationId) {
+      case 'validate-configuration':
+        return this.callApi('PATCH', 200, true, ["draft", "device", "types", deviceTypeId], body);
+      case 'activate-configuration':
+        return this.callApi('PATCH', 202, true, ["draft", "device", "types", deviceTypeId], body);
+      case 'deactivate-configuration':
+        return this.callApi('PATCH', 202, true, ["draft", "device", "types", deviceTypeId], body);
+      case 'list-differences':
+        return this.callApi('PATCH', 200, true, ["draft", "device", "types", deviceTypeId], body);
+      default:
+        return this.callApi('PATCH', 200, true, ["draft", "device", "types", deviceTypeId], body);
+    }
+  } else {
+     return this.invalidOperation("this method cannot be called when draftMode=false");
+  }
+}  
+
   // Create device type with physical Interface Id
   createDeviceType(typeId, description, deviceInfo, metadata, classId, physicalInterfaceId) {
     this.log.debug("[ApiClient] registerDeviceType(" + typeId + ", " + description + ", " + deviceInfo + ", " + metadata + ", " + classId + ", " + physicalInterfaceId + ")");
@@ -326,6 +350,15 @@ export default class StateClient {
     };
 
     return this.callApi('POST', 201, true, ['device', 'types'], JSON.stringify(body));
+  }
+
+
+  getDeviceTypesByLogicalInterfaceId(logicalInterfaceId, bookmark=0, limit=10) {
+    if(this.draftMode) {
+      return this.callApi('GET', 200, true, ['draft', 'device', 'types'], null, {logicalInterfaceId, '_bookmark': bookmark, '_limit': limit});
+    } else {
+      return this.callApi('GET', 200, true, ['device', 'types'], null, {'_bookmark': bookmark, '_limit': limit});
+    }
   }
 
   createDeviceTypePhysicalInterfaceAssociation(typeId, physicalInterfaceId) {

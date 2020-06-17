@@ -5,6 +5,7 @@
       key: myKey
       token: myToken
     options:
+      apiRoot: api/v0002
       domain: internetofthings.ibmcloud.com
       logLevel: info
       mqtt:
@@ -16,4 +17,7 @@
         keepAlive: 60
         caFile: myPath
       http:
-        verify: true    
+        verify: true
+        additionalHeaders:
+          hello: world
+          name: tom

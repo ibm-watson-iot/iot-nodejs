@@ -53,10 +53,15 @@ export default class ApplicationConfig  extends BaseConfig{
       }
     }
 
+    // Returns options.apiRoot if set, 'api/v0002' otherwiss
+    getApiRoot() {
+      return this.options.apiRoot || 'api/v0002';
+    }
+
     getApiBaseUri() {
       return this.auth && this.auth.useLtpa
-        ? `/api/v0002`
-        :  `https://${this.getOrgId()}.${this.options.domain}/api/v0002`;
+        ? `/${this.getApiRoot()}`
+        :  `https://${this.getOrgId()}.${this.options.domain}/${this.getApiRoot()}`;
     }
 
     getClientId() {
@@ -75,6 +80,18 @@ export default class ApplicationConfig  extends BaseConfig{
         return this.auth.token;
     }
 
+    getAdditionalHeaders() {
+      return this.options && this.options.http
+        ? this.options.http.additionalHeaders
+        : [];
+    }
+
+    setAdditionalHeader(key, value) {
+      if(!this.options.http) this.options.http = {};
+      if(!this.options.http.additionalHeaders) this.options.http.additionalHeaders = {}
+      this.options.http.additionalHeaders[key] = value;
+    }
+
     static parseEnvVars() {
         // Auth
         let authKey = process.env.WIOTP_AUTH_KEY || null;
@@ -91,6 +108,7 @@ export default class ApplicationConfig  extends BaseConfig{
 
         // Options
         let domain = process.env.WIOTP_OPTIONS_DOMAIN || null;
+        let apiRoot = process.env.WIOTP_OPTIONS_API_ROOT || null;
         let logLevel = process.env.WIOTP_OPTIONS_LOGLEVEL || "info";
         let port = process.env.WIOTP_OPTIONS_MQTT_PORT || null;
         let transport = process.env.WIOTP_OPTIONS_MQTT_TRANSPORT || null;
@@ -100,6 +118,8 @@ export default class ApplicationConfig  extends BaseConfig{
         let keepAlive = process.env.WIOTP_OPTIONS_MQTT_KEEPALIVE || 60;
         let sharedSubs = process.env.WIOTP_OPTIONS_MQTT_SHAREDSUBSCRIPTION || "false";
         let verifyCert = process.env.WIOTP_OPTIONS_HTTP_VERIFY || "true";
+
+        // TODO: add environment variable parsing for options.http.additionalHeaders
     
         // String to int conversions
         if (port != null) {
@@ -111,6 +131,7 @@ export default class ApplicationConfig  extends BaseConfig{
         let identity = {appId: appId};
         let options = {
             domain: domain,
+            apiRoot: apiRoot,
             logLevel: logLevel,
             mqtt: {
                 port: port,
@@ -146,6 +167,7 @@ export default class ApplicationConfig  extends BaseConfig{
             token: Ab$76s)asj8_s5
         options:
             domain: internetofthings.ibmcloud.com
+            apiRoot: 'api/platform'
             logLevel: error|warning|info|debug
             mqtt:
                 instanceId: myInstance
@@ -156,7 +178,10 @@ export default class ApplicationConfig  extends BaseConfig{
                 keepAlive: 60
                 caFile: /path/to/certificateAuthorityFile.pem
             http:
-                verify: true  
+                verify: true
+                additionalHeaders:
+                    X-Csrf-Token: sdfsdfsdf
+                    X-myheader: hello
         */  
 
         const configFile = fs.readFileSync(configFilePath, 'utf8');
