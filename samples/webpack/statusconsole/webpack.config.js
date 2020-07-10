@@ -14,5 +14,9 @@ module.exports = {
         exclude: /node_modules/
       }
     ]
-  }
+  },
+  externals: {
+    fs: "commonjs fs"
+    //resolves webpack not calling FS as a module but as an environmental object
+  },
 };
