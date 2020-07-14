@@ -16,4 +16,11 @@ export { default as GatewayClient } from './gateway/GatewayClient';
 export { default as ApplicationConfig } from './application/ApplicationConfig';
 export { default as DeviceConfig } from './device/DeviceConfig';
 
-export {default as ApiErrors} from './api/ApiErrors';
+export { default as ApiClient} from './api/ApiClient';
+export { default as ApiErrors} from './api/ApiErrors';
+export { default as DscClient} from './api/DscClient';
+export { default as LecClient} from './api/LecClient';
+export { default as MgmtClient} from './api/MgmtClient';
+export { default as RegistryClient} from './api/RegistryClient';
+export { default as RulesClient} from './api/RulesClient';
+export { default as StateClient} from './api/StateClient';
