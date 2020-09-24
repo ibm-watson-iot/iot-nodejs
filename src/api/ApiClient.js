@@ -344,7 +344,8 @@ export default class ApiClient {
           if(xhrConfig.method == "POST") {
             if(data.schemaFile) {
               var blob = new Blob([data.schemaFile], { type: "application/json" })
-              formData.append('schemaFile', blob)
+              var schemaFileName = `${data.name || 'schema'}.json`;
+              formData.append('schemaFile', blob, schemaFileName);
             }
 
             if(data.name) {
@@ -360,7 +361,8 @@ export default class ApiClient {
           } else if(xhrConfig.method == "PUT") {
             if(data.schemaFile) {
               var blob = new Blob([data.schemaFile], { type: "application/json", name: data.name })
-              formData.append('schemaFile', blob)
+              var schemaFileName = `${data.name || 'schema'}.json`;
+              formData.append('schemaFile', blob, schemaFileName);
             }
           }
 
