@@ -8,7 +8,7 @@
  *****************************************************************************
  *
  */
-const uuidv4 = require('uuid/v4');
+ const { v4: uuidv4 } = require('uuid');
 
 import { expect, use } from 'chai';
 const chaiAsPromised = require('chai-as-promised');
