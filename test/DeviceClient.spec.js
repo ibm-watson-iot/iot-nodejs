@@ -13,7 +13,7 @@ import { DeviceConfig, DeviceClient } from '../src/device';
 import { assert } from 'chai';
 import { step } from 'mocha-steps';
 
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 
 // Turn off console output
 console.info = () => {};

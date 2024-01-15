@@ -8,13 +8,13 @@
  *****************************************************************************
  *
  */
-const uuidv4 = require('uuid/v4');
+ const { v4: uuidv4 } = require('uuid');
 
 import { expect, use } from 'chai';
 const chaiAsPromised = require('chai-as-promised');
 use(chaiAsPromised);
 
-var Cloudant = require('@cloudant/cloudant');
+const { CloudantV1: Cloudant } = require('@ibm-cloud/cloudant');
 
 import { ApplicationConfig, ApplicationClient } from '../src/application';
 import * as errors from '../src/api/ApiErrors';

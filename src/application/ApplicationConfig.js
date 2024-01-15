@@ -13,7 +13,7 @@ import log from 'loglevel';
 const YAML = require('yaml');
 const fs = require('fs');
 
-const uuidv4 = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 
 export default class ApplicationConfig  extends BaseConfig{
     constructor(identity, auth, options) {
