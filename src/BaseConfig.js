@@ -134,7 +134,7 @@ export default class BaseConfig{
         }
 
         // For encrypted ports
-        if (this.options.mqtt.port  == 433 || this.options.mqtt.port == 8883) {
+        if (this.options.mqtt.port  == 443 || this.options.mqtt.port == 8883) {
             if (this.options.mqtt.transport == "tcp") {
                 return "ssl://" + server;
             }
