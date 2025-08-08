@@ -1,6 +1,6 @@
 {
   "name": "@wiotp/sdk",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "description": "SDK for developing device, gateway, and application clients for IBM Watson IoT Platform",
   "main": "dist/index.js",
   "files": [
@@ -14,13 +14,13 @@
     "access": "public"
   },
   "dependencies": {
-    "axios": "^1.7.9",
+    "axios": "^1.11.0",
     "bluebird": "^3.7.2",
     "btoa": "^1.2.1",
     "concat-stream": "^2.0.0",
     "esm": "^3.2.25",
     "events": "^3.3.0",
-    "form-data": "^4.0.1",
+    "form-data": "^4.0.4",
     "format": "^0.2.2",
     "loglevel": "^1.9.2",
     "mqtt": "^4.3.8",
