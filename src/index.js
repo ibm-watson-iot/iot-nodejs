@@ -15,6 +15,7 @@ export { default as GatewayClient } from './gateway/GatewayClient';
 
 export { default as ApplicationConfig } from './application/ApplicationConfig';
 export { default as DeviceConfig } from './device/DeviceConfig';
+export { default as GatewayConfig } from './gateway/GatewayConfig';
 
 export { default as ApiClient} from './api/ApiClient';
 export { default as ApiErrors} from './api/ApiErrors';
