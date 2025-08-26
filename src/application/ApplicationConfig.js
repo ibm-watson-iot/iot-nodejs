@@ -113,6 +113,7 @@ export default class ApplicationConfig  extends BaseConfig{
         let port = process.env.WIOTP_OPTIONS_MQTT_PORT || null;
         let transport = process.env.WIOTP_OPTIONS_MQTT_TRANSPORT || null;
         let caFile = process.env.WIOTP_OPTIONS_MQTT_CAFILE || null;
+        let protocolVersion = process.env.WIOTP_OPTIONS_MQTT_VERSION || 4;
         let cleanStart = process.env.WIOTP_OPTIONS_MQTT_CLEANSTART || "true";
         let sessionExpiry = process.env.WIOTP_OPTIONS_MQTT_SESSIONEXPIRY || 3600;
         let keepAlive = process.env.WIOTP_OPTIONS_MQTT_KEEPALIVE || 60;
@@ -126,7 +127,8 @@ export default class ApplicationConfig  extends BaseConfig{
             port = parseInt(port);
         }
         sessionExpiry = parseInt(sessionExpiry);
-        keepAlive = parseInt(keepAlive)
+        keepAlive = parseInt(keepAlive);
+        protocolVersion = parseInt(protocolVersion);
     
         let identity = {appId: appId};
         let options = {
@@ -141,6 +143,7 @@ export default class ApplicationConfig  extends BaseConfig{
                 keepAlive: keepAlive,
                 sharedSubscription: (["True", "true", "1"].includes(sharedSubs)),
                 caFile: caFile,
+                protocolVersion: protocolVersion
             },
             http: {
                 verify: (["True", "true", "1"].includes(verifyCert))
@@ -177,6 +180,7 @@ export default class ApplicationConfig  extends BaseConfig{
                 sessionExpiry: 3600
                 keepAlive: 60
                 caFile: /path/to/certificateAuthorityFile.pem
+                protocolVersion: 4
             http:
                 verify: true
                 additionalHeaders:

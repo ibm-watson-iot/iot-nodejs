@@ -66,6 +66,10 @@ export default class BaseConfig{
         if (!("caFile" in this.options.mqtt)) {
             this.options.mqtt.caFile = null;
         }    
+
+        if (!("protocolVersion" in this.options.mqtt)) {
+            this.options.mqtt.protocolVersion = 4;
+        }    
     }
 
     getOrgId() {
@@ -113,9 +117,9 @@ export default class BaseConfig{
             // is not recommended for production environments.
             rejectUnauthorized: true,
 
-            // MQTTv5 support doesn't work with Watson IoT Platform, so stick to default for now
-            // protocolId: "MQTT",
-            // protocolVersion: 5
+            //MQTT version support - MQTTv5 is currently unavailable to use due to the the mqtt.js module 
+            protocolId: "MQTT",
+            protocolVersion: this.options.mqtt.protocolVersion
         }
         return mqttConfig;
     }
