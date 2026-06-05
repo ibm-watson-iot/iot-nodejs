@@ -27,7 +27,7 @@
     "systeminformation": "^5.25.11",
     "tinycache": "^1.1.2",
     "uuid": "^9.0.1",
-    "yaml": "2.6.1",
+    "yaml": "2.8.3",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
