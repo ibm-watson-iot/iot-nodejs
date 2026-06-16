@@ -16,6 +16,7 @@
         sessionExpiry: 3600
         keepAlive: 60
         caFile: myPath
+        protocolVersion: 4
       http:
         verify: true
         additionalHeaders:
